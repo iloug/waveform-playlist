@@ -3,31 +3,6 @@ Fades = function() {};
 Fades.prototype.init = function init(params) {
     var that = this;
 
-    //creating a curve to simulate an S-curve with setValueCurveAtTime.
-    function createSCurveBuffer(length, phase) {
-        var curve = new Float32Array(length);
-
-        for (var i = 0; i < length; ++i) {
-            curve[i] = (Math.sin((Math.PI * i / length) - phase))/2 + 0.5;
-        }
-        return curve;
-    }
-
-    //creating a curve to simulate a logarithmic curve with setValueCurveAtTime.
-    function createLogarithmicBuffer(length, base, rotation) {
-        var curve = new Float32Array(length),
-            scale = Math.log(length + 1) / Math.log(base),
-            index;
-
-        //starting at 1 to avoid a negative infinity.
-        for (var i = 1; i < length + 1; ++i) {
-            index = rotation > 0 ? i - 1 : length - i;
-            curve[index] = (Math.log(i) / Math.log(base)) / scale;
-        }
-
-        return curve;
-    }
-
     that.context = params.context;
     
     that.defaultParams = {
@@ -38,61 +13,153 @@ Fades.prototype.init = function init(params) {
     Object.keys(that.defaultParams).forEach(function (key) {
         if (!(key in params)) { params[key] = that.defaultParams[key]; }
     }); 
-
-    that.sCurveIn = createSCurveBuffer(that.context.sampleRate, (Math.PI/2));
-    that.sCurveOut = createSCurveBuffer(that.context.sampleRate, -(Math.PI/2));
-
-    that.logCurveIn = createLogarithmicBuffer(that.context.sampleRate, 3, 1);
-    that.logCurveOut = createLogarithmicBuffer(that.context.sampleRate, 3, -1)   
 }
+
+//creating a curve to simulate an S-curve with setValueCurveAtTime.
+Fades.prototype.createSCurveBuffer = function createSCurveBuffer(length, phase) {
+    var curve = new Float32Array(length);
+
+    for (var i = 0; i < length; ++i) {
+        curve[i] = (Math.sin((Math.PI * i / length) - phase))/2 + 0.5;
+    }
+    return curve;
+}
+
+//creating a curve to simulate a logarithmic curve with setValueCurveAtTime.
+Fades.prototype.createLogarithmicBuffer = function createLogarithmicBuffer(length, base, rotation) {
+
+    var curve = new Float32Array(length),
+        scale = Math.log(length + 1) / Math.log(base),
+        index,
+        value,
+        key = ""+length+base+rotation;
+        store = [];
+
+    if (store[key]) {
+        return store[key];
+    }
+
+    //starting at 1 to avoid a negative infinity.
+    for (var i = 1; i < length + 1; ++i) {
+        index = rotation > 0 ? i - 1 : length - i;
+        value = Math.log(i) / Math.log(base);
+        curve[index] = value / scale;
+    }
+
+    store[key] = curve;
+
+    return curve;
+}
+
+/*
+The setValueCurveAtTime method
+Sets an array of arbitrary parameter values starting at the given time for the given duration. The number of values will be scaled to fit into the desired duration.
+
+The values parameter is a Float32Array representing a parameter value curve. These values will apply starting at the given time and lasting for the given duration.
+
+The startTime parameter is the time in the same time coordinate system as AudioContext.currentTime.
+
+The duration parameter is the amount of time in seconds (after the time parameter) where values will be calculated according to the values parameter..
+
+During the time interval: startTime <= t < startTime + duration, values will be calculated:
+
+      v(t) = values[N * (t - startTime) / duration], where N is the length of the values array.
+      
+After the end of the curve time interval (t >= startTime + duration), the value will remain constant at the final curve value, until there is another automation event (if any).
+*/
    
-Fades.prototype.sCurveFadeIn = function sCurveFadeIn(gain, start, duration) {
-
-    gain.setValueCurveAtTime(this.sCurveIn, start, duration);
+Fades.prototype.sCurveFadeIn = function sCurveFadeIn(gain, start, duration, options) {
+    var curve;
+        
+    curve = this.createSCurveBuffer(this.context.sampleRate, (Math.PI/2));
+    gain.setValueCurveAtTime(curve, start, duration);
 };
 
-Fades.prototype.sCurveFadeOut = function sCurveFadeOut(gain, start, duration) {
-
-    gain.setValueCurveAtTime(this.sCurveOut, start, duration);
+Fades.prototype.sCurveFadeOut = function sCurveFadeOut(gain, start, duration, options) {
+    var curve;
+        
+    curve = this.createSCurveBuffer(this.context.sampleRate, -(Math.PI/2));
+    gain.setValueCurveAtTime(curve, start, duration);
 };
 
-Fades.prototype.linearFadeIn = function linearFadeIn(gain, start, duration) {
+/*
+
+The linearRampToValueAtTime method
+Schedules a linear continuous change in parameter value from the previous scheduled parameter value to the given value.
+
+The value parameter is the value the parameter will linearly ramp to at the given time.
+
+The endTime parameter is the time in the same time coordinate system as AudioContext.currentTime.
+
+The value during the time interval T0 <= t < T1 (where T0 is the time of the previous event and T1 is the endTime parameter passed into this method) will be calculated as:
+
+      v(t) = V0 + (V1 - V0) * ((t - T0) / (T1 - T0))
+      
+Where V0 is the value at the time T0 and V1 is the value parameter passed into this method.
+
+If there are no more events after this LinearRampToValue event then for t >= T1, v(t) = V1
+
+*/
+Fades.prototype.linearFadeIn = function linearFadeIn(gain, start, duration, options) {
 
     gain.linearRampToValueAtTime(0, start);
     gain.linearRampToValueAtTime(1, start + duration);
 };
 
-Fades.prototype.linearFadeOut = function linearFadeOut(gain, start, duration) {
+Fades.prototype.linearFadeOut = function linearFadeOut(gain, start, duration, options) {
 
     gain.linearRampToValueAtTime(1, start);
     gain.linearRampToValueAtTime(0, start + duration);
 };
 
 /*
-DOES NOT SEEM TO WORK PROPERLY USING 0
+DOES NOT WORK PROPERLY USING 0
+
+The exponentialRampToValueAtTime method
+Schedules an exponential continuous change in parameter value from the previous scheduled parameter value to the given value. Parameters representing filter frequencies and playback rate are best changed exponentially because of the way humans perceive sound.
+
+The value parameter is the value the parameter will exponentially ramp to at the given time. An exception will be thrown if this value is less than or equal to 0, or if the value at the time of the previous event is less than or equal to 0.
+
+The endTime parameter is the time in the same time coordinate system as AudioContext.currentTime.
+
+The value during the time interval T0 <= t < T1 (where T0 is the time of the previous event and T1 is the endTime parameter passed into this method) will be calculated as:
+
+      v(t) = V0 * (V1 / V0) ^ ((t - T0) / (T1 - T0))
+      
+Where V0 is the value at the time T0 and V1 is the value parameter passed into this method.
+
+If there are no more events after this ExponentialRampToValue event then for t >= T1, v(t) = V1
 */
-Fades.prototype.exponentialFadeIn = function exponentialFadeIn(gain, start, duration) {
+Fades.prototype.exponentialFadeIn = function exponentialFadeIn(gain, start, duration, options) {
 
     gain.exponentialRampToValueAtTime(0.01, start);
     gain.exponentialRampToValueAtTime(1, start + duration);
 };
 
-Fades.prototype.exponentialFadeOut = function exponentialFadeOut(gain, start, duration) {
+Fades.prototype.exponentialFadeOut = function exponentialFadeOut(gain, start, duration, options) {
 
     gain.exponentialRampToValueAtTime(1, start);
     gain.exponentialRampToValueAtTime(0.01, start + duration);
 };
 
-Fades.prototype.logarithmicFadeIn = function logarithmicFadeIn(gain, start, duration, base) {
+Fades.prototype.logarithmicFadeIn = function logarithmicFadeIn(gain, start, duration, options) {
+    var curve,
+        base = options.base;
 
     base = typeof base !== 'undefined' ? base : 2;
-    gain.setValueCurveAtTime(this.logCurveIn, start, duration);
+
+    curve = this.createLogarithmicBuffer(this.context.sampleRate, base, 1);
+    gain.setValueCurveAtTime(curve, start, duration);
 };
 
-Fades.prototype.logarithmicFadeOut = function logarithmicFadeOut(gain, start, duration, base) {
+Fades.prototype.logarithmicFadeOut = function logarithmicFadeOut(gain, start, duration, options) {
+    var curve,
+        base = options.base;
 
     base = typeof base !== 'undefined' ? base : 2;
-    gain.setValueCurveAtTime(this.logCurveOut, start, duration);
+
+    curve = this.createLogarithmicBuffer(this.context.sampleRate, base, -1);
+    gain.setValueCurveAtTime(curve, start, duration);
 };
 
 /**

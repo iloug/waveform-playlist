@@ -45,10 +45,11 @@ var fadeTest = function(buffers) {
 
     var opts = {
         start: currTime + duration - fadeTime,
-        duration: currTime + duration 
+        duration: currTime + duration,
+        base: 10 
     };
 
-    fades.createFadeOut(ctrls.gainNode.gain, "logarithmic", opts);
+    fades.createFadeOut(ctrls.gainNode.gain, "sCurve", opts);
 
     ctrls.source.noteOn(0);
 }
