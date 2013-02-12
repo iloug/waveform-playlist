@@ -29,21 +29,21 @@ Fades.prototype.createSCurveBuffer = function createSCurveBuffer(length, phase) 
 Fades.prototype.createLogarithmicBuffer = function createLogarithmicBuffer(length, base, rotation) {
 
     var curve = new Float32Array(length),
-        scale = Math.log(length + 1) / Math.log(base),
         index,
-        value,
         key = ""+length+base+rotation;
-        store = [];
+        store = [],
+        x = 0;
 
     if (store[key]) {
         return store[key];
     }
 
-    //starting at 1 to avoid a negative infinity.
-    for (var i = 1; i < length + 1; ++i) {
-        index = rotation > 0 ? i - 1 : length - i;
-        value = Math.log(i) / Math.log(base);
-        curve[index] = value / scale;
+    for (var i = 0; i < length; i++) {
+        //index for the curve array.
+        index = rotation > 0 ? i : length - 1 - i;
+
+        x = i/length;
+        curve[index] = Math.log(1 + base*x) / Math.log(1 + base);
     }
 
     store[key] = curve;
@@ -146,7 +146,7 @@ Fades.prototype.logarithmicFadeIn = function logarithmicFadeIn(gain, start, dura
     var curve,
         base = options.base;
 
-    base = typeof base !== 'undefined' ? base : 2;
+    base = typeof base !== 'undefined' ? base : 10;
 
     curve = this.createLogarithmicBuffer(this.context.sampleRate, base, 1);
     gain.setValueCurveAtTime(curve, start, duration);
@@ -156,7 +156,7 @@ Fades.prototype.logarithmicFadeOut = function logarithmicFadeOut(gain, start, du
     var curve,
         base = options.base;
 
-    base = typeof base !== 'undefined' ? base : 2;
+    base = typeof base !== 'undefined' ? base : 10;
 
     curve = this.createLogarithmicBuffer(this.context.sampleRate, base, -1);
     gain.setValueCurveAtTime(curve, start, duration);

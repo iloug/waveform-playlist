@@ -32,7 +32,7 @@ var fadeTest = function(buffers) {
     var fadeTime = 3;
     var currTime = context.currentTime;
 
-/*
+
     var opts = {
         start: currTime,
         duration: currTime + fadeTime,
@@ -40,16 +40,17 @@ var fadeTest = function(buffers) {
     };
 
     fades.createFadeIn(ctrls.gainNode.gain, "logarithmic", opts);
-*/
 
 
+/*
     var opts = {
         start: currTime + duration - fadeTime,
         duration: currTime + duration,
         base: 10 
     };
 
-    fades.createFadeOut(ctrls.gainNode.gain, "sCurve", opts);
+    fades.createFadeOut(ctrls.gainNode.gain, "logarithmic", opts);
+*/
 
     ctrls.source.noteOn(0);
 }
