@@ -4,6 +4,11 @@
 <meta charset=utf-8 />
 <title>DB meter</title>
 <style>
+
+#meter-wrapper {
+  width: 100%;
+  border:1px solid red;
+}
 #meter {
   width: 0%;
   height: 15px;
@@ -15,7 +20,11 @@
 </style>
 </head>
 <body>
-  <div id=meter></div>
+  
+  <div id=meter-wrapper>
+    <div id=meter></div>
+  </div>
+  
   <div id=db></div>
 
 <script type="text/javascript">
@@ -48,6 +57,7 @@
             i = 0,
             rms,
             decibel,
+            percent = 0,
             slice = Array.prototype.slice;
 
         output.set(input);
@@ -59,10 +69,14 @@
         });
 
         rms = Math.sqrt( total / len );
-        meter.style.width = ( rms * 100 ) + '%';
-
         decibel = 20 * Math.log(rms) / Math.LN10;
+
+        //scale is from -60db to 0db
+        percent = (1/60) * decibel + 1.0
+        percent = percent < 0 ? 0 : percent * 100;
+
         db.innerHTML = decibel;
+        meter.style.width = (percent) + '%';
     };
   
 })();
