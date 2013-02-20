@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Drawer Tests</title>
+<style>
+
+#meter-wrapper {
+  width: 100%;
+  border:1px solid red;
+}
+#meter {
+  width: 0%;
+  height: 15px;
+  margin: 2px 0;
+  background: green;
+  border: red;
+  -webkit-transition: width .05s;
+}
+</style>
+
+<script type="text/javascript" src="../src/loader.js"></script>
+<script type="text/javascript" src="../src/render.js"></script>
+
+</head>
+<body>
+  
+  <div id=waveform></div>
+
+
+<script type="text/javascript">
+(function(){
+
+    var BUFFERS_TO_LOAD = {
+        test:'AlwaysDo.mp3'
+    };
+
+    var ctx = new webkitAudioContext(), 
+        buffer,
+        source;
+
+    var onAudioLoad = function(buffers) {
+
+        source = ctx.createBufferSource();
+        source.buffer = buffers["test"];
+        source.connect(ctx.destination);
+
+        drawer.init({
+            buffer:buffers["test"],
+            container: document.getElementById("waveform"),
+            resolution: 6000
+        });
+        var peaks = drawer.getPeaks();
+        drawer.draw();
+        
+        //source.start(0);
+    };
+
+    var bufferLoader = new BufferLoader();
+    bufferLoader.init({
+        context: ctx,
+        onComplete: onAudioLoad
+    });
+    bufferLoader.loadAudio(BUFFERS_TO_LOAD);
+
+    var drawer = new WaveformDrawer();
+  
+})();
+</script>
+</body>
+</html>

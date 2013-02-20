@@ -1,4 +1,6 @@
-BufferLoader = function() {
+'use strict';
+
+var BufferLoader = function() {
 
 }
 
