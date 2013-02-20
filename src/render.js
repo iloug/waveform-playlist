@@ -6,7 +6,12 @@ var WaveformDrawer = function() {
 
     this.defaultParams = {
         resolution: 4096, //resolution - samples per pixel to draw.
-        mono: true //whether to draw multiple channels or combine them.
+        mono: true, //whether to draw multiple channels or combine them.
+        waveColor: 'violet',
+        progressColor: 'purple',
+        loadingColor: 'purple',
+        cursorColor: 'green',
+        waveHeight: 128
     };
 }
 
@@ -31,7 +36,7 @@ WaveformDrawer.prototype.init = function(params) {
     this.params.numChan = this.buffer.numberOfChannels;
 
     this.width = this.params.sampleLength / this.params.resolution;
-    this.height = 128;
+    this.height = this.params.waveHeight;
 
     canv = document.createElement("canvas");
     canv.setAttribute('width', this.width);
@@ -56,7 +61,7 @@ WaveformDrawer.prototype.getPeaks = function () {
         peaks = [],
         i, c, p, l,
         chanLength = this.params.sampleLength,
-        pixels = Math.floor(chanLength / res),
+        pixels = ~~(chanLength / res),
         numChan = this.params.numChan,
         weight = 1 / (numChan),
         makeMono = this.params.mono,
@@ -102,13 +107,12 @@ WaveformDrawer.prototype.getPeaks = function () {
             }
 
             peaks[i] = {max:max, min:min};
-
-            //TODO? could recalculate maxPeak, but probably won't change too much.
         }
     }
 
     this.maxPeak = maxPeak;
     this.peaks = peaks;
+    this.updateCursor(0);
 }
 
 WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak) {
@@ -121,38 +125,55 @@ WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak) {
     w = 1;
     x = index * w;
     y = Math.round(h2 - max);
-    h = Math.round(max - min);
+    h = Math.ceil(max - min);
 
-    //var x = index * w;
-    //var y = Math.round((this.height - h) / 2);
-
-    /*
     if (this.cursorPos >= x) {
         this.cc.fillStyle = this.params.progressColor;
-    } else {
+    } 
+    else {
         this.cc.fillStyle = this.params.waveColor;
     }
-    */
 
     this.cc.fillRect(x, y, w, h);
 }
 
-WaveformDrawer.prototype.draw = function () {
+WaveformDrawer.prototype.draw = function() {
     var that = this;
 
     this.clear();
 
     // Draw WebAudio buffer peaks.
     if (this.peaks) {
-        this.peaks && this.peaks.forEach(function (peak, index) {
+        this.peaks && this.peaks.forEach(function(peak, index) {
             that.drawFrame(index, peak, that.maxPeak);
         });
     }
     else {
         console.error("waveform peaks are not defined.");
     }
+
+    this.drawCursor();
 }
 
 WaveformDrawer.prototype.clear = function() {
     this.cc.clearRect(0, 0, this.width, this.height);
+}
+
+WaveformDrawer.prototype.updateCursor = function(percents) {
+    //That ~~ is a double NOT bitwise operator.
+    //It is used as a faster substitute for Math.floor().
+    //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
+    this.cursorPos = ~~(this.width * percents);
+    this.draw();
+
+}
+
+WaveformDrawer.prototype.drawCursor = function() {
+    var h = this.height,
+        x = this.cursorPos,
+        y = 0,
+        w = 1;
+
+    this.cc.fillStyle = this.params.cursorColor;
+    this.cc.fillRect(x, y, w, h);
 }

@@ -21,29 +21,28 @@
 
 <script type="text/javascript" src="../src/loader.js"></script>
 <script type="text/javascript" src="../src/render.js"></script>
+<script type="text/javascript" src="../src/playout.js"></script>
 
 </head>
 <body>
   
   <div id=waveform></div>
 
+  <div id=play onclick="playout.play()">Play</div>
+  <div id=pause onclick="playout.pause()">Pause</div>
+  <div id=stop onclick="playout.stop()">Stop</div>
 
 <script type="text/javascript">
 (function(){
 
     var BUFFERS_TO_LOAD = {
-        test:'AlwaysDo.mp3'
+        test:'Beautiful.m4a'
     };
 
     var ctx = new webkitAudioContext(), 
-        buffer,
-        source;
+        buffer;
 
     var onAudioLoad = function(buffers) {
-
-        source = ctx.createBufferSource();
-        source.buffer = buffers["test"];
-        source.connect(ctx.destination);
 
         drawer.init({
             buffer:buffers["test"],
@@ -52,8 +51,13 @@
         });
         var peaks = drawer.getPeaks();
         drawer.draw();
-        
-        //source.start(0);
+
+        playout.init({
+            context: ctx,
+            buffer:buffers["test"]
+        });
+
+        window.playout = playout;  
     };
 
     var bufferLoader = new BufferLoader();
@@ -64,6 +68,7 @@
     bufferLoader.loadAudio(BUFFERS_TO_LOAD);
 
     var drawer = new WaveformDrawer();
+    var playout = new AudioPlayout();
   
 })();
 </script>
