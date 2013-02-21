@@ -128,6 +128,9 @@ WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak) {
     y = Math.round(h2 - max);
     h = Math.ceil(max - min);
 
+    //to prevent blank space when there is basically silence in the track.
+    h = h === 0 ? 1 : h; 
+
     if (this.cursorPos >= x) {
         this.cc.fillStyle = this.params.progressColor;
     } 
