@@ -25,9 +25,9 @@ TrackEditor.prototype.init = function(params) {
     this.playout = new AudioPlayout();
     this.playout.init(params.playout || {});
 
-    this.playout.onAudioUpdate(function(e){
-        that.drawer.updateCursor(that.playout.getPlayedPercents());
-    });
+    this.playout.onAudioUpdate(that.onAudioUpdate.bind(that));
+
+    this.marker = 0;
 
     //TODO remove this, only for quick testing.
     window.playout = this.playout;  
@@ -42,7 +42,7 @@ TrackEditor.prototype.loadTrack = function(src) {
 
     xhr.responseType = 'arraybuffer';
 
-    xhr.addEventListener('progress', function (e) {
+    xhr.addEventListener('progress', function(e) {
         if (e.lengthComputable) {
             var percentComplete = e.loaded / e.total;
         } 
@@ -53,7 +53,7 @@ TrackEditor.prototype.loadTrack = function(src) {
         //my.drawer.drawLoading(percentComplete);
     }, false);
 
-    xhr.addEventListener('load', function (e) {
+    xhr.addEventListener('load', function(e) {
         that.playout.loadData(
             e.target.response,
             that.render.bind(that)
@@ -64,8 +64,38 @@ TrackEditor.prototype.loadTrack = function(src) {
     xhr.send();
 };
 
-TrackEditor.prototype.render = function (buffer) {
-    
+TrackEditor.prototype.render = function(buffer) {
+    var that = this;
+
     this.drawer.drawBuffer(buffer);
+
+    this.bindClick(this.container, function (x, width) {
+        that.playAt(x, width);
+    });
+};
+
+TrackEditor.prototype.playAt = function(x, width) {
+   
+    this.marker = x;
+    this.playout.setPlayOffset(x/width);
+    this.playout.play();
+};
+
+TrackEditor.prototype.onAudioUpdate = function(e) {
+    
+    this.drawer.updateEditor(this.marker, this.playout.getPlayedPercents());
+};
+
+ /**
+ * Click to seek.
+ */
+TrackEditor.prototype.bindClick = function(element, callback) {
+    var that = this;
+
+    element.addEventListener('click', function(e) {
+        var relX = e.offsetX;
+        if (null == relX) { relX = e.layerX; }
+        callback(relX, that.drawer.width);
+    }, false);
 };
 

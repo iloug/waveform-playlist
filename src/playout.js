@@ -27,10 +27,6 @@ AudioPlayout.prototype.init = function(params) {
     
     this.playing = false;
     this.secondsOffset = 0;
-    //place on UI where user has clicked to start from.
-    this.markerPos = 0;
-    //cursor marks where the audio was last paused.
-    this.cursorPos = 0;
 }
 
 /**
@@ -49,12 +45,11 @@ AudioPlayout.prototype.loadData = function (audioData, cb) {
         },
         Error
     );
-},
+};
 
 AudioPlayout.prototype.onAudioUpdate = function(callback) {
     this.proc.onaudioprocess = callback;
 };
-
 
 AudioPlayout.prototype.isPlaying = function() {
     return this.playing;
@@ -64,9 +59,14 @@ AudioPlayout.prototype.getDuration = function() {
     return this.buffer.duration;
 };
 
+AudioPlayout.prototype.setPlayOffset = function(percent) {
+    this.secondsOffset = percent * this.getDuration();
+}
+
 AudioPlayout.prototype.getPlayOffset = function() {
     var offset = 0;
 
+    //TODO needs a fix for when the buffer naturally plays out. But also have to mind the entire playlist.
     if (this.playing) {
         offset = this.secondsOffset + (this.ac.currentTime - this.playTime);
     }
@@ -75,6 +75,10 @@ AudioPlayout.prototype.getPlayOffset = function() {
     }
 
     return offset;
+};
+
+AudioPlayout.prototype.setPlayedPercents = function(percent) {
+    this.secondsOffset = this.getDuration() * percent;
 };
 
 AudioPlayout.prototype.getPlayedPercents = function() {
@@ -89,35 +93,8 @@ AudioPlayout.prototype.setSource = function(source) {
 
 
 AudioPlayout.prototype.play = function(delay) {
-    var buffer = this.buffer;
-
-    if (!buffer) {
-        console.error("no buffer to play");
-        return;
-    }
-
-    if (this.playing) {
-        return;
-    }
-
-    this.secondsOffset = 0;
-    this.setSource(this.ac.createBufferSource());
-    this.source.buffer = buffer;
-
-    this.proc.connect(this.analyser);
-
-    this.playTime = this.ac.currentTime;
-    this.playing = true;
-    this.source.start(delay || 0, this.cursorPos, this.getDuration() - this.cursorPos);
-};
-
-AudioPlayout.prototype.resume = function(delay) {
     if (!this.buffer) {
         console.error("no buffer to play");
-        return;
-    }
-
-    if (this.playing) {
         return;
     }
 
@@ -145,9 +122,9 @@ AudioPlayout.prototype.pause = function(delay) {
     this.pauseTime = this.ac.currentTime;
 
     this.playing = false;
-    elapsed = this.pauseTime - this.playTime;
+    //elapsed = this.pauseTime - this.playTime;
+    //this.secondsOffset += elapsed;
 
-    this.secondsOffset += elapsed;
     this.proc.disconnect(this.analyser);
 };
 
@@ -157,7 +134,6 @@ AudioPlayout.prototype.stop = function(delay) {
         return;
     }
 
-    this.secondsOffset = this.cursorPos;
     this.source.stop(delay || 0);
     this.stopTime = this.ac.currentTime;
 

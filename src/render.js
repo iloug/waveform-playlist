@@ -2,8 +2,6 @@
 
 var WaveformDrawer = function() {
 
-    this.buffer = undefined;
-
     this.defaultParams = {
         resolution: 4096, //resolution - samples per pixel to draw.
         mono: true, //whether to draw multiple channels or combine them.
@@ -11,6 +9,7 @@ var WaveformDrawer = function() {
         progressColor: 'purple',
         loadingColor: 'purple',
         cursorColor: 'green',
+        markerColor: 'green',
         waveHeight: 128
     };
 }
@@ -96,7 +95,7 @@ WaveformDrawer.prototype.drawBuffer = function (buffer) {
     this.params.sampleLength = buffer.getChannelData(0).length;
     this.params.numChan = buffer.numberOfChannels;
 
-    this.width = this.params.sampleLength / this.params.resolution;
+    this.width = Math.ceil(this.params.sampleLength / this.params.resolution);
     this.height = this.params.waveHeight;
 
     canv = document.createElement("canvas");
@@ -114,7 +113,7 @@ WaveformDrawer.prototype.drawBuffer = function (buffer) {
     }
 
     this.getPeaks(buffer);
-    this.updateCursor(0);
+    this.updateEditor(0, 0);
 };
 
 WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak) {
@@ -154,6 +153,7 @@ WaveformDrawer.prototype.draw = function() {
         console.error("waveform peaks are not defined.");
     }
 
+    this.drawMarker();
     this.drawCursor();
 }
 
@@ -161,13 +161,25 @@ WaveformDrawer.prototype.clear = function() {
     this.cc.clearRect(0, 0, this.width, this.height);
 }
 
-WaveformDrawer.prototype.updateCursor = function(percents) {
+WaveformDrawer.prototype.updateEditor = function(marker, percents) {
     //That ~~ is a double NOT bitwise operator.
     //It is used as a faster substitute for Math.floor().
     //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
+    
+    this.markerPos = marker;
     this.cursorPos = ~~(this.width * percents);
     this.draw();
 
+}
+
+WaveformDrawer.prototype.drawMarker = function() {
+    var h = this.height,
+        x = this.markerPos,
+        y = 0,
+        w = 1;
+
+    this.cc.fillStyle = this.params.markerColor;
+    this.cc.fillRect(x, y, w, h);
 }
 
 WaveformDrawer.prototype.drawCursor = function() {

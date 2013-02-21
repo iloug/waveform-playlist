@@ -30,18 +30,20 @@
   <div id=waveform></div>
 
   <div id=play onclick="playout.play()">Play</div>
-  <div id=pause onclick="playout.resume()">Resume</div>
   <div id=pause onclick="playout.pause()">Pause</div>
   <div id=stop onclick="playout.stop()">Stop</div>
 
 <script type="text/javascript">
 (function(){
 
+    var container = document.getElementById("waveform");
     var trackEditor = new TrackEditor();
     trackEditor.init({
+        container: container,
+
         drawer: {
-            container: document.getElementById("waveform"),
-            resolution: 6000
+            container: container,
+            resolution: 5000
         }
     });
     trackEditor.loadTrack("Beautiful.m4a");
