@@ -27,24 +27,43 @@ AudioPlayout.prototype.init = function(params) {
     this.analyser.connect(this.destination);
 
     this.proc = this.ac.createScriptProcessor(2048, 1, 1);
-    //this.proc.connect(this.destination);
+    
+    this.playing = false;
+    this.secondsOffset = 0;
+    //place on UI where user has clicked to start from.
+    this.markerPos = 0;
+    //cursor marks where the audio was last paused.
+    this.cursorPos = 0;
 }
 
+AudioPlayout.prototype.onAudioUpdate = function(callback) {
+    this.proc.onaudioprocess = callback;
+};
 
-AudioPlayout.prototype.isPaused = function() {
-    return this.paused;
+
+AudioPlayout.prototype.isPlaying = function() {
+    return this.playing;
 };
 
 AudioPlayout.prototype.getDuration = function() {
     return this.buffer.duration;
 };
 
-AudioPlayout.prototype.getCurrentTime = function() {
-    
+AudioPlayout.prototype.getPlayOffset = function() {
+    var offset = 0;
+
+    if (this.playing) {
+        offset = this.secondsOffset + (this.ac.currentTime - this.playTime);
+    }
+    else {
+        offset = this.secondsOffset;
+    }
+
+    return offset;
 };
 
 AudioPlayout.prototype.getPlayedPercents = function() {
-    return this.getCurrentTime() / this.getDuration();
+    return this.getPlayOffset() / this.getDuration();
 };
 
 AudioPlayout.prototype.setSource = function(source) {
@@ -54,9 +73,36 @@ AudioPlayout.prototype.setSource = function(source) {
 };
 
 
-AudioPlayout.prototype.play = function() {
+AudioPlayout.prototype.play = function(delay) {
+    var buffer = this.buffer;
+
+    if (!buffer) {
+        console.error("no buffer to play");
+        return;
+    }
+
+    if (this.playing) {
+        return;
+    }
+
+    this.secondsOffset = 0;
+    this.setSource(this.ac.createBufferSource());
+    this.source.buffer = buffer;
+
+    this.proc.connect(this.analyser);
+
+    this.playTime = this.ac.currentTime;
+    this.playing = true;
+    this.source.start(delay || 0, this.cursorPos, this.getDuration() - this.cursorPos);
+};
+
+AudioPlayout.prototype.resume = function(delay) {
     if (!this.buffer) {
         console.error("no buffer to play");
+        return;
+    }
+
+    if (this.playing) {
         return;
     }
 
@@ -64,24 +110,43 @@ AudioPlayout.prototype.play = function() {
     this.source.buffer = this.buffer;
 
     this.proc.connect(this.analyser);
-    this.source.start(0);
+
+    this.playTime = this.ac.currentTime;
+    this.playing = true;
+    this.source.start(delay || 0, this.getPlayOffset(), this.getDuration() - this.getPlayOffset());
 };
 
 /*
     Will pause audio playback. Different from stop() as it leaves the cursor's pause position on the UI.
 */
 AudioPlayout.prototype.pause = function(delay) {
-    //this.lastPause = this.getCurrentTime();
+    var elapsed;
+
+    if (!this.playing) {
+        return;
+    }
 
     this.source.stop(delay || 0);
-    this.paused = true;
+    this.pauseTime = this.ac.currentTime;
 
+    this.playing = false;
+    elapsed = this.pauseTime - this.playTime;
+
+    this.secondsOffset += elapsed;
     this.proc.disconnect(this.analyser);
 };
 
 AudioPlayout.prototype.stop = function(delay) {
-    this.source.stop(delay || 0);
 
+    if (!this.playing) {
+        return;
+    }
+
+    this.secondsOffset = this.cursorPos;
+    this.source.stop(delay || 0);
+    this.stopTime = this.ac.currentTime;
+
+    this.playing = false;
     this.proc.disconnect(this.analyser);
 }
 

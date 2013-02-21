@@ -29,6 +29,7 @@
   <div id=waveform></div>
 
   <div id=play onclick="playout.play()">Play</div>
+  <div id=pause onclick="playout.resume()">Resume</div>
   <div id=pause onclick="playout.pause()">Pause</div>
   <div id=stop onclick="playout.stop()">Stop</div>
 
@@ -55,6 +56,10 @@
         playout.init({
             context: ctx,
             buffer:buffers["test"]
+        });
+
+        playout.onAudioUpdate(function(e){
+            drawer.updateCursor(playout.getPlayedPercents());
         });
 
         window.playout = playout;  
