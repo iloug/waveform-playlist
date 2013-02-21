@@ -22,6 +22,7 @@
 <script type="text/javascript" src="../src/loader.js"></script>
 <script type="text/javascript" src="../src/render.js"></script>
 <script type="text/javascript" src="../src/playout.js"></script>
+<script type="text/javascript" src="../src/track.js"></script>
 
 </head>
 <body>
@@ -36,44 +37,14 @@
 <script type="text/javascript">
 (function(){
 
-    var BUFFERS_TO_LOAD = {
-        test:'Beautiful.m4a'
-    };
-
-    var ctx = new webkitAudioContext(), 
-        buffer;
-
-    var onAudioLoad = function(buffers) {
-
-        drawer.init({
-            buffer:buffers["test"],
+    var trackEditor = new TrackEditor();
+    trackEditor.init({
+        drawer: {
             container: document.getElementById("waveform"),
             resolution: 6000
-        });
-        var peaks = drawer.getPeaks();
-        drawer.draw();
-
-        playout.init({
-            context: ctx,
-            buffer:buffers["test"]
-        });
-
-        playout.onAudioUpdate(function(e){
-            drawer.updateCursor(playout.getPlayedPercents());
-        });
-
-        window.playout = playout;  
-    };
-
-    var bufferLoader = new BufferLoader();
-    bufferLoader.init({
-        context: ctx,
-        onComplete: onAudioLoad
+        }
     });
-    bufferLoader.loadAudio(BUFFERS_TO_LOAD);
-
-    var drawer = new WaveformDrawer();
-    var playout = new AudioPlayout();
+    trackEditor.loadTrack("Beautiful.m4a");
   
 })();
 </script>

@@ -17,12 +17,9 @@ var WaveformDrawer = function() {
 
 WaveformDrawer.prototype.init = function(params) {
 
-    var canv,
-        that = this;
+    var that = this;
 
-    this.buffer = params.buffer;
     this.container = params.container;
-    delete params.buffer;
     delete params.container;
 
     this.params = Object.create(params);
@@ -31,30 +28,9 @@ WaveformDrawer.prototype.init = function(params) {
             params[key] = that.defaultParams[key]; 
         }
     });
-
-    this.params.sampleLength = this.buffer.getChannelData(0).length;
-    this.params.numChan = this.buffer.numberOfChannels;
-
-    this.width = this.params.sampleLength / this.params.resolution;
-    this.height = this.params.waveHeight;
-
-    canv = document.createElement("canvas");
-    canv.setAttribute('width', this.width);
-    canv.setAttribute('height', this.height);
-
-    this.canvas = canv;
-    this.cc = this.canvas.getContext('2d');
-
-    if (this.container){
-        this.container.appendChild(canv);
-    }
-    else {
-        console.error("no container element");
-    }
 }
 
-
-WaveformDrawer.prototype.getPeaks = function () {
+WaveformDrawer.prototype.getPeaks = function(buffer) {
     
     // Frames per pixel
     var res = this.params.resolution,
@@ -79,7 +55,7 @@ WaveformDrawer.prototype.getPeaks = function () {
 
         for (c = 0; c < numChan; c++) {
 
-            chan = this.buffer.getChannelData(c);
+            chan = buffer.getChannelData(c);
             start = i * res;
             end = (i + 1) * res > chanLength ? chanLength : (i + 1) * res;
             vals = chan.subarray(start, end);
@@ -112,8 +88,34 @@ WaveformDrawer.prototype.getPeaks = function () {
 
     this.maxPeak = maxPeak;
     this.peaks = peaks;
-    this.updateCursor(0);
 }
+
+WaveformDrawer.prototype.drawBuffer = function (buffer) {
+    var canv;    
+
+    this.params.sampleLength = buffer.getChannelData(0).length;
+    this.params.numChan = buffer.numberOfChannels;
+
+    this.width = this.params.sampleLength / this.params.resolution;
+    this.height = this.params.waveHeight;
+
+    canv = document.createElement("canvas");
+    canv.setAttribute('width', this.width);
+    canv.setAttribute('height', this.height);
+
+    this.canvas = canv;
+    this.cc = this.canvas.getContext('2d');
+
+    if (this.container){
+        this.container.appendChild(canv);
+    }
+    else {
+        console.error("no container element");
+    }
+
+    this.getPeaks(buffer);
+    this.updateCursor(0);
+};
 
 WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak) {
     var x, y, w, h, max, min,

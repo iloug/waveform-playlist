@@ -9,10 +9,7 @@ AudioPlayout.prototype.init = function(params) {
 
     var that = this;
 
-    this.buffer = params.buffer;
-    this.ac = params.context;
-    delete params.buffer;
-    delete params.context;
+    this.ac = new (window.AudioContext || window.webkitAudioContext);
     
     this.params = Object.create(params);
     Object.keys(this.defaultParams).forEach(function(key) {
@@ -35,6 +32,24 @@ AudioPlayout.prototype.init = function(params) {
     //cursor marks where the audio was last paused.
     this.cursorPos = 0;
 }
+
+/**
+ * Loads audiobuffer.
+ *
+ * @param {AudioBuffer} audioData Audio data.
+ */
+AudioPlayout.prototype.loadData = function (audioData, cb) {
+    var that = this;
+
+    this.ac.decodeAudioData(
+        audioData,
+        function (buffer) {
+            that.buffer = buffer;
+            cb(buffer);
+        },
+        Error
+    );
+},
 
 AudioPlayout.prototype.onAudioUpdate = function(callback) {
     this.proc.onaudioprocess = callback;
