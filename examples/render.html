@@ -32,23 +32,23 @@ canvas {
     var trackElem1 = trackEditor1.init({
         
         drawer: {
-            resolution: 5000
+            resolution: 9000
         }
     });
-    trackEditor1.loadTrack("Beautiful.m4a");
-
-    container.appendChild(trackElem1);
-
+    
     var trackEditor2 = new TrackEditor();
     var trackElem2 = trackEditor2.init({
         
         drawer: {
-            resolution: 5000
+            resolution: 9000
         }
     });
-    trackEditor2.loadTrack("AlwaysDo.mp3");
 
+    container.appendChild(trackElem1);
     container.appendChild(trackElem2);
+
+    trackEditor1.loadTrack("Beautiful.m4a");
+    trackEditor2.loadTrack("AlwaysDo.mp3");
 
 })();
 </script>

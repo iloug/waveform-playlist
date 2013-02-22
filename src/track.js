@@ -10,7 +10,6 @@ TrackEditor.prototype.init = function(params) {
     var that = this;
 
     this.container = document.createElement("div");
-    this.container.setAttribute('id', 'track-editor');
 
     this.params = Object.create(params);
     Object.keys(this.defaultParams).forEach(function (key) {
@@ -29,6 +28,11 @@ TrackEditor.prototype.init = function(params) {
     this.playout.onAudioUpdate(that.onAudioUpdate.bind(that));
 
     this.marker = 0;
+
+    this.container.setAttribute('id', 'track-editor');
+    this.container.style.height = this.drawer.params.waveHeight+"px";
+
+    this.container.onmousedown = this.timeShift.bind(that);
 
     return this.container;
 
@@ -65,6 +69,33 @@ TrackEditor.prototype.loadTrack = function(src) {
 
     xhr.open('GET', src, true);
     xhr.send();
+};
+
+//TODO move this to a better location, just for trying out.
+//will move the waveform only changing the x-axis.
+//a mousedown event.
+TrackEditor.prototype.timeShift = function(e) {
+    var startX = e.pageX, 
+        diffX = 0, 
+        origX = 0,
+        editor = this;
+
+    origX = parseInt(e.target.style.left, 10);
+    if (isNaN(origX)) origX = 0;
+    
+    //dynamically put an event on the element.
+    e.target.onmousemove = function(e) {
+        var endX = e.pageX,
+            updatedX = 0;
+        
+        diffX = endX - startX;
+        updatedX = origX + diffX;
+        editor.drawer.setTimeShift(updatedX);
+    };
+    e.target.onmouseup = function() {
+        
+        e.target.onmousemove = e.target.onmouseup = null;
+    };
 };
 
 TrackEditor.prototype.render = function(buffer) {
