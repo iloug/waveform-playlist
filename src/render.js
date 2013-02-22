@@ -89,6 +89,31 @@ WaveformDrawer.prototype.getPeaks = function(buffer) {
     this.peaks = peaks;
 }
 
+//TODO move this to a better location, just for trying out.
+//will move the waveform only changing the x-axis.
+//a mousedown event.
+WaveformDrawer.prototype.timeShift = function(e) {
+    var startX = e.pageX, 
+        diffX = 0, 
+        origX = 0;
+
+    origX = parseInt(e.target.style.left, 10);
+    if (isNaN(origX)) origX = 0;
+    
+    document.body.onmousemove = function(e) {
+        var endX = e.pageX,
+            updatedX = 0;
+        
+        diffX = endX - startX;
+        updatedX = origX + diffX;
+        e.target.style.left = updatedX+"px";
+    };
+    document.body.onmouseup = function() {
+        
+        document.body.onmousemove = document.body.onmouseup = null;
+    };
+};
+
 WaveformDrawer.prototype.drawBuffer = function (buffer) {
     var canv;    
 
@@ -101,6 +126,8 @@ WaveformDrawer.prototype.drawBuffer = function (buffer) {
     canv = document.createElement("canvas");
     canv.setAttribute('width', this.width);
     canv.setAttribute('height', this.height);
+
+    canv.onmousedown = this.timeShift;
 
     this.canvas = canv;
     this.cc = this.canvas.getContext('2d');

@@ -9,8 +9,8 @@ TrackEditor.prototype.init = function(params) {
 
     var that = this;
 
-    this.container = params.container;
-    delete params.container;
+    this.container = document.createElement("div");
+    this.container.setAttribute('id', 'track-editor');
 
     this.params = Object.create(params);
     Object.keys(this.defaultParams).forEach(function (key) {
@@ -20,6 +20,7 @@ TrackEditor.prototype.init = function(params) {
     });
 
     this.drawer = new WaveformDrawer();
+    params.drawer.container = this.container;
     this.drawer.init(params.drawer || {});
 
     this.playout = new AudioPlayout();
@@ -28,6 +29,8 @@ TrackEditor.prototype.init = function(params) {
     this.playout.onAudioUpdate(that.onAudioUpdate.bind(that));
 
     this.marker = 0;
+
+    return this.container;
 
     //TODO remove this, only for quick testing.
     window.playout = this.playout;  
@@ -69,9 +72,9 @@ TrackEditor.prototype.render = function(buffer) {
 
     this.drawer.drawBuffer(buffer);
 
-    this.bindClick(this.container, function (x, width) {
-        that.playAt(x, width);
-    });
+    //this.bindClick(this.container, function (x, width) {
+    //    that.playAt(x, width);
+    //});
 };
 
 TrackEditor.prototype.playAt = function(x, width) {

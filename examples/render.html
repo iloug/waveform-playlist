@@ -5,21 +5,12 @@
 <title>Drawer Tests</title>
 <style>
 
-#meter-wrapper {
-  width: 100%;
-  border:1px solid red;
+canvas {
+  position: relative;
 }
-#meter {
-  width: 0%;
-  height: 15px;
-  margin: 2px 0;
-  background: green;
-  border: red;
-  -webkit-transition: width .05s;
-}
+
 </style>
 
-<script type="text/javascript" src="../src/loader.js"></script>
 <script type="text/javascript" src="../src/render.js"></script>
 <script type="text/javascript" src="../src/playout.js"></script>
 <script type="text/javascript" src="../src/track.js"></script>
@@ -27,7 +18,7 @@
 </head>
 <body>
   
-  <div id=waveform></div>
+  <div id=playlist></div>
 
   <div id=play onclick="playout.play()">Play</div>
   <div id=pause onclick="playout.pause()">Pause</div>
@@ -36,18 +27,29 @@
 <script type="text/javascript">
 (function(){
 
-    var container = document.getElementById("waveform");
-    var trackEditor = new TrackEditor();
-    trackEditor.init({
-        container: container,
-
+    var container = document.getElementById("playlist");
+    var trackEditor1 = new TrackEditor();
+    var trackElem1 = trackEditor1.init({
+        
         drawer: {
-            container: container,
             resolution: 5000
         }
     });
-    trackEditor.loadTrack("Beautiful.m4a");
-  
+    trackEditor1.loadTrack("Beautiful.m4a");
+
+    container.appendChild(trackElem1);
+
+    var trackEditor2 = new TrackEditor();
+    var trackElem2 = trackEditor2.init({
+        
+        drawer: {
+            resolution: 5000
+        }
+    });
+    trackEditor2.loadTrack("AlwaysDo.mp3");
+
+    container.appendChild(trackElem2);
+
 })();
 </script>
 </body>
