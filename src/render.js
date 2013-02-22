@@ -100,7 +100,7 @@ WaveformDrawer.prototype.timeShift = function(e) {
     origX = parseInt(e.target.style.left, 10);
     if (isNaN(origX)) origX = 0;
     
-    document.body.onmousemove = function(e) {
+    e.target.onmousemove = function(e) {
         var endX = e.pageX,
             updatedX = 0;
         
@@ -108,9 +108,9 @@ WaveformDrawer.prototype.timeShift = function(e) {
         updatedX = origX + diffX;
         e.target.style.left = updatedX+"px";
     };
-    document.body.onmouseup = function() {
+    e.target.onmouseup = function() {
         
-        document.body.onmousemove = document.body.onmouseup = null;
+        e.target.onmousemove = e.target.onmouseup = null;
     };
 };
 
