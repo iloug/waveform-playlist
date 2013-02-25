@@ -93,7 +93,7 @@ WaveformDrawer.prototype.setTimeShift = function(pixels) {
     this.canvas.style.left = pixels+"px";
 }
 
-WaveformDrawer.prototype.drawBuffer = function(buffer) {
+WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     var canv;    
 
     this.params.sampleLength = buffer.getChannelData(0).length;
@@ -120,6 +120,8 @@ WaveformDrawer.prototype.drawBuffer = function(buffer) {
 
     this.getPeaks(buffer);
     this.updateEditor(0, 0);
+
+    this.setTimeShift(sampleOffset/this.params.resolution);
 };
 
 WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak) {

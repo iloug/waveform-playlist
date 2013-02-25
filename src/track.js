@@ -28,6 +28,7 @@ TrackEditor.prototype.init = function(params) {
     this.playout.onAudioUpdate(that.onAudioUpdate.bind(that));
 
     this.marker = 0;
+    this.leftOffset = params.leftOffset || 0;
 
     this.container.setAttribute('id', 'track-editor');
     this.container.style.height = this.drawer.params.waveHeight+"px";
@@ -78,15 +79,18 @@ TrackEditor.prototype.timeShift = function(e) {
     var startX = e.pageX, 
         diffX = 0, 
         origX = 0,
-        editor = this;
+        updatedX = 0,
+        editor = this,
+        res = editor.drawer.params.resolution;
 
-    origX = parseInt(e.target.style.left, 10);
-    if (isNaN(origX)) origX = 0;
+    //origX = parseInt(e.target.style.left, 10);
+    //if (isNaN(origX)) origX = 0;
+
+    origX = editor.leftOffset/res;
     
     //dynamically put an event on the element.
     e.target.onmousemove = function(e) {
-        var endX = e.pageX,
-            updatedX = 0;
+        var endX = e.pageX;
         
         diffX = endX - startX;
         updatedX = origX + diffX;
@@ -95,13 +99,14 @@ TrackEditor.prototype.timeShift = function(e) {
     document.body.onmouseup = function() {
         
         e.target.onmousemove = document.body.onmouseup = null;
+        editor.leftOffset = updatedX * res;
     };
 };
 
 TrackEditor.prototype.render = function(buffer) {
     var that = this;
 
-    this.drawer.drawBuffer(buffer);
+    this.drawer.drawBuffer(buffer, this.leftOffset);
 
     //this.bindClick(this.container, function (x, width) {
     //    that.playAt(x, width);
