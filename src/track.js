@@ -92,9 +92,9 @@ TrackEditor.prototype.timeShift = function(e) {
         updatedX = origX + diffX;
         editor.drawer.setTimeShift(updatedX);
     };
-    e.target.onmouseup = function() {
+    document.body.onmouseup = function() {
         
-        e.target.onmousemove = e.target.onmouseup = null;
+        e.target.onmousemove = document.body.onmouseup = null;
     };
 };
 
