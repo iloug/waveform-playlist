@@ -22,11 +22,6 @@ AudioPlayout.prototype.init = function(params) {
 
     this.analyser = this.ac.createAnalyser();
     this.analyser.connect(this.destination);
-
-    this.proc = this.ac.createScriptProcessor(2048, 1, 1);
-    
-    this.playing = false;
-    this.secondsOffset = 0;
 }
 
 /**
@@ -47,21 +42,13 @@ AudioPlayout.prototype.loadData = function (audioData, cb) {
     );
 };
 
-AudioPlayout.prototype.onAudioUpdate = function(callback) {
-    this.proc.onaudioprocess = callback;
-};
-
-AudioPlayout.prototype.isPlaying = function() {
-    return this.playing;
-};
+//AudioPlayout.prototype.onAudioUpdate = function(callback) {
+//    this.proc.onaudioprocess = callback;
+//};
 
 AudioPlayout.prototype.getDuration = function() {
     return this.buffer.duration;
 };
-
-AudioPlayout.prototype.setPlayOffset = function(percent) {
-    this.secondsOffset = percent * this.getDuration();
-}
 
 AudioPlayout.prototype.getPlayOffset = function() {
     var offset = 0;
@@ -106,14 +93,11 @@ AudioPlayout.prototype.play = function(delay, start, end) {
     this.setSource(this.ac.createBufferSource());
     this.source.buffer = this.buffer;
 
-    this.proc.connect(this.analyser);
-
     this.source.start(delay || 0, start, end);
 };
 
 AudioPlayout.prototype.stop = function(delay) {
  
     this.source.stop(delay || 0);
-    this.proc.disconnect(this.analyser);
-}
+};
 

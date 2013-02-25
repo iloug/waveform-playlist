@@ -5,7 +5,7 @@ var WaveformDrawer = function() {
     this.defaultParams = {
         resolution: 4096, //resolution - samples per pixel to draw.
         mono: true, //whether to draw multiple channels or combine them.
-        waveColor: 'violet',
+        waveColor: 'grey',
         progressColor: 'purple',
         loadingColor: 'purple',
         cursorColor: 'green',
@@ -119,12 +119,12 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     }
 
     this.getPeaks(buffer);
-    this.updateEditor(0, 0);
+    this.updateEditor();
 
     this.setTimeShift(sampleOffset/this.params.resolution);
 };
 
-WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak) {
+WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak, cursorPos) {
     var x, y, w, h, max, min,
         h2 = this.height / 2;
 
@@ -139,7 +139,7 @@ WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak) {
     //to prevent blank space when there is basically silence in the track.
     h = h === 0 ? 1 : h; 
 
-    if (this.cursorPos >= x) {
+    if (cursorPos >= x) {
         this.cc.fillStyle = this.params.progressColor;
     } 
     else {
@@ -149,7 +149,7 @@ WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak) {
     this.cc.fillRect(x, y, w, h);
 }
 
-WaveformDrawer.prototype.draw = function() {
+WaveformDrawer.prototype.draw = function(cursorPos) {
     var that = this;
 
     this.clear();
@@ -157,48 +157,52 @@ WaveformDrawer.prototype.draw = function() {
     // Draw WebAudio buffer peaks.
     if (this.peaks) {
         this.peaks && this.peaks.forEach(function(peak, index) {
-            that.drawFrame(index, peak, that.maxPeak);
+            that.drawFrame(index, peak, that.maxPeak, cursorPos);
         });
     }
     else {
         console.error("waveform peaks are not defined.");
     }
 
-    this.drawMarker();
-    this.drawCursor();
+    //this.drawMarker();
+    //this.drawCursor();
 }
 
 WaveformDrawer.prototype.clear = function() {
     this.cc.clearRect(0, 0, this.width, this.height);
 }
 
-WaveformDrawer.prototype.updateEditor = function(marker, percents) {
+WaveformDrawer.prototype.updateEditor = function(cursorPos) {
     //That ~~ is a double NOT bitwise operator.
     //It is used as a faster substitute for Math.floor().
     //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
     
-    this.markerPos = marker;
-    this.cursorPos = ~~(this.width * percents);
-    this.draw();
+    //this.markerPos = marker;
+    //this.cursorPos = ~~(this.width * percents);
+    this.draw(cursorPos);
 
 }
 
 WaveformDrawer.prototype.drawMarker = function() {
-    var h = this.height,
+    if (this.markerPos) {
+        var h = this.height,
         x = this.markerPos,
         y = 0,
         w = 1;
 
-    this.cc.fillStyle = this.params.markerColor;
-    this.cc.fillRect(x, y, w, h);
+        this.cc.fillStyle = this.params.markerColor;
+        this.cc.fillRect(x, y, w, h);
+    }  
 }
 
 WaveformDrawer.prototype.drawCursor = function() {
-    var h = this.height,
-        x = this.cursorPos,
-        y = 0,
-        w = 1;
+    if (this.cursorPos) {
+        var h = this.height,
+            x = this.cursorPos,
+            y = 0,
+            w = 1;
 
-    this.cc.fillStyle = this.params.cursorColor;
-    this.cc.fillRect(x, y, w, h);
+        this.cc.fillStyle = this.params.cursorColor;
+        this.cc.fillRect(x, y, w, h);
+    }  
 }

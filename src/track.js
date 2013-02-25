@@ -25,12 +25,10 @@ TrackEditor.prototype.init = function(params) {
     this.playout = new AudioPlayout();
     this.playout.init(params.playout || {});
 
-    this.playout.onAudioUpdate(that.onAudioUpdate.bind(that));
-
     this.sampleRate = this.playout.ac.sampleRate;
     this.resolution = params.drawer.resolution;
 
-    this.marker = 0;
+    this.marker = undefined;
     this.leftOffset = params.leftOffset || 0; //value is measured in samples.
 
     //value is a float in seconds
@@ -172,9 +170,9 @@ TrackEditor.prototype.playAt = function(x, width) {
     this.playout.play();
 };
 
-TrackEditor.prototype.onAudioUpdate = function(e) {
+TrackEditor.prototype.updateEditor = function(cursorPos) {
     
-    //this.drawer.updateEditor(this.marker, this.playout.getPlayedPercents());
+    this.drawer.updateEditor(cursorPos);
 };
 
  /**

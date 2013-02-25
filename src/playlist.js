@@ -43,11 +43,16 @@ PlaylistEditor.prototype.init = function(params, tracks) {
 
     this.cursorPos = 0; //in pixels
     this.sampleRate = this.ac.sampleRate;
+    this.resolution = params.drawer.resolution;
+
+    //for setInterval that's toggled during play/stop.
+    this.interval;
 }
 
 PlaylistEditor.prototype.play = function() {
     
-    var editors = this.trackEditors,
+    var that = this,
+        editors = this.trackEditors,
         i,
         len,
         currentTime = this.ac.currentTime;
@@ -56,6 +61,9 @@ PlaylistEditor.prototype.play = function() {
         editors[i].schedulePlay(currentTime + 0.2, this.cursorPos);
     }
 
+    this.lastPlay = currentTime + 0.2;
+
+    this.interval = setInterval(that.updateEditor.bind(that), 300);
 }
 
 PlaylistEditor.prototype.stop = function() {
@@ -66,7 +74,27 @@ PlaylistEditor.prototype.stop = function() {
         currentTime = this.ac.currentTime;
 
     for(i = 0, len = editors.length; i < len; i++) {
-        editors[i].scheduleStop(currentTime + 0.2);
+        editors[i].scheduleStop(currentTime);
     }
+
+    clearInterval(this.interval);
 }
+
+PlaylistEditor.prototype.updateEditor = function() {
+    var editors = this.trackEditors,
+        i,
+        len,
+        currentTime = this.ac.currentTime,
+        elapsed = currentTime - this.lastPlay,
+        delta = elapsed * this.sampleRate / this.resolution,
+        cursor = this.cursorPos;
+
+    if (elapsed) {
+        cursor = ~~(cursor + delta);
+
+        for(i = 0, len = editors.length; i < len; i++) {
+            editors[i].updateEditor(cursor);
+        }
+    } 
+};
 
