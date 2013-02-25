@@ -9,7 +9,7 @@ AudioPlayout.prototype.init = function(params) {
 
     var that = this;
 
-    this.ac = new (window.AudioContext || window.webkitAudioContext);
+    this.ac = params.ac;
     
     this.params = Object.create(params);
     Object.keys(this.defaultParams).forEach(function(key) {
@@ -91,8 +91,13 @@ AudioPlayout.prototype.setSource = function(source) {
     this.source.connect(this.analyser);
 };
 
-
-AudioPlayout.prototype.play = function(delay) {
+/*
+    source.start is picky when passing the end time. 
+    If rounding error causes a number to make the source think 
+    it is playing slightly more samples than it has it won't play at all.
+    Unfortunately it doesn't seem to work if you just give it a start time.
+*/
+AudioPlayout.prototype.play = function(delay, start, end) {
     if (!this.buffer) {
         console.error("no buffer to play");
         return;
@@ -103,41 +108,12 @@ AudioPlayout.prototype.play = function(delay) {
 
     this.proc.connect(this.analyser);
 
-    this.playTime = this.ac.currentTime;
-    this.playing = true;
-    this.source.start(delay || 0, this.getPlayOffset(), this.getDuration() - this.getPlayOffset());
-};
-
-/*
-    Will pause audio playback. Different from stop() as it leaves the cursor's pause position on the UI.
-*/
-AudioPlayout.prototype.pause = function(delay) {
-    var elapsed;
-
-    if (!this.playing) {
-        return;
-    }
-
-    this.source.stop(delay || 0);
-    this.pauseTime = this.ac.currentTime;
-
-    this.playing = false;
-    //elapsed = this.pauseTime - this.playTime;
-    //this.secondsOffset += elapsed;
-
-    this.proc.disconnect(this.analyser);
+    this.source.start(delay || 0, start, end);
 };
 
 AudioPlayout.prototype.stop = function(delay) {
-
-    if (!this.playing) {
-        return;
-    }
-
+ 
     this.source.stop(delay || 0);
-    this.stopTime = this.ac.currentTime;
-
-    this.playing = false;
     this.proc.disconnect(this.analyser);
 }
 

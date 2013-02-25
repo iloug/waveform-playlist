@@ -21,21 +21,20 @@ canvas {
   
   <div id=playlist></div>
 
-  <div id=play onclick="playout.play()">Play</div>
-  <div id=pause onclick="playout.pause()">Pause</div>
-  <div id=stop onclick="playout.stop()">Stop</div>
+  <div id=play onclick="playlistEditor.play()">Play</div>
+  <div id=stop onclick="playlistEditor.stop()">Stop</div>
 
 <script type="text/javascript">
-(function(){
+(function(exports){
 
     var container = document.getElementById("playlist");
     var tracks = [
         {
-            url: "Beautiful.m4a"
+            url: "AlwaysDo.mp3"
         },
 
         {
-            url: "AlwaysDo.mp3"
+            url: "Beautiful.m4a"
         }
     ];
 
@@ -45,12 +44,18 @@ canvas {
 
             drawer: {
                 resolution: 9000
+            },
+
+            playout: {
+                ac: new (window.AudioContext || window.webkitAudioContext)
             }
         },
         tracks
     );
 
-})();
+    exports.playlistEditor = playlistEditor;
+
+})(window);
 </script>
 </body>
 </html>
