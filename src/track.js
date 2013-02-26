@@ -171,8 +171,8 @@ TrackEditor.prototype.playAt = function(x, width) {
 };
 
 TrackEditor.prototype.updateEditor = function(cursorPos) {
-    
-    this.drawer.updateEditor(cursorPos);
+    var pixelOffset = this.leftOffset / this.resolution;
+    this.drawer.updateEditor(cursorPos, pixelOffset);
 };
 
  /**

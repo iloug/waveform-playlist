@@ -124,7 +124,7 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     this.setTimeShift(sampleOffset/this.params.resolution);
 };
 
-WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak, cursorPos) {
+WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak, cursorPos, pixelOffset) {
     var x, y, w, h, max, min,
         h2 = this.height / 2;
 
@@ -139,7 +139,7 @@ WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak, cursorPos) 
     //to prevent blank space when there is basically silence in the track.
     h = h === 0 ? 1 : h; 
 
-    if (cursorPos >= x) {
+    if (cursorPos >= (x + pixelOffset)) {
         this.cc.fillStyle = this.params.progressColor;
     } 
     else {
@@ -149,7 +149,7 @@ WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak, cursorPos) 
     this.cc.fillRect(x, y, w, h);
 }
 
-WaveformDrawer.prototype.draw = function(cursorPos) {
+WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset) {
     var that = this;
 
     this.clear();
@@ -157,7 +157,7 @@ WaveformDrawer.prototype.draw = function(cursorPos) {
     // Draw WebAudio buffer peaks.
     if (this.peaks) {
         this.peaks && this.peaks.forEach(function(peak, index) {
-            that.drawFrame(index, peak, that.maxPeak, cursorPos);
+            that.drawFrame(index, peak, that.maxPeak, cursorPos, pixelOffset);
         });
     }
     else {
@@ -172,14 +172,14 @@ WaveformDrawer.prototype.clear = function() {
     this.cc.clearRect(0, 0, this.width, this.height);
 }
 
-WaveformDrawer.prototype.updateEditor = function(cursorPos) {
+WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset) {
     //That ~~ is a double NOT bitwise operator.
     //It is used as a faster substitute for Math.floor().
     //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
     
     //this.markerPos = marker;
     //this.cursorPos = ~~(this.width * percents);
-    this.draw(cursorPos);
+    this.draw(cursorPos, pixelOffset);
 
 }
 
