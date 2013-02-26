@@ -37,7 +37,7 @@ TrackEditor.prototype.init = function(params) {
     this.endTime = 0;
 
     //this.container.setAttribute('id', 'track-editor');
-    this.container.style.height = this.drawer.params.waveHeight+"px";
+    //this.container.style.height = this.drawer.params.waveHeight+"px";
 
     //TODO this needs to be changed to different callback states
     this.container.onmousedown = this.timeShift.bind(that);

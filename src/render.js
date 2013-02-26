@@ -27,6 +27,8 @@ WaveformDrawer.prototype.init = function(params) {
             params[key] = that.defaultParams[key]; 
         }
     });
+
+    this.channels = []; //array of canvases, contexts, 1 for each channel displayed.
 }
 
 WaveformDrawer.prototype.getPeaks = function(buffer) {
@@ -35,9 +37,9 @@ WaveformDrawer.prototype.getPeaks = function(buffer) {
     var res = this.params.resolution,
         peaks = [],
         i, c, p, l,
-        chanLength = this.params.sampleLength,
+        chanLength = buffer.getChannelData(0).length,
         pixels = ~~(chanLength / res),
-        numChan = this.params.numChan,
+        numChan = buffer.numberOfChannels,
         weight = 1 / (numChan),
         makeMono = this.params.mono,
         chan, 
@@ -81,7 +83,8 @@ WaveformDrawer.prototype.getPeaks = function(buffer) {
                 min = min + weight * peaks[i][c].min;     
             }
 
-            peaks[i] = {max:max, min:min};
+            peaks[i] = []; //need to clear out old stuff (maybe we should keep it for toggling views?).
+            peaks[i].push({max:max, min:min});
         }
     }
 
@@ -90,33 +93,43 @@ WaveformDrawer.prototype.getPeaks = function(buffer) {
 }
 
 WaveformDrawer.prototype.setTimeShift = function(pixels) {
-    this.canvas.style.left = pixels+"px";
+    var i, len;
+
+    for (i=0, len = this.channels.length; i < len; i++) {
+        this.channels[i].canvas.style.left = pixels+"px";
+    } 
 }
 
 WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
-    var canv;    
+    var canv,
+        div,
+        i,
+        numChan = buffer.numberOfChannels,
+        numSamples = buffer.getChannelData(0).length,
+        fragment = document.createDocumentFragment();    
 
-    this.params.sampleLength = buffer.getChannelData(0).length;
-    this.params.numChan = buffer.numberOfChannels;
-
-    this.width = Math.ceil(this.params.sampleLength / this.params.resolution);
+    //width and height is per waveform canvas.
+    this.width = Math.ceil(numSamples / this.params.resolution);
     this.height = this.params.waveHeight;
 
-    canv = document.createElement("canvas");
-    canv.setAttribute('width', this.width);
-    canv.setAttribute('height', this.height);
+    for (i=0; i < numChan; i++) {
 
-    //canv.onmousedown = this.timeShift;
+        div = document.createElement("div");
+        canv = document.createElement("canvas");
+        canv.setAttribute('width', this.width);
+        canv.setAttribute('height', this.height);
 
-    this.canvas = canv;
-    this.cc = this.canvas.getContext('2d');
+        this.channels.push({
+            canvas: canv,
+            context: canv.getContext('2d')
+        });
 
-    if (this.container){
-        this.container.appendChild(canv);
+        div.appendChild(canv);
+        fragment.appendChild(div);
     }
-    else {
-        console.error("no container element");
-    }
+  
+    this.container.appendChild(fragment);
+    
 
     this.getPeaks(buffer);
     this.updateEditor();
@@ -124,9 +137,10 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     this.setTimeShift(sampleOffset/this.params.resolution);
 };
 
-WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak, cursorPos, pixelOffset) {
+WaveformDrawer.prototype.drawFrame = function(chanNum, index, peaks, maxPeak, cursorPos, pixelOffset) {
     var x, y, w, h, max, min,
-        h2 = this.height / 2;
+        h2 = this.height / 2,
+        cc = this.channels[chanNum].context;
 
     max = (peaks.max / maxPeak) * h2;
     min = (peaks.min / maxPeak) * h2;
@@ -140,69 +154,42 @@ WaveformDrawer.prototype.drawFrame = function(index, peaks, maxPeak, cursorPos, 
     h = h === 0 ? 1 : h; 
 
     if (cursorPos >= (x + pixelOffset)) {
-        this.cc.fillStyle = this.params.progressColor;
+        cc.fillStyle = this.params.progressColor;
     } 
     else {
-        this.cc.fillStyle = this.params.waveColor;
+        cc.fillStyle = this.params.waveColor;
     }
 
-    this.cc.fillRect(x, y, w, h);
+    cc.fillRect(x, y, w, h);
 }
 
 WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset) {
-    var that = this;
+    var that = this,
+        i,
+        len,
+        peaks = this.peaks;
 
     this.clear();
+ 
+    for (i=0, len=peaks.length; i < len; i++) {
 
-    // Draw WebAudio buffer peaks.
-    if (this.peaks) {
-        this.peaks && this.peaks.forEach(function(peak, index) {
-            that.drawFrame(index, peak, that.maxPeak, cursorPos, pixelOffset);
+        peaks[i].forEach(function(peak, chanNum) {
+            that.drawFrame(chanNum, i, peak, that.maxPeak, cursorPos, pixelOffset);
         });
-    }
-    else {
-        console.error("waveform peaks are not defined.");
-    }
 
-    //this.drawMarker();
-    //this.drawCursor();
+    }
 }
 
 WaveformDrawer.prototype.clear = function() {
-    this.cc.clearRect(0, 0, this.width, this.height);
+    var i, len;
+
+    for (i = 0, len = this.channels.length; i < len; i++) {
+        this.channels[i].context.clearRect(0, 0, this.width, this.height);
+    } 
 }
 
 WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset) {
-    //That ~~ is a double NOT bitwise operator.
-    //It is used as a faster substitute for Math.floor().
-    //http://stackoverflow.com/questions/5971645/what-is-the-double-tilde-operator-in-javascript
     
-    //this.markerPos = marker;
-    //this.cursorPos = ~~(this.width * percents);
     this.draw(cursorPos, pixelOffset);
-
 }
 
-WaveformDrawer.prototype.drawMarker = function() {
-    if (this.markerPos) {
-        var h = this.height,
-        x = this.markerPos,
-        y = 0,
-        w = 1;
-
-        this.cc.fillStyle = this.params.markerColor;
-        this.cc.fillRect(x, y, w, h);
-    }  
-}
-
-WaveformDrawer.prototype.drawCursor = function() {
-    if (this.cursorPos) {
-        var h = this.height,
-            x = this.cursorPos,
-            y = 0,
-            w = 1;
-
-        this.cc.fillStyle = this.params.cursorColor;
-        this.cc.fillRect(x, y, w, h);
-    }  
-}

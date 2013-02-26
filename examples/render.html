@@ -28,22 +28,34 @@ canvas {
 (function(exports){
 
     var container = document.getElementById("playlist");
+
     var tracks = [
-        {
-            url: "AlwaysDo.mp3"
-        },
+        //{
+        //    url: "AlwaysDo.mp3"
+        //},
 
         {
             url: "Beautiful.m4a"
         }
     ];
 
+/*
+    var tracks = [
+        {url: "../sounds/techno.wav"},
+        {url: "../sounds/blueyellow.wav"},
+        {url: "../sounds/organ-echo-chords.wav"},
+        {url: "../sounds/snare.wav"},
+        {url: "../sounds/clapping-crowd.wav"} 
+    ];
+*/
+
     var playlistEditor = new PlaylistEditor();
         playlistEditor.init({
             container: container,
 
             drawer: {
-                resolution: 9000
+                resolution: 6000,
+                mono: false
             },
 
             playout: {
