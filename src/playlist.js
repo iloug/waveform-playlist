@@ -1,11 +1,10 @@
+'use strict';
+
 var PlaylistEditor = function() {
 
-    this.defaultParams = {
-        
-    };
-}
+};
 
-PlaylistEditor.prototype.init = function(params, tracks) {
+PlaylistEditor.prototype.init = function(tracks) {
 
     var that = this,
         i,
@@ -14,24 +13,14 @@ PlaylistEditor.prototype.init = function(params, tracks) {
         trackEditor,
         trackElem;
 
-    this.container = params.container;
-    delete params.container;
-
-    this.ac = params.playout.ac;
-
+    this.config = new Config();
+    this.container = this.config.getContainer();
     this.trackEditors = [];
-
-    this.params = Object.create(params);
-    Object.keys(this.defaultParams).forEach(function(key) {
-        if (!(key in params)) { 
-            params[key] = that.defaultParams[key]; 
-        }
-    });
 
     for (i = 0, len = tracks.length; i < len; i++) {
 
         trackEditor = new TrackEditor();
-        trackElem = trackEditor.init(params);
+        trackElem = trackEditor.init();
 
         this.trackEditors.push(trackEditor);
 
@@ -42,12 +31,12 @@ PlaylistEditor.prototype.init = function(params, tracks) {
     this.container.appendChild(fragment);
 
     this.cursorPos = 0; //in pixels
-    this.sampleRate = this.ac.sampleRate;
-    this.resolution = params.drawer.resolution;
+    this.sampleRate = this.config.getSampleRate();
+    this.resolution = this.config.getResolution();
 
     //for setInterval that's toggled during play/stop.
     this.interval;
-}
+};
 
 PlaylistEditor.prototype.play = function() {
     
@@ -55,7 +44,7 @@ PlaylistEditor.prototype.play = function() {
         editors = this.trackEditors,
         i,
         len,
-        currentTime = this.ac.currentTime;
+        currentTime = this.config.getCurrentTime();
 
     for(i = 0, len = editors.length; i < len; i++) {
         editors[i].schedulePlay(currentTime + 0.2, this.cursorPos);
@@ -64,27 +53,27 @@ PlaylistEditor.prototype.play = function() {
     this.lastPlay = currentTime + 0.2;
 
     this.interval = setInterval(that.updateEditor.bind(that), 300);
-}
+};
 
 PlaylistEditor.prototype.stop = function() {
 
      var editors = this.trackEditors,
         i,
         len,
-        currentTime = this.ac.currentTime;
+        currentTime = this.config.getCurrentTime();
 
     for(i = 0, len = editors.length; i < len; i++) {
         editors[i].scheduleStop(currentTime);
     }
 
     clearInterval(this.interval);
-}
+};
 
 PlaylistEditor.prototype.updateEditor = function() {
     var editors = this.trackEditors,
         i,
         len,
-        currentTime = this.ac.currentTime,
+        currentTime = this.config.getCurrentTime(),
         elapsed = currentTime - this.lastPlay,
         delta = elapsed * this.sampleRate / this.resolution,
         cursor = this.cursorPos;

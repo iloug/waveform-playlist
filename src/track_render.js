@@ -2,46 +2,28 @@
 
 var WaveformDrawer = function() {
 
-    this.defaultParams = {
-        resolution: 4096, //resolution - samples per pixel to draw.
-        mono: true, //whether to draw multiple channels or combine them.
-        waveColor: 'grey',
-        progressColor: 'purple',
-        loadingColor: 'purple',
-        cursorColor: 'green',
-        markerColor: 'green',
-        waveHeight: 128
-    };
 }
 
-WaveformDrawer.prototype.init = function(params) {
+WaveformDrawer.prototype.init = function(container) {
 
     var that = this;
 
-    this.container = params.container;
-    delete params.container;
-
-    this.params = Object.create(params);
-    Object.keys(this.defaultParams).forEach(function (key) {
-        if (!(key in params)) { 
-            params[key] = that.defaultParams[key]; 
-        }
-    });
-
+    this.config = new Config();
+    this.container = container;
     this.channels = []; //array of canvases, contexts, 1 for each channel displayed.
 }
 
 WaveformDrawer.prototype.getPeaks = function(buffer) {
     
     // Frames per pixel
-    var res = this.params.resolution,
+    var res = this.config.getResolution(),
         peaks = [],
         i, c, p, l,
         chanLength = buffer.getChannelData(0).length,
         pixels = ~~(chanLength / res),
         numChan = buffer.numberOfChannels,
         weight = 1 / (numChan),
-        makeMono = this.params.mono,
+        makeMono = this.config.isDisplayMono(),
         chan, 
         start, 
         end, 
@@ -104,13 +86,14 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     var canv,
         div,
         i,
+        res = this.config.getResolution(),
         numChan = buffer.numberOfChannels,
         numSamples = buffer.getChannelData(0).length,
         fragment = document.createDocumentFragment();    
 
     //width and height is per waveform canvas.
-    this.width = Math.ceil(numSamples / this.params.resolution);
-    this.height = this.params.waveHeight;
+    this.width = Math.ceil(numSamples / res);
+    this.height = this.config.getWaveHeight();
 
     for (i=0; i < numChan; i++) {
 
@@ -134,13 +117,14 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     this.getPeaks(buffer);
     this.updateEditor();
 
-    this.setTimeShift(sampleOffset/this.params.resolution);
+    this.setTimeShift(sampleOffset/res);
 };
 
 WaveformDrawer.prototype.drawFrame = function(chanNum, index, peaks, maxPeak, cursorPos, pixelOffset) {
     var x, y, w, h, max, min,
         h2 = this.height / 2,
-        cc = this.channels[chanNum].context;
+        cc = this.channels[chanNum].context,
+        colors = this.config.getColorScheme();
 
     max = (peaks.max / maxPeak) * h2;
     min = (peaks.min / maxPeak) * h2;
@@ -154,10 +138,10 @@ WaveformDrawer.prototype.drawFrame = function(chanNum, index, peaks, maxPeak, cu
     h = h === 0 ? 1 : h; 
 
     if (cursorPos >= (x + pixelOffset)) {
-        cc.fillStyle = this.params.progressColor;
+        cc.fillStyle = colors.progressColor;
     } 
     else {
-        cc.fillStyle = this.params.waveColor;
+        cc.fillStyle = colors.waveColor;
     }
 
     cc.fillRect(x, y, w, h);

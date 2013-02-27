@@ -9,25 +9,93 @@ canvas {
   position: relative;
 }
 
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  position: relative;
+}
+
+.playlist {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.playlist-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+}
+
+.playlist-time-scale {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  height: 30px;
+}
+
+.playlist-time-scale canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30px;
+  width: 100%;
+}
+
+.playlist-tracks {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 0;
+}
+
+.playlist-bottom-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30px;
+}
+
 </style>
 
-<script type="text/javascript" src="../src/render.js"></script>
+<script type="text/javascript" src="../src/config.js"></script>
+<script type="text/javascript" src="../src/track_render.js"></script>
 <script type="text/javascript" src="../src/playout.js"></script>
 <script type="text/javascript" src="../src/track.js"></script>
 <script type="text/javascript" src="../src/playlist.js"></script>
 
 </head>
 <body>
-  
-  <div id=playlist></div>
 
-  <div id=play onclick="playlistEditor.play()">Play</div>
-  <div id=stop onclick="playlistEditor.stop()">Stop</div>
+  <div id=playlist class="playlist">
+    <div id=top-bar class="playlist-top-bar">
+      <div id=play onclick="playlistEditor.play()">Play</div>
+      <div id=stop onclick="playlistEditor.stop()">Stop</div>
+    </div>
+    <div id=time-scale class="playlist-time-scale">
+      <canvas></canvas>
+    </div>
+
+    <div id=tracks class="playlist-tracks"></div>
+
+    <div id=bottom-bar class="playlist-bottom-bar"></div>
+  </div>
 
 <script type="text/javascript">
 (function(exports){
 
-    var container = document.getElementById("playlist");
+    var container = document.getElementById("tracks");
 
     var tracks = [
         //{
@@ -49,21 +117,13 @@ canvas {
     ];
 */
 
+    var config = new Config(container, {
+        resolution: 6000,
+        mono: false
+    });
+
     var playlistEditor = new PlaylistEditor();
-        playlistEditor.init({
-            container: container,
-
-            drawer: {
-                resolution: 6000,
-                mono: false
-            },
-
-            playout: {
-                ac: new (window.AudioContext || window.webkitAudioContext)
-            }
-        },
-        tracks
-    );
+    playlistEditor.init(tracks);
 
     exports.playlistEditor = playlistEditor;
 

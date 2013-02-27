@@ -1,25 +1,17 @@
+'use strict';
+
 var AudioPlayout = function() {
 
-    this.defaultParams = {
-        
-    };
 }
 
-AudioPlayout.prototype.init = function(params) {
+AudioPlayout.prototype.init = function() {
 
     var that = this;
 
-    this.ac = params.ac;
+    this.config = new Config();
+    this.ac = this.config.getAudioContext();
     
-    this.params = Object.create(params);
-    Object.keys(this.defaultParams).forEach(function(key) {
-        if (!(key in params)) { 
-            params[key] = that.defaultParams[key]; 
-        }
-    });
-
     this.destination = this.ac.destination;
-
     this.analyser = this.ac.createAnalyser();
     this.analyser.connect(this.destination);
 }

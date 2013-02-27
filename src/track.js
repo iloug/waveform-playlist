@@ -1,43 +1,32 @@
+'use strict';
+
 var TrackEditor = function() {
 
-    this.defaultParams = {
-        
-    };
 }
 
-TrackEditor.prototype.init = function(params) {
+TrackEditor.prototype.init = function(leftOffset) {
 
     var that = this;
 
+    this.config = new Config();
+
     this.container = document.createElement("div");
 
-    this.params = Object.create(params);
-    Object.keys(this.defaultParams).forEach(function (key) {
-        if (!(key in params)) { 
-            params[key] = that.defaultParams[key]; 
-        }
-    });
-
     this.drawer = new WaveformDrawer();
-    params.drawer.container = this.container;
-    this.drawer.init(params.drawer || {});
+    this.drawer.init(this.container);
 
     this.playout = new AudioPlayout();
-    this.playout.init(params.playout || {});
+    this.playout.init();
 
-    this.sampleRate = this.playout.ac.sampleRate;
-    this.resolution = params.drawer.resolution;
+    this.sampleRate = this.config.getSampleRate();
+    this.resolution = this.config.getResolution();
 
-    this.marker = undefined;
-    this.leftOffset = params.leftOffset || 0; //value is measured in samples.
+    this.leftOffset = leftOffset || 0; //value is measured in samples.
 
     //value is a float in seconds
     this.startTime = this.leftOffset/this.sampleRate;
     //value is a float in seconds
     this.endTime = 0;
-
-    //this.container.setAttribute('id', 'track-editor');
-    //this.container.style.height = this.drawer.params.waveHeight+"px";
 
     //TODO this needs to be changed to different callback states
     this.container.onmousedown = this.timeShift.bind(that);
@@ -85,10 +74,7 @@ TrackEditor.prototype.timeShift = function(e) {
         origX = 0,
         updatedX = 0,
         editor = this,
-        res = editor.drawer.params.resolution;
-
-    //origX = parseInt(e.target.style.left, 10);
-    //if (isNaN(origX)) origX = 0;
+        res = editor.resolution;
 
     origX = editor.leftOffset/res;
     
@@ -117,16 +103,12 @@ TrackEditor.prototype.timeShift = function(e) {
 TrackEditor.prototype.onTrackLoad = function(buffer) {
     var that = this;
 
-    this.endTime = this.playout.buffer.length/this.sampleRate;
+    this.endTime = buffer.length/this.sampleRate;
 
     this.drawer.drawBuffer(buffer, this.leftOffset);
 
     this.numSamples = buffer.length;
     this.duration = buffer.duration;
-
-    //this.bindClick(this.container, function (x, width) {
-    //    that.playAt(x, width);
-    //});
 };
 
 //cursorPos (in pixels)
@@ -163,28 +145,9 @@ TrackEditor.prototype.scheduleStop = function(when) {
     this.playout.stop(when); 
 };
 
-TrackEditor.prototype.playAt = function(x, width) {
-   
-    this.marker = x;
-    this.playout.setPlayOffset(x/width);
-    this.playout.play();
-};
-
 TrackEditor.prototype.updateEditor = function(cursorPos) {
     var pixelOffset = this.leftOffset / this.resolution;
+
     this.drawer.updateEditor(cursorPos, pixelOffset);
-};
-
- /**
- * Click to seek.
- */
-TrackEditor.prototype.bindClick = function(element, callback) {
-    var that = this;
-
-    element.addEventListener('click', function(e) {
-        var relX = e.offsetX;
-        if (null == relX) { relX = e.layerX; }
-        callback(relX, that.drawer.width);
-    }, false);
 };
 
