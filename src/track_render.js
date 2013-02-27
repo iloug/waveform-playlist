@@ -86,8 +86,9 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     var canv,
         div,
         i,
+        makeMono = this.config.isDisplayMono(),
         res = this.config.getResolution(),
-        numChan = buffer.numberOfChannels,
+        numChan = makeMono? 1 : buffer.numberOfChannels,
         numSamples = buffer.getChannelData(0).length,
         fragment = document.createDocumentFragment();    
 
