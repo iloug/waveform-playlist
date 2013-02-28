@@ -9,13 +9,23 @@ PlaylistEditor.prototype.init = function(tracks) {
     var that = this,
         i,
         len,
-        fragment = document.createDocumentFragment(),
+        div = document.createElement("div"),
         trackEditor,
-        trackElem;
+        trackElem,
+        timeScale;
+
+    div.className = div.className + " playlist-tracks";
 
     this.config = new Config();
-    this.container = this.config.getContainer();
+    this.playlistContainer = this.config.getContainer();
     this.trackEditors = [];
+
+    timeScale = new TimeScale();
+    timeScale.init();
+
+    this.playlistContainer.appendChild(div);
+
+    this.timeScale = timeScale;
 
     for (i = 0, len = tracks.length; i < len; i++) {
 
@@ -24,11 +34,9 @@ PlaylistEditor.prototype.init = function(tracks) {
 
         this.trackEditors.push(trackEditor);
 
-        fragment.appendChild(trackElem);
+        div.appendChild(trackElem);
         trackEditor.loadTrack(tracks[i].url);
     }
-
-    this.container.appendChild(fragment);
 
     this.cursorPos = 0; //in pixels
     this.sampleRate = this.config.getSampleRate();

@@ -24,6 +24,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
+  overflow: hidden;
 }
 
 .playlist-top-bar {
@@ -52,11 +53,16 @@ body {
   width: 100%;
 }
 
+.playlist-time-scale div {
+  position: absolute;
+}
+
 .playlist-tracks {
   position: absolute;
   top: 80px;
   left: 0;
   right: 0;
+  overflow: auto;
 }
 
 .playlist-bottom-bar {
@@ -73,6 +79,7 @@ body {
 <script type="text/javascript" src="../src/track_render.js"></script>
 <script type="text/javascript" src="../src/playout.js"></script>
 <script type="text/javascript" src="../src/track.js"></script>
+<script type="text/javascript" src="../src/time_scale.js"></script>
 <script type="text/javascript" src="../src/playlist.js"></script>
 
 </head>
@@ -83,24 +90,28 @@ body {
       <div id=play onclick="playlistEditor.play()">Play</div>
       <div id=stop onclick="playlistEditor.stop()">Stop</div>
     </div>
+    
+<!--
     <div id=time-scale class="playlist-time-scale">
       <canvas></canvas>
     </div>
 
     <div id=tracks class="playlist-tracks"></div>
-
+-->
+<!--
     <div id=bottom-bar class="playlist-bottom-bar"></div>
+-->
   </div>
 
 <script type="text/javascript">
 (function(exports){
 
-    var container = document.getElementById("tracks");
+    var container = document.getElementById("playlist");
 
     var tracks = [
-        //{
-        //    url: "AlwaysDo.mp3"
-        //},
+        {
+            url: "versa.mp3"
+        },
 
         {
             url: "Beautiful.m4a"
@@ -118,7 +129,7 @@ body {
 */
 
     var config = new Config(container, {
-        resolution: 6000,
+        resolution: 10000,
         mono: false
     });
 

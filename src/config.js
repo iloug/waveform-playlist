@@ -30,6 +30,9 @@ var Config;
             cursorColor: 'green',
             markerColor: 'green',
 
+            timeColor: 'grey',
+            fontColor: 'black',
+
             waveHeight: 128 //height of each canvas element a waveform is on.
         };
 
@@ -79,7 +82,9 @@ var Config;
                 progressColor: params.progressColor,
                 loadingColor: params.loadingColor,
                 cursorColor: params.cursorColor,
-                markerColor: params.markerColor 
+                markerColor: params.markerColor,
+                timeColor: params.timeColor,
+                fontColor: params.fontColor 
             };
         };
 

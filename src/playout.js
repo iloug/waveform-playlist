@@ -34,10 +34,6 @@ AudioPlayout.prototype.loadData = function (audioData, cb) {
     );
 };
 
-//AudioPlayout.prototype.onAudioUpdate = function(callback) {
-//    this.proc.onaudioprocess = callback;
-//};
-
 AudioPlayout.prototype.getDuration = function() {
     return this.buffer.duration;
 };

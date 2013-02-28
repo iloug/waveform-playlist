@@ -32,7 +32,7 @@ WaveformDrawer.prototype.getPeaks = function(buffer) {
         min,
         maxPeak = -Infinity; //used to scale the waveform on the canvas.
 
-    for (var i = 0; i < pixels; i++) {
+    for (i = 0; i < pixels; i++) {
         
         peaks[i] = [];
 
