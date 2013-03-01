@@ -112,8 +112,7 @@ TrackEditor.prototype.onTrackLoad = function(buffer) {
 };
 
 //cursorPos (in pixels)
-TrackEditor.prototype.schedulePlay = function(when, cursorPos, duration) {
-    
+TrackEditor.prototype.schedulePlay = function(when, cursorPos, duration) { 
     var start,
         end,
         cursorTime = cursorPos * this.resolution / this.sampleRate;

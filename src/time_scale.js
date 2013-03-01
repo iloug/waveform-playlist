@@ -21,13 +21,22 @@ TimeScale.prototype.init = function() {
     this.resolution = this.config.getResolution();
     this.sampleRate = this.config.getSampleRate();
 
-    div.appendChild(canv);
+    //div.appendChild(canv);
     this.playlistContainer.appendChild(div);
 
     this.container = div; //container for the main time scale.
 
+    //TODO check for window resizes to set these.
+    this.width = div.clientWidth;
+    this.height = div.clientHeight;
+
+    canv.setAttribute('width', this.width);
+    canv.setAttribute('height', this.height);
+
     //array of divs displaying time every 30 seconds. (TODO should make this depend on resolution)
     this.times = [];
+
+    this.prevScrollPos = 0; //checking the horizontal scroll (must update timeline above in case of change)
 
     this.drawScale();
 };
@@ -50,60 +59,86 @@ TimeScale.prototype.formatTime = function(seconds) {
     return out;
 };
 
-TimeScale.prototype.drawScale = function() {
+TimeScale.prototype.clear = function() {
+   
+    this.container.innerHTML = "";
+    this.context.clearRect(0, 0, this.width, this.height);
+};
+
+TimeScale.prototype.drawScale = function(offset) {
     var cc = this.context,
         canv = this.canv,
         colors = this.config.getColorScheme(),
+        pix,
         pixPerSec = this.sampleRate/this.resolution,
-        i = 0,
+        pixOffset = offset || 0, //caused by scrolling horizontally
+        i,
+        end,
         counter = 0,
         pixIndex,
         container = this.container,
-        width = container.clientWidth,
-        height = container.clientHeight,
+        width = this.width,
+        height = this.height,
         div,
         time,
         sTime,
-        fragment = document.createDocumentFragment();
+        fragment = document.createDocumentFragment(),
+        scaleY,
+        scaleHeight;
 
-    canv.setAttribute('width', width);
-    canv.setAttribute('height', height);
 
+    this.clear();
+
+    fragment.appendChild(canv);
     cc.fillStyle = colors.timeColor;
+    end = width + pixOffset;
 
-    //draw ticks every 5 seconds.
-    for (; i < width; i = i + pixPerSec) {
+    for (i = 0; i < end; i = i + pixPerSec) {
 
         pixIndex = ~~(i);
+        pix = pixIndex - pixOffset;
 
-        //put a timestamp every 30 seconds.
-        if (counter % 30 === 0) {
+        if (pixIndex >= pixOffset) {
 
-            sTime = this.formatTime(counter);
-            time = document.createTextNode(sTime);
-            div = document.createElement("div");
-    
-            div.style.left = pixIndex+"px";
-            div.appendChild(time);
-            fragment.appendChild(div);
+            //put a timestamp every 30 seconds.
+            if (counter % 30 === 0) {
 
-            cc.fillRect(pixIndex, height - 10, 1, 10);
+                sTime = this.formatTime(counter);
+                time = document.createTextNode(sTime);
+                div = document.createElement("div");
+        
+                div.style.left = pix+"px";
+                div.appendChild(time);
+                fragment.appendChild(div);
+
+                scaleHeight = 10;
+                scaleY = height - scaleHeight;
+            }
+            else if (counter % 5 === 0) {
+                scaleHeight = 5;
+                scaleY = height - scaleHeight;
+            }
+            else {
+                scaleHeight = 2;
+                scaleY = height - scaleHeight;
+            }
+
+            cc.fillRect(pix, scaleY, 1, scaleHeight);
         }
-        else if (counter % 5 === 0) {
-            cc.fillRect(pixIndex, height - 5, 1, 5);
-        }
-        else {
-            cc.fillRect(pixIndex, height - 2, 1, 2);
-        }
 
-        counter++;   
+        counter++;  
     }
 
-    container.appendChild(fragment); 
+    container.appendChild(fragment);
 };
 
 TimeScale.prototype.onTrackScroll = function(e) {
-    console.log("track scrolling");
+    var scrollX = e.srcElement.scrollLeft;    
+
+    if (scrollX !== this.prevScrollPos) {
+        this.prevScrollPos = scrollX;
+        this.drawScale(scrollX);
+    }
 };
 
 makePublisher(TimeScale.prototype);

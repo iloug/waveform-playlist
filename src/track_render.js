@@ -2,7 +2,7 @@
 
 var WaveformDrawer = function() {
 
-}
+};
 
 WaveformDrawer.prototype.init = function(container) {
 
@@ -11,7 +11,7 @@ WaveformDrawer.prototype.init = function(container) {
     this.config = new Config();
     this.container = container;
     this.channels = []; //array of canvases, contexts, 1 for each channel displayed.
-}
+};
 
 WaveformDrawer.prototype.getPeaks = function(buffer) {
     
@@ -72,7 +72,7 @@ WaveformDrawer.prototype.getPeaks = function(buffer) {
 
     this.maxPeak = maxPeak;
     this.peaks = peaks;
-}
+};
 
 WaveformDrawer.prototype.setTimeShift = function(pixels) {
     var i, len;
@@ -80,7 +80,7 @@ WaveformDrawer.prototype.setTimeShift = function(pixels) {
     for (i=0, len = this.channels.length; i < len; i++) {
         this.channels[i].canvas.style.left = pixels+"px";
     } 
-}
+};
 
 WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     var canv,
@@ -146,7 +146,7 @@ WaveformDrawer.prototype.drawFrame = function(chanNum, index, peaks, maxPeak, cu
     }
 
     cc.fillRect(x, y, w, h);
-}
+};
 
 WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset) {
     var that = this,
@@ -163,7 +163,7 @@ WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset) {
         });
 
     }
-}
+};
 
 WaveformDrawer.prototype.clear = function() {
     var i, len;
@@ -171,12 +171,12 @@ WaveformDrawer.prototype.clear = function() {
     for (i = 0, len = this.channels.length; i < len; i++) {
         this.channels[i].context.clearRect(0, 0, this.width, this.height);
     } 
-}
+};
 
 WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset) {
     
     this.draw(cursorPos, pixelOffset);
-}
+};
 
 makePublisher(WaveformDrawer.prototype);
 

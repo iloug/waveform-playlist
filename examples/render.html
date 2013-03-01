@@ -140,8 +140,6 @@ body {
     var playlistEditor = new PlaylistEditor();
     playlistEditor.init(tracks);
 
-    PlaylistEditor.prototype.on("trackscroll", "onTrackScroll", TimeScale.prototype);
-
     exports.playlistEditor = playlistEditor;
 
 })(window);

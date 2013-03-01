@@ -49,6 +49,8 @@ PlaylistEditor.prototype.init = function(tracks) {
 
     //for setInterval that's toggled during play/stop.
     this.interval;
+
+    PlaylistEditor.prototype.on("trackscroll", "onTrackScroll", timeScale);
 };
 
 PlaylistEditor.prototype.onTrackScroll = function(e) {
@@ -61,7 +63,7 @@ PlaylistEditor.prototype.onTrackScroll = function(e) {
         
         that.fire('trackscroll', e);
         that.scrollTimeout = false;
-    }, 250);   
+    }, 150);   
 };
 
 PlaylistEditor.prototype.play = function() {
