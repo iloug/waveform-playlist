@@ -78,6 +78,7 @@ body {
 
 </style>
 
+<script type="text/javascript" src="../src/observer/observer.js"></script>
 <script type="text/javascript" src="../src/config.js"></script>
 <script type="text/javascript" src="../src/track_render.js"></script>
 <script type="text/javascript" src="../src/playout.js"></script>
@@ -138,6 +139,8 @@ body {
 
     var playlistEditor = new PlaylistEditor();
     playlistEditor.init(tracks);
+
+    PlaylistEditor.prototype.on("trackscroll", "onTrackScroll", TimeScale.prototype);
 
     exports.playlistEditor = playlistEditor;
 

@@ -178,3 +178,5 @@ WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset) {
     this.draw(cursorPos, pixelOffset);
 }
 
+makePublisher(WaveformDrawer.prototype);
+

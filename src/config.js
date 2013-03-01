@@ -2,6 +2,7 @@
     Stores configuration settings for the playlist builder.
     A container object (ex a div) must be passed in, the playlist will be built on this element.
 */
+
 var Config;
 
 (function() {

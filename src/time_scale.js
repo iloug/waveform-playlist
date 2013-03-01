@@ -101,3 +101,9 @@ TimeScale.prototype.drawScale = function() {
 
     container.appendChild(fragment); 
 };
+
+TimeScale.prototype.onTrackScroll = function(e) {
+    console.log("track scrolling");
+};
+
+makePublisher(TimeScale.prototype);

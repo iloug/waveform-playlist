@@ -89,3 +89,5 @@ AudioPlayout.prototype.stop = function(delay) {
     this.source.stop(delay || 0);
 };
 
+makePublisher(AudioPlayout.prototype);
+

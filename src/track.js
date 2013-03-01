@@ -151,3 +151,5 @@ TrackEditor.prototype.updateEditor = function(cursorPos) {
     this.drawer.updateEditor(cursorPos, pixelOffset);
 };
 
+makePublisher(TrackEditor.prototype);
+

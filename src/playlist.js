@@ -26,7 +26,7 @@ PlaylistEditor.prototype.init = function(tracks) {
     this.playlistContainer.appendChild(div);
 
     this.timeScale = timeScale;
-
+    
     for (i = 0, len = tracks.length; i < len; i++) {
 
         trackEditor = new TrackEditor();
@@ -38,12 +38,30 @@ PlaylistEditor.prototype.init = function(tracks) {
         trackEditor.loadTrack(tracks[i].url);
     }
 
+    div.onscroll = this.onTrackScroll.bind(that);
+
+
     this.cursorPos = 0; //in pixels
     this.sampleRate = this.config.getSampleRate();
     this.resolution = this.config.getResolution();
 
+    this.scrollTimeout = false;
+
     //for setInterval that's toggled during play/stop.
     this.interval;
+};
+
+PlaylistEditor.prototype.onTrackScroll = function(e) {
+    var that = this;
+
+    if (that.scrollTimeout) return;
+
+    //limit the scroll firing to every 250ms.
+    that.scrollTimeout = setTimeout(function() {
+        
+        that.fire('trackscroll', e);
+        that.scrollTimeout = false;
+    }, 250);   
 };
 
 PlaylistEditor.prototype.play = function() {
@@ -94,4 +112,6 @@ PlaylistEditor.prototype.updateEditor = function() {
         }
     } 
 };
+
+makePublisher(PlaylistEditor.prototype);
 
