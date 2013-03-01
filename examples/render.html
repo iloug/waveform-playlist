@@ -89,10 +89,17 @@ body {
 </head>
 <body>
 
+  
+
   <div id=playlist class="playlist">
     <div id=top-bar class="playlist-top-bar">
-      <div id=play onclick="playlistEditor.play()">Play</div>
-      <div id=stop onclick="playlistEditor.stop()">Stop</div>
+      <div class="btn-toolbar">
+        <div class="btn-group">
+          <a id="btn_play" class="btn btn-success" onclick="playlistEditor.play()"><i class="icon-play icon-white"></i></a>
+          <a id="btn_pause" class="btn btn-warning"><i class="icon-pause icon-white"></i></a> <!-- can use class 'disabled' -->
+          <a id="btn_stop" class="btn btn-danger" onclick="playlistEditor.stop()"><i class="icon-stop icon-white"></i></a>
+        </div>
+      </div>
     </div>
     
 <!--
