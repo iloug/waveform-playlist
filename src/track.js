@@ -2,7 +2,17 @@
 
 var TrackEditor = function() {
 
-}
+};
+
+TrackEditor.prototype.states = {
+    "select" : {
+
+    },
+    
+    "shift" : {
+        "mousedown": "timeShift"
+    }
+};
 
 TrackEditor.prototype.init = function(leftOffset) {
 
@@ -28,11 +38,11 @@ TrackEditor.prototype.init = function(leftOffset) {
     //value is a float in seconds
     this.endTime = 0;
 
-    //TODO this needs to be changed to different callback states
-    this.container.onmousedown = this.timeShift.bind(that);
+
+    this.setState("shift");
 
     return this.container;
-}
+};
 
 /**
  * Loads an audio file via XHR.
@@ -65,9 +75,7 @@ TrackEditor.prototype.loadTrack = function(src) {
     xhr.send();
 };
 
-//TODO move this to a better location, just for trying out.
-//will move the waveform only changing the x-axis.
-//a mousedown event.
+//TODO modify this to work with scrolls.
 TrackEditor.prototype.timeShift = function(e) {
     var startX = e.pageX, 
         diffX = 0, 
@@ -109,6 +117,33 @@ TrackEditor.prototype.onTrackLoad = function(buffer) {
 
     this.numSamples = buffer.length;
     this.duration = buffer.duration;
+};
+
+TrackEditor.prototype.setState = function(state) {
+    var that = this,
+        stateEvents = this.states[state],
+        event,
+        container = this.container,
+        prevState = this.currentState,
+        prevStateEvents,
+        func;
+
+    if (prevState) {
+        prevStateEvents = this.states[prevState];
+
+        for (event in prevStateEvents) {
+            func = that[prevStateEvents[event]].bind(that);
+            container.removeEventListener(event, func);
+        }
+    }
+
+    for (event in stateEvents) {
+
+        func = that[stateEvents[event]].bind(that);
+        container.addEventListener(event, func);
+    }
+
+    this.currentState = state;
 };
 
 //cursorPos (in pixels)
