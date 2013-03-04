@@ -5,12 +5,13 @@ var TrackEditor = function() {
 };
 
 TrackEditor.prototype.states = {
-    "select" : {
-
+    select: {
+        mousedown: "selectDown",
+        mouseup: "selectUp"
     },
     
-    "shift" : {
-        "mousedown": "timeShift"
+    shift: {
+        mousedown: "timeShift"
     }
 };
 
@@ -38,7 +39,7 @@ TrackEditor.prototype.init = function(leftOffset) {
     //value is a float in seconds
     this.endTime = 0;
 
-
+    this.prevStateEvents = {};
     this.setState("shift");
 
     return this.container;
@@ -75,6 +76,8 @@ TrackEditor.prototype.loadTrack = function(src) {
     xhr.send();
 };
 
+/* start of state methods */
+
 //TODO modify this to work with scrolls.
 TrackEditor.prototype.timeShift = function(e) {
     var startX = e.pageX, 
@@ -82,7 +85,9 @@ TrackEditor.prototype.timeShift = function(e) {
         origX = 0,
         updatedX = 0,
         editor = this,
-        res = editor.resolution;
+        res = editor.resolution,
+        scroll = this.config.getTrackScroll(),
+        scrollX = scroll.left;
 
     origX = editor.leftOffset/res;
     
@@ -108,6 +113,16 @@ TrackEditor.prototype.timeShift = function(e) {
     };
 };
 
+TrackEditor.prototype.selectDown = function(e) {
+    var x;
+};
+
+TrackEditor.prototype.selectUp = function(e) {
+    var x;
+};
+
+/* end of state methods */
+
 TrackEditor.prototype.onTrackLoad = function(buffer) {
     var that = this;
 
@@ -125,25 +140,32 @@ TrackEditor.prototype.setState = function(state) {
         event,
         container = this.container,
         prevState = this.currentState,
-        prevStateEvents,
+        prevStateEvents = this.prevStateEvents,
         func;
 
     if (prevState) {
-        prevStateEvents = this.states[prevState];
-
+       
         for (event in prevStateEvents) {
-            func = that[prevStateEvents[event]].bind(that);
-            container.removeEventListener(event, func);
+            container.removeEventListener(event, prevStateEvents[event]);
         }
+        this.prevStateEvents = {};
     }
 
     for (event in stateEvents) {
 
         func = that[stateEvents[event]].bind(that);
+        //need to keep track of the added events for later removal since a new function is returned after using "bind"
+        this.prevStateEvents[event] = func;
         container.addEventListener(event, func);
     }
 
     this.currentState = state;
+};
+
+TrackEditor.prototype.onStateChange = function() {
+    var state = this.config.getState();
+
+    this.setState(state);
 };
 
 //cursorPos (in pixels)

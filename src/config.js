@@ -34,7 +34,14 @@ var Config;
             timeColor: 'grey',
             fontColor: 'black',
 
-            waveHeight: 128 //height of each canvas element a waveform is on.
+            waveHeight: 128, //height of each canvas element a waveform is on.
+
+            trackscroll: {
+                left: 0,
+                top: 0
+            },
+
+            state: "select"
         };
 
         params = Object.create(params);
@@ -55,6 +62,10 @@ var Config;
 
         that.getContainer = function getContainer() {
             return container;
+        };
+
+        that.getState = function getState() {
+            return params.state;
         };
 
         that.getAudioContext = function getAudioContext() {
@@ -89,6 +100,15 @@ var Config;
             };
         };
 
+        that.getTrackScroll = function getTrackScroll() {
+            var scroll = params.trackscroll;
+        
+            return {
+                left: scroll.left,
+                top: scroll.top
+            };
+        };
+
 
         /*
             Start of all setter methods for config.
@@ -100,6 +120,17 @@ var Config;
 
         that.setDisplayMono = function setDisplayMono(bool) {
             params.mono = bool;
+        };
+
+        that.setState = function setState(state) {
+            params.state = state;
+        };
+
+        that.setTrackScroll = function setTrackScroll(left, top) {
+            var scroll = params.trackscroll;
+
+            scroll.left = left;
+            scroll.top = top;
         };
 
     };

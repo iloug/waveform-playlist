@@ -12,13 +12,17 @@ PlaylistEditor.prototype.init = function(tracks) {
         div = document.createElement("div"),
         trackEditor,
         trackElem,
-        timeScale;
+        timeScale,
+        toolBar;
 
     div.className = div.className + " playlist-tracks";
 
     this.config = new Config();
     this.playlistContainer = this.config.getContainer();
     this.trackEditors = [];
+
+    toolBar = new ToolBar();
+    toolBar.init();
 
     timeScale = new TimeScale();
     timeScale.init();
@@ -36,6 +40,8 @@ PlaylistEditor.prototype.init = function(tracks) {
 
         div.appendChild(trackElem);
         trackEditor.loadTrack(tracks[i].url);
+
+        ToolBar.prototype.on("changestate", "onStateChange", trackEditor);
     }
 
     div.onscroll = this.onTrackScroll.bind(that);
@@ -51,19 +57,24 @@ PlaylistEditor.prototype.init = function(tracks) {
     this.interval;
 
     PlaylistEditor.prototype.on("trackscroll", "onTrackScroll", timeScale);
+
+    ToolBar.prototype.on("playaudio", "play", this);
+    ToolBar.prototype.on("stopaudio", "stop", this);
 };
 
 PlaylistEditor.prototype.onTrackScroll = function(e) {
-    var that = this;
+    var that = this,
+        el = e.srcElement;
 
     if (that.scrollTimeout) return;
 
     //limit the scroll firing to every 250ms.
     that.scrollTimeout = setTimeout(function() {
         
+        that.config.setTrackScroll(el.scrollLeft, el.scrollTop);
         that.fire('trackscroll', e);
         that.scrollTimeout = false;
-    }, 150);   
+    }, 25);   
 };
 
 PlaylistEditor.prototype.play = function() {
@@ -90,7 +101,7 @@ PlaylistEditor.prototype.stop = function() {
         len,
         currentTime = this.config.getCurrentTime();
 
-    for(i = 0, len = editors.length; i < len; i++) {
+    for (i = 0, len = editors.length; i < len; i++) {
         editors[i].scheduleStop(currentTime);
     }
 

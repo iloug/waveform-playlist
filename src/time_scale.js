@@ -132,8 +132,9 @@ TimeScale.prototype.drawScale = function(offset) {
     container.appendChild(fragment);
 };
 
-TimeScale.prototype.onTrackScroll = function(e) {
-    var scrollX = e.srcElement.scrollLeft;    
+TimeScale.prototype.onTrackScroll = function() {
+    var scroll = this.config.getTrackScroll(),
+        scrollX = scroll.left;    
 
     if (scrollX !== this.prevScrollPos) {
         this.prevScrollPos = scrollX;
