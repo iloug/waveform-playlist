@@ -160,7 +160,11 @@ WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset, start, end) {
         i = (start) ? start - pixelOffset : 0,
         len = (end) ? end - pixelOffset + 1 : peaks.length;
 
-    this.clear(start, end, pixelOffset);
+    if (len > peaks.length) {
+        len = peaks.length;
+    }
+
+    this.clear(i, len-1);
  
     for (; i < len; i++) {
 
@@ -173,15 +177,12 @@ WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset, start, end) {
 /*
     If start/end are set clear only part of the canvas.
 */
-WaveformDrawer.prototype.clear = function(start, end, pixelOffset) {
+WaveformDrawer.prototype.clear = function(start, end) {
     var i, len,
-        start = start || 0,
-        end = end || this.width,
-        width = end - start + 1,
-        startPix = start - pixelOffset;
+        width = end - start + 1;
 
     for (i = 0, len = this.channels.length; i < len; i++) {
-        this.channels[i].context.clearRect(startPix, 0, width, this.height);
+        this.channels[i].context.clearRect(start, 0, width, this.height);
     } 
 };
 
