@@ -79,7 +79,8 @@ TrackEditor.prototype.loadTrack = function(src) {
 
 //TODO modify this to work with scrolls.
 TrackEditor.prototype.timeShift = function(e) {
-    var startX = e.pageX, 
+    var el = e.target,
+        startX = e.pageX, 
         diffX = 0, 
         origX = 0,
         updatedX = 0,
@@ -91,7 +92,7 @@ TrackEditor.prototype.timeShift = function(e) {
     origX = editor.leftOffset/res;
     
     //dynamically put an event on the element.
-    e.target.onmousemove = function(e) {
+    el.onmousemove = function(e) {
         var endX = e.pageX;
         
         diffX = endX - startX;
@@ -101,7 +102,7 @@ TrackEditor.prototype.timeShift = function(e) {
     document.body.onmouseup = function() {
         var delta;
 
-        e.target.onmousemove = document.body.onmouseup = null;
+        el.onmousemove = document.body.onmouseup = null;
         editor.leftOffset = updatedX * res;
 
         delta = diffX * res / editor.sampleRate;
@@ -113,7 +114,8 @@ TrackEditor.prototype.timeShift = function(e) {
 };
 
 TrackEditor.prototype.selectStart = function(e) {
-    var startX = e.pageX,
+    var el = e.target,
+        startX = e.pageX,
         prevX = e.pageX,
         editor = this,
         pixelOffset = this.leftOffset / this.resolution;
@@ -122,7 +124,7 @@ TrackEditor.prototype.selectStart = function(e) {
     editor.drawer.drawHighlight(startX, startX, true, pixelOffset);
 
     //dynamically put an event on the element.
-    e.target.onmousemove = function(e) {
+    el.onmousemove = function(e) {
         var currentX = e.pageX,
             delta = currentX - prevX,
             min = Math.min(prevX, currentX, startX),
@@ -158,7 +160,7 @@ TrackEditor.prototype.selectStart = function(e) {
     document.body.onmouseup = function(e) {
         var endX = e.pageX;
 
-        e.target.onmousemove = document.body.onmouseup = null;
+        el.onmousemove = document.body.onmouseup = null;
         editor.drawer.drawHighlight(endX, endX, true, pixelOffset);    
     };
 };
