@@ -113,6 +113,10 @@ TrackEditor.prototype.timeShift = function(e) {
     };
 };
 
+/* 
+    TODO check to see if this can be done on the containing div, not canvas element
+    so that the mouse drag can be over any channel in the track.
+*/
 TrackEditor.prototype.selectStart = function(e) {
     var el = e.target,
         startX = e.pageX,
@@ -144,16 +148,6 @@ TrackEditor.prototype.selectStart = function(e) {
         editor.drawer.draw(0, pixelOffset, min, max);
         editor.drawer.drawHighlight(selectStart, selectEnd, false, pixelOffset);
         editor.drawer.drawHighlight(startX, startX, true, pixelOffset);
-
-    /*
-        console.log("-----------------------------");
-        console.log(pixelOffset);
-        console.log(min);
-        console.log(max);
-        console.log(selectStart);
-        console.log(selectEnd);
-        console.log("-----------------------------");
-    */
 
         prevX = currentX;
     };

@@ -20,7 +20,8 @@ WaveformDrawer.prototype.getPeaks = function(buffer) {
         peaks = [],
         i, c, p, l,
         chanLength = buffer.getChannelData(0).length,
-        pixels = ~~(chanLength / res),
+        //pixels = ~~(chanLength / res),
+        pixels = Math.ceil(chanLength / res),
         numChan = buffer.numberOfChannels,
         weight = 1 / (numChan),
         makeMono = this.config.isDisplayMono(),
@@ -158,13 +159,13 @@ WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset, start, end) {
     var that = this,
         peaks = this.peaks,
         i = (start) ? start - pixelOffset : 0,
-        len = (end) ? end - pixelOffset + 1 : peaks.length;
+        len = (end) ? end - pixelOffset : peaks.length;
 
     if (len > peaks.length) {
         len = peaks.length;
     }
 
-    this.clear(i, len-1);
+    this.clear(i, len);
  
     for (; i < len; i++) {
 
@@ -179,7 +180,7 @@ WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset, start, end) {
 */
 WaveformDrawer.prototype.clear = function(start, end) {
     var i, len,
-        width = end - start + 1;
+        width = end - start;
 
     for (i = 0, len = this.channels.length; i < len; i++) {
         this.channels[i].context.clearRect(start, 0, width, this.height);
