@@ -6,8 +6,7 @@ var TrackEditor = function() {
 
 TrackEditor.prototype.states = {
     select: {
-        mousedown: "selectDown",
-        mouseup: "selectUp"
+        mousedown: "selectStart"
     },
     
     shift: {
@@ -35,7 +34,7 @@ TrackEditor.prototype.init = function(leftOffset) {
     this.leftOffset = leftOffset || 0; //value is measured in samples.
 
     //value is a float in seconds
-    this.startTime = this.leftOffset/this.sampleRate;
+    this.startTime = this.leftOffset / this.sampleRate;
     //value is a float in seconds
     this.endTime = 0;
 
@@ -113,12 +112,55 @@ TrackEditor.prototype.timeShift = function(e) {
     };
 };
 
-TrackEditor.prototype.selectDown = function(e) {
-    var x;
-};
+TrackEditor.prototype.selectStart = function(e) {
+    var startX = e.pageX,
+        prevX = e.pageX,
+        editor = this,
+        pixelOffset = this.leftOffset / this.resolution;
 
-TrackEditor.prototype.selectUp = function(e) {
-    var x;
+    editor.updateEditor(0);
+    editor.drawer.drawHighlight(startX, startX, true, pixelOffset);
+
+    //dynamically put an event on the element.
+    e.target.onmousemove = function(e) {
+        var currentX = e.pageX,
+            delta = currentX - prevX,
+            min = Math.min(prevX, currentX, startX),
+            max = Math.max(prevX, currentX, startX),
+            selectStart,
+            selectEnd;
+        
+        if (currentX > startX) {
+            selectStart = startX;
+            selectEnd = currentX;
+        }
+        else {
+            selectStart = currentX;
+            selectEnd = startX;
+        }
+
+        editor.drawer.draw(0, pixelOffset, min, max);
+        editor.drawer.drawHighlight(selectStart, selectEnd, false, pixelOffset);
+        editor.drawer.drawHighlight(startX, startX, true, pixelOffset);
+
+    /*
+        console.log("-----------------------------");
+        console.log(pixelOffset);
+        console.log(min);
+        console.log(max);
+        console.log(selectStart);
+        console.log(selectEnd);
+        console.log("-----------------------------");
+    */
+
+        prevX = currentX;
+    };
+    document.body.onmouseup = function(e) {
+        var endX = e.pageX;
+
+        e.target.onmousemove = document.body.onmouseup = null;
+        editor.drawer.drawHighlight(endX, endX, true, pixelOffset);    
+    };
 };
 
 /* end of state methods */

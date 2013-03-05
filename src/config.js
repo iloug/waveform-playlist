@@ -30,6 +30,8 @@ var Config;
             loadingColor: 'purple',
             cursorColor: 'green',
             markerColor: 'green',
+            selectBorderColor: 'red',
+            selectBackgroundColor: 'rgba(0,0,0,0.3)',
 
             timeColor: 'grey',
             fontColor: 'black',
@@ -96,7 +98,9 @@ var Config;
                 cursorColor: params.cursorColor,
                 markerColor: params.markerColor,
                 timeColor: params.timeColor,
-                fontColor: params.fontColor 
+                fontColor: params.fontColor,
+                selectBorderColor: params.selectBorderColor,
+                selectBackgroundColor: params.selectBackgroundColor, 
             };
         };
 

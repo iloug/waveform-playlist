@@ -99,6 +99,9 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     for (i=0; i < numChan; i++) {
 
         div = document.createElement("div");
+        div.style.width = this.width+"px";
+        div.style.height = this.height+"px";
+
         canv = document.createElement("canvas");
         canv.setAttribute('width', this.width);
         canv.setAttribute('height', this.height);
@@ -148,34 +151,63 @@ WaveformDrawer.prototype.drawFrame = function(chanNum, index, peaks, maxPeak, cu
     cc.fillRect(x, y, w, h);
 };
 
-WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset) {
+/*
+    start, end are optional parameters to only redraw part of the canvas.
+*/
+WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset, start, end) {
     var that = this,
-        i,
-        len,
-        peaks = this.peaks;
+        peaks = this.peaks,
+        i = (start) ? start - pixelOffset : 0,
+        len = (end) ? end - pixelOffset + 1 : peaks.length;
 
-    this.clear();
+    this.clear(start, end, pixelOffset);
  
-    for (i=0, len=peaks.length; i < len; i++) {
+    for (; i < len; i++) {
 
         peaks[i].forEach(function(peak, chanNum) {
             that.drawFrame(chanNum, i, peak, that.maxPeak, cursorPos, pixelOffset);
         });
-
     }
 };
 
-WaveformDrawer.prototype.clear = function() {
-    var i, len;
+/*
+    If start/end are set clear only part of the canvas.
+*/
+WaveformDrawer.prototype.clear = function(start, end, pixelOffset) {
+    var i, len,
+        start = start || 0,
+        end = end || this.width,
+        width = end - start + 1,
+        startPix = start - pixelOffset;
 
     for (i = 0, len = this.channels.length; i < len; i++) {
-        this.channels[i].context.clearRect(0, 0, this.width, this.height);
+        this.channels[i].context.clearRect(startPix, 0, width, this.height);
     } 
 };
 
 WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset) {
     
     this.draw(cursorPos, pixelOffset);
+};
+
+/*
+    start, end in pixels.
+*/
+WaveformDrawer.prototype.drawHighlight = function(start, end, isBorder, pixelOffset) {
+    var i, len,
+        colors = this.config.getColorScheme(),
+        fillStyle,
+        ctx,
+        startPix = start - pixelOffset,
+        width = end - start + 1;
+
+    fillStyle = (isBorder) ? colors.selectBorderColor : colors.selectBackgroundColor;
+
+    for (i = 0, len = this.channels.length; i < len; i++) {
+        ctx = this.channels[i].context;
+        ctx.fillStyle = fillStyle;
+        ctx.fillRect(startPix, 0, width, this.height);
+    }
 };
 
 makePublisher(WaveformDrawer.prototype);
