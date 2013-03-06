@@ -4,6 +4,11 @@ var ToolBar = function() {
 
 };
 
+ToolBar.prototype.classes = {
+    "btn-state-active": "btn btn-mini active",
+    "btn-state-default": "btn btn-mini"
+};
+
 ToolBar.prototype.events = {
    "btn_play": {
         click: "playAudio"
@@ -28,13 +33,17 @@ ToolBar.prototype.init = function() {
         event,
         events = this.events,
         tmpEl,
-        func;
+        func,
+        state;
 
     this.config = new Config();
+    state = this.config.getState();
 
     this.tmpl = document.getElementById("top-bar-tmpl");
     this.el = document.getElementById("top-bar");
     this.el.innerHTML = this.tmpl.innerHTML;
+
+    document.getElementById("btn_"+state).className = this.classes["btn-state-active"];
 
     for (id in events) {
     
@@ -61,7 +70,12 @@ ToolBar.prototype.stopAudio = function() {
 
 ToolBar.prototype.changeState = function(e) {
     var el = e.currentTarget,
-        state = el.dataset.state;
+        state = el.dataset.state,
+        classes = this.classes;
+
+    this.el.getElementsByClassName('active')[0].className = classes["btn-state-default"];
+
+    el.className = classes["btn-state-active"];
 
     this.config.setState(state);
     this.fire('changestate', this);

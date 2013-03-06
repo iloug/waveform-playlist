@@ -15,7 +15,6 @@ TrackEditor.prototype.states = {
 };
 
 TrackEditor.prototype.init = function(leftOffset) {
-
     var that = this;
 
     this.config = new Config();
@@ -39,7 +38,8 @@ TrackEditor.prototype.init = function(leftOffset) {
     this.endTime = 0;
 
     this.prevStateEvents = {};
-    this.setState("shift");
+
+    this.setState(this.config.getState());
 
     return this.container;
 };
