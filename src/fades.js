@@ -21,7 +21,7 @@ Fades.prototype.createLogarithmicBuffer = function createLogarithmicBuffer(lengt
 
     var curve = new Float32Array(length),
         index,
-        key = ""+length+base+rotation;
+        key = ""+length+base+rotation,
         store = [],
         x = 0,
         i;
