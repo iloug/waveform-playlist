@@ -15,7 +15,8 @@ TrackEditor.prototype.states = {
 };
 
 TrackEditor.prototype.init = function(leftOffset) {
-    var that = this;
+    var that = this,
+        fadeId = 0;
 
     this.config = new Config();
 
@@ -43,6 +44,10 @@ TrackEditor.prototype.init = function(leftOffset) {
 
     //keep track of all fades which have been applied to this track.
     this.fades = {};
+
+    this.getFadeId = function() {
+        return fadeId++;
+    }
 
     this.selectedArea = {
         start: undefined,
@@ -188,6 +193,24 @@ TrackEditor.prototype.selectStart = function(e) {
 
 /* end of state methods */
 
+TrackEditor.prototype.saveFade = function(type, shape, start, end) {
+    var id = this.getFadeId();
+
+    this.fades[id] = {
+        type: type,
+        shape: shape,
+        start: start,
+        end: end
+    };
+
+    return id;
+};
+
+TrackEditor.prototype.removeFade = function(id) {
+
+    delete this.fades[id];
+};
+
 TrackEditor.prototype.onCreateFade = function(args) {
     var selected = this.selectedArea,
         pixelOffset = this.leftOffset / this.resolution,
@@ -196,7 +219,7 @@ TrackEditor.prototype.onCreateFade = function(args) {
         startTime = start * this.resolution / this.sampleRate,
         endTime = end * this.resolution / this.sampleRate;
 
-    this.playout.saveFade(args.type, args.shape, startTime, endTime);  
+    this.saveFade(args.type, args.shape, startTime, endTime);  
 };
 
 TrackEditor.prototype.onTrackLoad = function(buffer) {
@@ -271,7 +294,7 @@ TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, duration) {
     }
 
     relPos = cursorTime - this.startTime;
-    this.playout.applyFades(relPos, now, delay);
+    this.playout.applyFades(this.fades, relPos, now, delay);
 
     end = this.duration - start;
     this.playout.play(when, start, end);

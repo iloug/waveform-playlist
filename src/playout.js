@@ -6,8 +6,7 @@ var AudioPlayout = function() {
 
 AudioPlayout.prototype.init = function() {
 
-    var that = this,
-        fadeId = 0;
+    var that = this;
 
     this.config = new Config();
     this.ac = this.config.getAudioContext();
@@ -19,39 +18,15 @@ AudioPlayout.prototype.init = function() {
     this.destination = this.ac.destination;
     this.analyser = this.ac.createAnalyser();
     this.analyser.connect(this.destination);
-
-    this.fades = {};
-
-    this.getFadeId = function() {
-        return fadeId++;
-    }
 };
 
-AudioPlayout.prototype.saveFade = function(type, shape, start, end) {
-    var id = this.getFadeId();
-
-    this.fades[id] = {
-        type: type,
-        shape: shape,
-        start: start,
-        end: end
-    };
-
-    return id;
-};
-
-AudioPlayout.prototype.removeFade = function(id) {
-
-    delete this.fades[id];
-};
 
 /*
     param relPos: cursor position in seconds relative to this track.
         can be negative if the cursor is placed before the start of this track etc.
 */
-AudioPlayout.prototype.applyFades = function(relPos, now, delay) {
-    var fades = this.fades,
-        id,
+AudioPlayout.prototype.applyFades = function(fades, relPos, now, delay) {
+    var id,
         fade,
         fn,
         options,

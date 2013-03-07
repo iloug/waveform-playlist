@@ -97,11 +97,13 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     this.width = Math.ceil(numSamples / res);
     this.height = this.config.getWaveHeight();
 
-    for (i=0; i < numChan; i++) {
+    for (i = 0; i < numChan; i++) {
 
         div = document.createElement("div");
-        div.style.width = this.width+"px";
-        div.style.height = this.height+"px";
+        div.classList.add("channel");
+        div.classList.add("channel-"+i);
+        //div.style.width = this.width+"px";
+        //div.style.height = this.height+"px";
 
         canv = document.createElement("canvas");
         canv.setAttribute('width', this.width);
@@ -109,7 +111,8 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
 
         this.channels.push({
             canvas: canv,
-            context: canv.getContext('2d')
+            context: canv.getContext('2d'),
+            div: div
         });
 
         div.appendChild(canv);

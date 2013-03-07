@@ -83,15 +83,16 @@ PlaylistEditor.prototype.play = function() {
         editors = this.trackEditors,
         i,
         len,
-        currentTime = this.config.getCurrentTime();
+        currentTime = this.config.getCurrentTime(),
+        delay = 0.2;
 
     for(i = 0, len = editors.length; i < len; i++) {
-        editors[i].schedulePlay(currentTime, 0.2, this.cursorPos);
+        editors[i].schedulePlay(currentTime, delay, this.cursorPos);
     }
 
-    this.lastPlay = currentTime + 0.2;
+    this.lastPlay = currentTime + delay;
 
-    this.interval = setInterval(that.updateEditor.bind(that), 300);
+    this.interval = setInterval(that.updateEditor.bind(that), 200);
 };
 
 PlaylistEditor.prototype.stop = function() {
