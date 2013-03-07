@@ -1,25 +1,16 @@
 Fades = function() {};
 
-Fades.prototype.init = function init(params) {
-    var that = this;
-
-    that.context = params.context;
+Fades.prototype.init = function init(sampleRate) {
     
-    that.defaultParams = {
-        
-    };
-
-    that.params = Object.create(params);
-    Object.keys(that.defaultParams).forEach(function (key) {
-        if (!(key in params)) { params[key] = that.defaultParams[key]; }
-    }); 
+    this.sampleRate = sampleRate;  
 }
 
 //creating a curve to simulate an S-curve with setValueCurveAtTime.
 Fades.prototype.createSCurveBuffer = function createSCurveBuffer(length, phase) {
-    var curve = new Float32Array(length);
+    var curve = new Float32Array(length),
+        i;
 
-    for (var i = 0; i < length; ++i) {
+    for (i = 0; i < length; ++i) {
         curve[i] = (Math.sin((Math.PI * i / length) - phase))/2 + 0.5;
     }
     return curve;
@@ -32,13 +23,14 @@ Fades.prototype.createLogarithmicBuffer = function createLogarithmicBuffer(lengt
         index,
         key = ""+length+base+rotation;
         store = [],
-        x = 0;
+        x = 0,
+        i;
 
     if (store[key]) {
         return store[key];
     }
 
-    for (var i = 0; i < length; i++) {
+    for (i = 0; i < length; i++) {
         //index for the curve array.
         index = rotation > 0 ? i : length - 1 - i;
 
@@ -71,14 +63,14 @@ After the end of the curve time interval (t >= startTime + duration), the value 
 Fades.prototype.sCurveFadeIn = function sCurveFadeIn(gain, start, duration, options) {
     var curve;
         
-    curve = this.createSCurveBuffer(this.context.sampleRate, (Math.PI/2));
+    curve = this.createSCurveBuffer(this.sampleRate, (Math.PI/2));
     gain.setValueCurveAtTime(curve, start, duration);
 };
 
 Fades.prototype.sCurveFadeOut = function sCurveFadeOut(gain, start, duration, options) {
     var curve;
         
-    curve = this.createSCurveBuffer(this.context.sampleRate, -(Math.PI/2));
+    curve = this.createSCurveBuffer(this.sampleRate, -(Math.PI/2));
     gain.setValueCurveAtTime(curve, start, duration);
 };
 
@@ -148,7 +140,7 @@ Fades.prototype.logarithmicFadeIn = function logarithmicFadeIn(gain, start, dura
 
     base = typeof base !== 'undefined' ? base : 10;
 
-    curve = this.createLogarithmicBuffer(this.context.sampleRate, base, 1);
+    curve = this.createLogarithmicBuffer(this.sampleRate, base, 1);
     gain.setValueCurveAtTime(curve, start, duration);
 };
 
@@ -158,7 +150,7 @@ Fades.prototype.logarithmicFadeOut = function logarithmicFadeOut(gain, start, du
 
     base = typeof base !== 'undefined' ? base : 10;
 
-    curve = this.createLogarithmicBuffer(this.context.sampleRate, base, -1);
+    curve = this.createLogarithmicBuffer(this.sampleRate, base, -1);
     gain.setValueCurveAtTime(curve, start, duration);
 };
 
@@ -175,12 +167,12 @@ Fades.prototype.createFadeIn = function createFadeIn(gain, type, options) {
     var method = type + "FadeIn",
         fn = this[method];
 
-        fn.call(this, gain, options.start, options.duration, options);
+    fn.call(this, gain, options.start, options.duration, options);
 };
 
 Fades.prototype.createFadeOut = function createFadeOut(gain, type, options) {
     var method = type + "FadeOut",
         fn = this[method];
 
-        fn.call(this, gain, options.start, options.duration, options);
+    fn.call(this, gain, options.start, options.duration, options);
 };

@@ -159,7 +159,7 @@ WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset, start, end) {
     var that = this,
         peaks = this.peaks,
         i = (start) ? start - pixelOffset : 0,
-        len = (end) ? end - pixelOffset : peaks.length;
+        len = (end) ? end - pixelOffset + 1 : peaks.length;
 
     if (len > peaks.length) {
         len = peaks.length;
@@ -172,7 +172,7 @@ WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset, start, end) {
         peaks[i].forEach(function(peak, chanNum) {
             that.drawFrame(chanNum, i, peak, that.maxPeak, cursorPos, pixelOffset);
         });
-    }
+    } 
 };
 
 /*
@@ -184,7 +184,7 @@ WaveformDrawer.prototype.clear = function(start, end) {
 
     for (i = 0, len = this.channels.length; i < len; i++) {
         this.channels[i].context.clearRect(start, 0, width, this.height);
-    } 
+    }
 };
 
 WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset) {
@@ -210,6 +210,19 @@ WaveformDrawer.prototype.drawHighlight = function(start, end, isBorder, pixelOff
         ctx.fillStyle = fillStyle;
         ctx.fillRect(startPix, 0, width, this.height);
     }
+};
+
+/*
+    example fade object.
+
+    {
+        start: seconds,
+        end: seconds,
+        type: fadetype
+    }
+*/
+WaveformDrawer.prototype.drawFades = function(fades) {
+
 };
 
 makePublisher(WaveformDrawer.prototype);

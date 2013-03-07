@@ -23,6 +23,9 @@ var publisher = {
     fire: function (type, publication) {
         this.visitSubscribers('publish', type, publication);
     },
+    reset: function (type) {
+        this.subscribers[type] = undefined;
+    },
     visitSubscribers: function (action, type, arg, context) {
         var pubtype = type || 'any',
             subscribers = this.subscribers[pubtype],
@@ -32,7 +35,8 @@ var publisher = {
         for (i = 0; i < max; i += 1) {
             if (action === 'publish') {
                 subscribers[i].fn.call(subscribers[i].context, arg);
-            } else {
+            } 
+            else {
                 if (subscribers[i].fn === arg && subscribers[i].context === context) {
                     subscribers.splice(i, 1);
                 }

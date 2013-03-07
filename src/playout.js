@@ -10,11 +10,31 @@ AudioPlayout.prototype.init = function() {
 
     this.config = new Config();
     this.ac = this.config.getAudioContext();
+
+    this.fadeMaker = new Fades();
+    this.fadeMaker.init(this.ac.sampleRate);
     
+    this.gainNode = this.ac.createGainNode();
     this.destination = this.ac.destination;
     this.analyser = this.ac.createAnalyser();
     this.analyser.connect(this.destination);
 }
+
+/*
+    options {
+        start / seconds
+        duration / seconds
+    }
+*/
+AudioPlayout.prototype.applyFadeIn = function(gain, type, options) {
+
+    this.fadeMaker.createFadeIn(gain, type, options);
+};
+
+AudioPlayout.prototype.applyFadeOut = function(gain, type, options) {
+
+    this.fadeMaker.createFadeOut(gain, type, options);
+};
 
 /**
  * Loads audiobuffer.
@@ -63,7 +83,10 @@ AudioPlayout.prototype.getPlayedPercents = function() {
 AudioPlayout.prototype.setSource = function(source) {
     this.source && this.source.disconnect();
     this.source = source;
-    this.source.connect(this.analyser);
+    this.source.buffer = this.buffer;
+
+    this.source.connect(this.gainNode);
+    this.gainNode.connect(this.analyser);
 };
 
 /*
@@ -79,8 +102,7 @@ AudioPlayout.prototype.play = function(delay, start, end) {
     }
 
     this.setSource(this.ac.createBufferSource());
-    this.source.buffer = this.buffer;
-
+    
     this.source.start(delay || 0, start, end);
 };
 

@@ -41,6 +41,14 @@ TrackEditor.prototype.init = function(leftOffset) {
 
     this.setState(this.config.getState());
 
+    //keep track of all fades which have been applied to this track.
+    this.fades = {};
+
+    this.selectedArea = {
+        start: undefined,
+        end: undefined
+    };
+
     return this.container;
 };
 
@@ -124,6 +132,13 @@ TrackEditor.prototype.selectStart = function(e) {
         editor = this,
         pixelOffset = this.leftOffset / this.resolution;
 
+    this.selectedArea = {
+        start: undefined,
+        end: undefined
+    };
+
+    ToolBar.prototype.on("applyfade", "onApplyFade", editor);
+
     editor.updateEditor(0);
     editor.drawer.drawHighlight(startX, startX, true, pixelOffset);
 
@@ -149,10 +164,25 @@ TrackEditor.prototype.selectStart = function(e) {
         editor.drawer.drawHighlight(selectStart, selectEnd, false, pixelOffset);
         editor.drawer.drawHighlight(startX, startX, true, pixelOffset);
 
+        /*
+        console.log('----------------------');
+        console.log(min);
+        console.log(max);
+        console.log(startX);
+        console.log(prevX);
+        console.log(currentX); 
+        console.log('----------------------');
+        */
+
         prevX = currentX;
     };
     document.body.onmouseup = function(e) {
         var endX = e.pageX;
+
+        this.selectedArea = {
+            start: startX,
+            end: endX
+        };
 
         el.onmousemove = document.body.onmouseup = null;
         editor.drawer.drawHighlight(endX, endX, true, pixelOffset);    

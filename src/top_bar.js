@@ -81,4 +81,9 @@ ToolBar.prototype.changeState = function(e) {
     this.fire('changestate', this);
 };
 
+ToolBar.prototype.createFade = function(e) {
+
+    this.fire('createfade', this);
+};
+
 makePublisher(ToolBar.prototype);

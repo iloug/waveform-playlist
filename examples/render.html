@@ -81,6 +81,7 @@ body {
 <script type="text/javascript" src="../src/observer/observer.js"></script>
 <script type="text/javascript" src="../src/config.js"></script>
 <script type="text/javascript" src="../src/track_render.js"></script>
+<script type="text/javascript" src="../src/fades.js"></script>
 <script type="text/javascript" src="../src/playout.js"></script>
 <script type="text/javascript" src="../src/track.js"></script>
 <script type="text/javascript" src="../src/time_scale.js"></script>
@@ -98,6 +99,18 @@ body {
     <div class="btn-group">
       <a id="btn_select" class="btn btn-mini" data-state="select"><i class="icon-italic"></i></a>
       <a id="btn_shift" class="btn btn-mini" data-state="shift"><i class="icon-resize-horizontal"></i></a>
+    </div>
+    <div class="btn-group fade-in">
+      <a class="btn btn-mini disabled" data-state="linear">Linear</a>
+      <a class="btn btn-mini disabled" data-state="logarithmic">Logarithmic</a>
+      <a class="btn btn-mini disabled" data-state="scurve">S-Curve</a>
+      <a class="btn btn-mini disabled" data-state="exponential">Exponential</a>
+    </div>
+    <div class="btn-group fade-out">
+      <a class="btn btn-mini disabled" data-state="linear">Linear</a>
+      <a class="btn btn-mini disabled" data-state="logarithmic">Logarithmic</a>
+      <a class="btn btn-mini disabled" data-state="scurve">S-Curve</a>
+      <a class="btn btn-mini disabled" data-state="exponential">Exponential</a>
     </div>
   </div>
 </script>
@@ -126,6 +139,7 @@ body {
 
     var container = document.getElementById("playlist");
 
+
     var tracks = [
         {
             url: "Beautiful.m4a"
@@ -135,6 +149,7 @@ body {
             url: "AlwaysDo.mp3"
         }
     ];
+
 
 /*
     var tracks = [
@@ -147,7 +162,7 @@ body {
 */
 
     var config = new Config(container, {
-        resolution: 10000,
+        resolution: 8000,
         mono: false
     });
 
