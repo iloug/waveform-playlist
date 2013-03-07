@@ -137,7 +137,8 @@ TrackEditor.prototype.selectStart = function(e) {
         end: undefined
     };
 
-    ToolBar.prototype.on("applyfade", "onApplyFade", editor);
+    //remove previously listening track.
+    ToolBar.prototype.reset("createfade");
 
     editor.updateEditor(0);
     editor.drawer.drawHighlight(startX, startX, true, pixelOffset);
@@ -164,32 +165,39 @@ TrackEditor.prototype.selectStart = function(e) {
         editor.drawer.drawHighlight(selectStart, selectEnd, false, pixelOffset);
         editor.drawer.drawHighlight(startX, startX, true, pixelOffset);
 
-        /*
-        console.log('----------------------');
-        console.log(min);
-        console.log(max);
-        console.log(startX);
-        console.log(prevX);
-        console.log(currentX); 
-        console.log('----------------------');
-        */
-
         prevX = currentX;
     };
     document.body.onmouseup = function(e) {
         var endX = e.pageX;
 
-        this.selectedArea = {
-            start: startX,
-            end: endX
+        editor.selectedArea = {
+            start: Math.min(startX, endX),
+            end: Math.max(startX, endX)
         };
 
         el.onmousemove = document.body.onmouseup = null;
-        editor.drawer.drawHighlight(endX, endX, true, pixelOffset);    
+        editor.drawer.drawHighlight(endX, endX, true, pixelOffset);
+
+        //if more than one pixel is selected, listen to possible fade events.
+        if (Math.abs(startX - endX)) {
+            ToolBar.prototype.activateFades();
+            ToolBar.prototype.on("createfade", "onCreateFade", editor);
+        }      
     };
 };
 
 /* end of state methods */
+
+TrackEditor.prototype.onCreateFade = function(args) {
+    var selected = this.selectedArea,
+        pixelOffset = this.leftOffset / this.resolution,
+        start = selected.start - pixelOffset,
+        end = selected.end - pixelOffset,
+        startTime = start * this.resolution / this.sampleRate,
+        endTime = end * this.resolution / this.sampleRate;
+
+    this.playout.saveFade(args.type, args.shape, startTime, endTime);  
+};
 
 TrackEditor.prototype.onTrackLoad = function(buffer) {
     var that = this;
@@ -237,10 +245,12 @@ TrackEditor.prototype.onStateChange = function() {
 };
 
 //cursorPos (in pixels)
-TrackEditor.prototype.schedulePlay = function(when, cursorPos, duration) { 
+TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, duration) { 
     var start,
         end,
-        cursorTime = cursorPos * this.resolution / this.sampleRate;
+        cursorTime = cursorPos * this.resolution / this.sampleRate,
+        relPos,
+        when = now + delay;
 
     //track has no content to play.
     if (this.endTime <= cursorTime) return;
@@ -259,6 +269,9 @@ TrackEditor.prototype.schedulePlay = function(when, cursorPos, duration) {
     else {
         start = cursorTime - this.startTime;
     }
+
+    relPos = cursorTime - this.startTime;
+    this.playout.applyFades(relPos, now, delay);
 
     end = this.duration - start;
     this.playout.play(when, start, end);

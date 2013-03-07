@@ -6,7 +6,9 @@ var ToolBar = function() {
 
 ToolBar.prototype.classes = {
     "btn-state-active": "btn btn-mini active",
-    "btn-state-default": "btn btn-mini"
+    "btn-state-default": "btn btn-mini",
+    "disabled": "disabled",
+    "active": "active"
 };
 
 ToolBar.prototype.events = {
@@ -24,6 +26,10 @@ ToolBar.prototype.events = {
 
     "btn_shift": {
         click: "changeState"
+    },
+
+    "btns-fade": {
+        click: "createFade"
     }
 };
 
@@ -58,6 +64,28 @@ ToolBar.prototype.init = function() {
     
 };
 
+ToolBar.prototype.activateFades = function() {
+    var el = document.getElementById("btns-fade"),
+        btns = el.getElementsByTagName("a"),
+        classes = this.classes,
+        i, len;
+
+    for (i = 0, len = btns.length; i < len; i++) {
+        btns[i].classList.remove(classes["disabled"]);
+    }
+};
+
+ToolBar.prototype.deactivateFades = function() {
+    var el = document.getElementById("btns-fade"),
+        btns = el.getElementsByTagName("a"),
+        classes = this.classes,
+        i, len;
+
+    for (i = 0, len = btns.length; i < len; i++) {
+        btns[i].classList.add(classes["disabled"]);
+    }
+};
+
 ToolBar.prototype.playAudio = function() {
 
     this.fire('playaudio', this);
@@ -82,8 +110,20 @@ ToolBar.prototype.changeState = function(e) {
 };
 
 ToolBar.prototype.createFade = function(e) {
+    var el = e.target,
+        shape = el.dataset.shape,
+        type = el.dataset.type,
+        disabled,
+        classes = this.classes;
 
-    this.fire('createfade', this);
+    disabled = el.classList.contains(classes["disabled"]);
+
+    if (!disabled) {
+        this.fire('createfade', {
+            type: type, 
+            shape: shape
+        });
+    }  
 };
 
 makePublisher(ToolBar.prototype);

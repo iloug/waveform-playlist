@@ -100,17 +100,19 @@ body {
       <a id="btn_select" class="btn btn-mini" data-state="select"><i class="icon-italic"></i></a>
       <a id="btn_shift" class="btn btn-mini" data-state="shift"><i class="icon-resize-horizontal"></i></a>
     </div>
-    <div class="btn-group fade-in">
-      <a class="btn btn-mini disabled" data-state="linear">Linear</a>
-      <a class="btn btn-mini disabled" data-state="logarithmic">Logarithmic</a>
-      <a class="btn btn-mini disabled" data-state="scurve">S-Curve</a>
-      <a class="btn btn-mini disabled" data-state="exponential">Exponential</a>
-    </div>
-    <div class="btn-group fade-out">
-      <a class="btn btn-mini disabled" data-state="linear">Linear</a>
-      <a class="btn btn-mini disabled" data-state="logarithmic">Logarithmic</a>
-      <a class="btn btn-mini disabled" data-state="scurve">S-Curve</a>
-      <a class="btn btn-mini disabled" data-state="exponential">Exponential</a>
+    <div id="btns-fade" class="btn-group">
+      <div class="btn-group fade-in">
+        <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="linear">Linear</a>
+        <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="logarithmic">Logarithmic</a>
+        <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="sCurve">S-Curve</a>
+        <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="exponential">Exponential</a>
+      </div>
+      <div class="btn-group fade-out">
+        <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="linear">Linear</a>
+        <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="logarithmic">Logarithmic</a>
+        <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="sCurve">S-Curve</a>
+        <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="exponential">Exponential</a>
+      </div>
     </div>
   </div>
 </script>
@@ -143,11 +145,11 @@ body {
     var tracks = [
         {
             url: "Beautiful.m4a"
-        },
-
-        {
-            url: "AlwaysDo.mp3"
         }
+
+        //{
+        //    url: "AlwaysDo.mp3"
+        //}
     ];
 
 

@@ -68,7 +68,7 @@ PlaylistEditor.prototype.onTrackScroll = function(e) {
 
     if (that.scrollTimeout) return;
 
-    //limit the scroll firing to every 250ms.
+    //limit the scroll firing to every 25ms.
     that.scrollTimeout = setTimeout(function() {
         
         that.config.setTrackScroll(el.scrollLeft, el.scrollTop);
@@ -86,7 +86,7 @@ PlaylistEditor.prototype.play = function() {
         currentTime = this.config.getCurrentTime();
 
     for(i = 0, len = editors.length; i < len; i++) {
-        editors[i].schedulePlay(currentTime + 0.2, this.cursorPos);
+        editors[i].schedulePlay(currentTime, 0.2, this.cursorPos);
     }
 
     this.lastPlay = currentTime + 0.2;

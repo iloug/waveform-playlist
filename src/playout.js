@@ -2,11 +2,12 @@
 
 var AudioPlayout = function() {
 
-}
+};
 
 AudioPlayout.prototype.init = function() {
 
-    var that = this;
+    var that = this,
+        fadeId = 0;
 
     this.config = new Config();
     this.ac = this.config.getAudioContext();
@@ -18,22 +19,64 @@ AudioPlayout.prototype.init = function() {
     this.destination = this.ac.destination;
     this.analyser = this.ac.createAnalyser();
     this.analyser.connect(this.destination);
-}
 
-/*
-    options {
-        start / seconds
-        duration / seconds
+    this.fades = {};
+
+    this.getFadeId = function() {
+        return fadeId++;
     }
-*/
-AudioPlayout.prototype.applyFadeIn = function(gain, type, options) {
-
-    this.fadeMaker.createFadeIn(gain, type, options);
 };
 
-AudioPlayout.prototype.applyFadeOut = function(gain, type, options) {
+AudioPlayout.prototype.saveFade = function(type, shape, start, end) {
+    var id = this.getFadeId();
 
-    this.fadeMaker.createFadeOut(gain, type, options);
+    this.fades[id] = {
+        type: type,
+        shape: shape,
+        start: start,
+        end: end
+    };
+
+    return id;
+};
+
+AudioPlayout.prototype.removeFade = function(id) {
+
+    delete this.fades[id];
+};
+
+/*
+    param relPos: cursor position in seconds relative to this track.
+        can be negative if the cursor is placed before the start of this track etc.
+*/
+AudioPlayout.prototype.applyFades = function(relPos, now, delay) {
+    var fades = this.fades,
+        id,
+        fade,
+        fn,
+        options,
+        startTime,
+        duration;
+
+    for (id in fades) {
+
+        fade = fades[id];
+
+        if (relPos <= fade.start) {
+            startTime = now + (fade.start - relPos) + delay;
+            duration = fade.end - fade.start;
+        }
+
+        options = {
+            start: startTime,
+            duration: duration
+        };
+
+        if (fades.hasOwnProperty(id)) {
+            fn = this.fadeMaker["create"+fade.type];
+            fn.call(this.fadeMaker, this.gainNode.gain, fade.shape, options);
+        }
+    }
 };
 
 /**
@@ -95,20 +138,20 @@ AudioPlayout.prototype.setSource = function(source) {
     it is playing slightly more samples than it has it won't play at all.
     Unfortunately it doesn't seem to work if you just give it a start time.
 */
-AudioPlayout.prototype.play = function(delay, start, end) {
+AudioPlayout.prototype.play = function(when, start, end) {
     if (!this.buffer) {
         console.error("no buffer to play");
         return;
     }
 
     this.setSource(this.ac.createBufferSource());
-    
-    this.source.start(delay || 0, start, end);
+  
+    this.source.start(when || 0, start, end);
 };
 
-AudioPlayout.prototype.stop = function(delay) {
+AudioPlayout.prototype.stop = function(when) {
  
-    this.source.stop(delay || 0);
+    this.source.stop(when || 0);
 };
 
 makePublisher(AudioPlayout.prototype);
