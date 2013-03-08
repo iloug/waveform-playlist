@@ -61,6 +61,10 @@ AudioPlayout.prototype.applyFades = function(relPos, now, delay) {
             startTime = now + (fade.start - relPos) + delay;
             duration = fade.end - fade.start;
         }
+        else if (relPos > fade.start && relPos < fade.end) {
+            startTime = now - (relPos - fade.start) + delay;
+            duration = fade.end - fade.start;
+        }
 
         options = {
             start: startTime,
