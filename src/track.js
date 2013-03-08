@@ -108,6 +108,7 @@ TrackEditor.prototype.timeShift = function(e) {
         diffX = endX - startX;
         updatedX = origX + diffX;
         editor.drawer.setTimeShift(updatedX);
+        editor.leftOffset = updatedX * res;
     };
     document.body.onmouseup = function() {
         var delta;
@@ -207,8 +208,8 @@ TrackEditor.prototype.onCreateFade = function(args) {
         endTime = end * this.resolution / this.sampleRate,
         id = this.getFadeId();
 
-    this.drawer.saveFade(id, args.type, args.shape, start, end);
-    this.playout.saveFade(id, args.type, args.shape, startTime, endTime);  
+    this.playout.saveFade(id, args.type, args.shape, startTime, endTime);
+    this.drawer.drawFade(id, args.type, args.shape, start, end);  
 };
 
 TrackEditor.prototype.onTrackLoad = function(buffer) {

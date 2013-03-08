@@ -68,12 +68,19 @@ body {
   position: relative;
   margin: 0;
   padding: 0;
+  display: inline-block;
 }
 
 .playlist-tracks canvas {
   position: relative;
   padding:0;
   margin:0;
+}
+
+.playlist-fade {
+  position: absolute;
+  background-color: rgba(0,0,0,0.2);
+  z-index: 1000;
 }
 
 
@@ -152,13 +159,13 @@ body {
 
 
     var tracks = [
-        {
-            url: "Beautiful.m4a"
-        }
-
         //{
-        //    url: "AlwaysDo.mp3"
+        //    url: "Beautiful.m4a"
         //}
+
+        {
+            url: "AlwaysDo.mp3"
+        }
     ];
 
 

@@ -11,25 +11,6 @@ WaveformDrawer.prototype.init = function(container) {
     this.config = new Config();
     this.container = container;
     this.channels = []; //array of canvases, contexts, 1 for each channel displayed.
-
-    this.fades = {};
-};
-
-WaveformDrawer.prototype.saveFade = function(id, type, shape, start, end) {
-    
-    this.fades[id] = {
-        type: type,
-        shape: shape,
-        start: start,
-        end: end
-    };
-
-    return id;
-};
-
-WaveformDrawer.prototype.removeFade = function(id) {
-
-    delete this.fades[id];
 };
 
 WaveformDrawer.prototype.getPeaks = function(buffer) {
@@ -97,8 +78,8 @@ WaveformDrawer.prototype.getPeaks = function(buffer) {
 WaveformDrawer.prototype.setTimeShift = function(pixels) {
     var i, len;
 
-    for (i=0, len = this.channels.length; i < len; i++) {
-        this.channels[i].canvas.style.left = pixels+"px";
+    for (i = 0, len = this.channels.length; i < len; i++) {
+        this.channels[i].div.style.left = pixels+"px";
     } 
 };
 
@@ -206,6 +187,7 @@ WaveformDrawer.prototype.clear = function(start, end) {
 
     for (i = 0, len = this.channels.length; i < len; i++) {
         this.channels[i].context.clearRect(start, 0, width, this.height);
+        this.channels[i].context.clearRect(start, 0, width, this.height);
     }
 };
 
@@ -234,19 +216,29 @@ WaveformDrawer.prototype.drawHighlight = function(start, end, isBorder, pixelOff
     }
 };
 
-/*
-    example fade object.
+WaveformDrawer.prototype.drawFade = function(id, type, shape, start, end) {
+    var div,
+        width,
+        left,
+        fragment = document.createDocumentFragment(),
+        i, len;
 
-    {
-        start: seconds,
-        end: seconds,
-        type: fadetype
+        width = end - start + 1;
+        left = start;
+
+        div = document.createElement("div");
+        div.classList.add("playlist-fade");
+        div.classList.add("playlist-fade-"+id);
+        div.style.width = width+"px";
+        div.style.height = this.height+"px";
+        div.style.top = 0;
+        div.style.left = left+"px";
+
+        fragment.appendChild(div);   
+      
+    for (i = 0, len = this.channels.length; i < len; i++) {
+        this.channels[i].div.appendChild(fragment.cloneNode(true));
     }
-*/
-WaveformDrawer.prototype.drawFades = function(fades) {
-    var res = this.config.getResolution();
-
-    
 };
 
 makePublisher(WaveformDrawer.prototype);
