@@ -46,8 +46,6 @@ PlaylistEditor.prototype.init = function(tracks) {
 
     div.onscroll = this.onTrackScroll.bind(that);
 
-
-    this.cursorPos = 0; //in pixels
     this.sampleRate = this.config.getSampleRate();
     this.resolution = this.config.getResolution();
 
@@ -84,10 +82,11 @@ PlaylistEditor.prototype.play = function() {
         i,
         len,
         currentTime = this.config.getCurrentTime(),
-        delay = 0.2;
+        delay = 0.2,
+        cursorPos = this.config.getCursorPos();
 
     for(i = 0, len = editors.length; i < len; i++) {
-        editors[i].schedulePlay(currentTime, delay, this.cursorPos);
+        editors[i].schedulePlay(currentTime, delay, cursorPos);
     }
 
     this.lastPlay = currentTime + delay;
@@ -116,13 +115,13 @@ PlaylistEditor.prototype.updateEditor = function() {
         currentTime = this.config.getCurrentTime(),
         elapsed = currentTime - this.lastPlay,
         delta = elapsed * this.sampleRate / this.resolution,
-        cursor = this.cursorPos;
+        cursorPos = this.config.getCursorPos();
 
     if (elapsed) {
-        cursor = ~~(cursor + delta);
+        cursorPos = ~~(cursorPos + delta);
 
         for(i = 0, len = editors.length; i < len; i++) {
-            editors[i].updateEditor(cursor);
+            editors[i].updateEditor(cursorPos);
         }
     } 
 };

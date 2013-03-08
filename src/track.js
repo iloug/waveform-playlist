@@ -42,9 +42,6 @@ TrackEditor.prototype.init = function(leftOffset) {
 
     this.setState(this.config.getState());
 
-    //keep track of all fades which have been applied to this track.
-    this.fades = {};
-
     this.getFadeId = function() {
         return fadeId++;
     }
@@ -187,28 +184,18 @@ TrackEditor.prototype.selectStart = function(e) {
         if (Math.abs(startX - endX)) {
             ToolBar.prototype.activateFades();
             ToolBar.prototype.on("createfade", "onCreateFade", editor);
-        }      
+        }
+
+        editor.config.setCursorPos(Math.min(startX, endX));      
     };
 };
 
 /* end of state methods */
 
-TrackEditor.prototype.saveFade = function(type, shape, start, end) {
-    var id = this.getFadeId();
-
-    this.fades[id] = {
-        type: type,
-        shape: shape,
-        start: start,
-        end: end
-    };
-
-    return id;
-};
-
 TrackEditor.prototype.removeFade = function(id) {
 
-    delete this.fades[id];
+    this.drawer.removeFade(id);
+    this.playout.removeFade(id);
 };
 
 TrackEditor.prototype.onCreateFade = function(args) {
@@ -217,15 +204,17 @@ TrackEditor.prototype.onCreateFade = function(args) {
         start = selected.start - pixelOffset,
         end = selected.end - pixelOffset,
         startTime = start * this.resolution / this.sampleRate,
-        endTime = end * this.resolution / this.sampleRate;
+        endTime = end * this.resolution / this.sampleRate,
+        id = this.getFadeId();
 
-    this.saveFade(args.type, args.shape, startTime, endTime);  
+    this.drawer.saveFade(id, args.type, args.shape, start, end);
+    this.playout.saveFade(id, args.type, args.shape, startTime, endTime);  
 };
 
 TrackEditor.prototype.onTrackLoad = function(buffer) {
     var that = this;
 
-    this.endTime = buffer.length/this.sampleRate;
+    this.endTime = buffer.length / this.sampleRate;
 
     this.drawer.drawBuffer(buffer, this.leftOffset);
 
@@ -294,7 +283,7 @@ TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, duration) {
     }
 
     relPos = cursorTime - this.startTime;
-    this.playout.applyFades(this.fades, relPos, now, delay);
+    this.playout.applyFades(relPos, now, delay);
 
     end = this.duration - start;
     this.playout.play(when, start, end);

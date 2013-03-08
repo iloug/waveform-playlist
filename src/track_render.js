@@ -11,6 +11,25 @@ WaveformDrawer.prototype.init = function(container) {
     this.config = new Config();
     this.container = container;
     this.channels = []; //array of canvases, contexts, 1 for each channel displayed.
+
+    this.fades = {};
+};
+
+WaveformDrawer.prototype.saveFade = function(id, type, shape, start, end) {
+    
+    this.fades[id] = {
+        type: type,
+        shape: shape,
+        start: start,
+        end: end
+    };
+
+    return id;
+};
+
+WaveformDrawer.prototype.removeFade = function(id) {
+
+    delete this.fades[id];
 };
 
 WaveformDrawer.prototype.getPeaks = function(buffer) {
@@ -225,7 +244,9 @@ WaveformDrawer.prototype.drawHighlight = function(start, end, isBorder, pixelOff
     }
 */
 WaveformDrawer.prototype.drawFades = function(fades) {
+    var res = this.config.getResolution();
 
+    
 };
 
 makePublisher(WaveformDrawer.prototype);

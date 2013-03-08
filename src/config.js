@@ -43,7 +43,9 @@ var Config;
                 top: 0
             },
 
-            state: "select"
+            state: "select",
+
+            cursorPos: 0
         };
 
         params = Object.create(params);
@@ -60,6 +62,10 @@ var Config;
 
         that.isDisplayMono = function isDisplayMono() {
             return params.mono;
+        };
+
+        that.getCursorPos = function getCursorPos() {
+            return params.cursorPos;
         };
 
         that.getContainer = function getContainer() {
@@ -124,6 +130,10 @@ var Config;
 
         that.setDisplayMono = function setDisplayMono(bool) {
             params.mono = bool;
+        };
+
+        that.setCursorPos = function setCursorPos(pos) {
+            params.cursorPos = pos;
         };
 
         that.setState = function setState(state) {
