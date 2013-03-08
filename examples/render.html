@@ -64,15 +64,19 @@ body {
   overflow: auto;
 }
 
-.playlist-tracks div.channel {
+.channel-wrapper {
   position: relative;
-  margin: 0;
-  padding: 0;
-  display: inline-block;
 }
 
-.playlist-tracks canvas {
-  position: relative;
+.channel {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+}
+
+.channel canvas {
+  position: absolute;
+  top: 0;
   padding:0;
   margin:0;
 }
@@ -159,9 +163,9 @@ body {
 
 
     var tracks = [
-        //{
-        //    url: "Beautiful.m4a"
-        //}
+        {
+            url: "Beautiful.m4a"
+        },
 
         {
             url: "AlwaysDo.mp3"

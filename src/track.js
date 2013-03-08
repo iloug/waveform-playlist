@@ -21,6 +21,7 @@ TrackEditor.prototype.init = function(leftOffset) {
     this.config = new Config();
 
     this.container = document.createElement("div");
+    this.container.classList.add("channel-wrapper");
 
     this.drawer = new WaveformDrawer();
     this.drawer.init(this.container);

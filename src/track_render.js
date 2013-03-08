@@ -20,7 +20,6 @@ WaveformDrawer.prototype.getPeaks = function(buffer) {
         peaks = [],
         i, c, p, l,
         chanLength = buffer.getChannelData(0).length,
-        //pixels = ~~(chanLength / res),
         pixels = Math.ceil(chanLength / res),
         numChan = buffer.numberOfChannels,
         weight = 1 / (numChan),
@@ -87,11 +86,14 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     var canv,
         div,
         i,
+        top = 0,
+        left = 0,
         makeMono = this.config.isDisplayMono(),
         res = this.config.getResolution(),
         numChan = makeMono? 1 : buffer.numberOfChannels,
         numSamples = buffer.getChannelData(0).length,
-        fragment = document.createDocumentFragment();    
+        fragment = document.createDocumentFragment(),
+        wrapperHeight;    
 
     //width and height is per waveform canvas.
     this.width = Math.ceil(numSamples / res);
@@ -102,8 +104,10 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
         div = document.createElement("div");
         div.classList.add("channel");
         div.classList.add("channel-"+i);
-        //div.style.width = this.width+"px";
-        //div.style.height = this.height+"px";
+        div.style.width = this.width+"px";
+        div.style.height = this.height+"px";
+        div.style.top = top+"px";
+        div.style.left = left+"px";
 
         canv = document.createElement("canvas");
         canv.setAttribute('width', this.width);
@@ -117,8 +121,12 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
 
         div.appendChild(canv);
         fragment.appendChild(div);
+
+        top = top + this.height;
     }
   
+    wrapperHeight = numChan * this.height;
+    this.container.style.height = wrapperHeight+"px";
     this.container.appendChild(fragment);
     
 
