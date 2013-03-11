@@ -35,6 +35,7 @@ var Config;
 
             timeColor: 'grey',
             fontColor: 'black',
+            fadeColor: 'black',
 
             waveHeight: 128, //height of each canvas element a waveform is on.
 
@@ -105,6 +106,7 @@ var Config;
                 markerColor: params.markerColor,
                 timeColor: params.timeColor,
                 fontColor: params.fontColor,
+                fadeColor: params.fadeColor,
                 selectBorderColor: params.selectBorderColor,
                 selectBackgroundColor: params.selectBackgroundColor, 
             };

@@ -1,46 +1,8 @@
-Fades = function() {};
+var Fades = function() {};
 
 Fades.prototype.init = function init(sampleRate) {
     
     this.sampleRate = sampleRate;  
-}
-
-//creating a curve to simulate an S-curve with setValueCurveAtTime.
-Fades.prototype.createSCurveBuffer = function createSCurveBuffer(length, phase) {
-    var curve = new Float32Array(length),
-        i;
-
-    for (i = 0; i < length; ++i) {
-        curve[i] = (Math.sin((Math.PI * i / length) - phase))/2 + 0.5;
-    }
-    return curve;
-}
-
-//creating a curve to simulate a logarithmic curve with setValueCurveAtTime.
-Fades.prototype.createLogarithmicBuffer = function createLogarithmicBuffer(length, base, rotation) {
-
-    var curve = new Float32Array(length),
-        index,
-        key = ""+length+base+rotation,
-        store = [],
-        x = 0,
-        i;
-
-    if (store[key]) {
-        return store[key];
-    }
-
-    for (i = 0; i < length; i++) {
-        //index for the curve array.
-        index = rotation > 0 ? i : length - 1 - i;
-
-        x = i/length;
-        curve[index] = Math.log(1 + base*x) / Math.log(1 + base);
-    }
-
-    store[key] = curve;
-
-    return curve;
 }
 
 /*
@@ -63,14 +25,14 @@ After the end of the curve time interval (t >= startTime + duration), the value 
 Fades.prototype.sCurveFadeIn = function sCurveFadeIn(gain, start, duration, options) {
     var curve;
         
-    curve = this.createSCurveBuffer(this.sampleRate, (Math.PI/2));
+    curve = Curves.createSCurveBuffer(this.sampleRate, (Math.PI/2));
     gain.setValueCurveAtTime(curve, start, duration);
 };
 
 Fades.prototype.sCurveFadeOut = function sCurveFadeOut(gain, start, duration, options) {
     var curve;
         
-    curve = this.createSCurveBuffer(this.sampleRate, -(Math.PI/2));
+    curve = Curves.createSCurveBuffer(this.sampleRate, -(Math.PI/2));
     gain.setValueCurveAtTime(curve, start, duration);
 };
 
@@ -140,7 +102,7 @@ Fades.prototype.logarithmicFadeIn = function logarithmicFadeIn(gain, start, dura
 
     base = typeof base !== 'undefined' ? base : 10;
 
-    curve = this.createLogarithmicBuffer(this.sampleRate, base, 1);
+    curve = Curves.createLogarithmicBuffer(this.sampleRate, base, 1);
     gain.setValueCurveAtTime(curve, start, duration);
 };
 
@@ -150,7 +112,7 @@ Fades.prototype.logarithmicFadeOut = function logarithmicFadeOut(gain, start, du
 
     base = typeof base !== 'undefined' ? base : 10;
 
-    curve = this.createLogarithmicBuffer(this.sampleRate, base, -1);
+    curve = Curves.createLogarithmicBuffer(this.sampleRate, base, -1);
     gain.setValueCurveAtTime(curve, start, duration);
 };
 

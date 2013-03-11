@@ -224,12 +224,68 @@ WaveformDrawer.prototype.drawHighlight = function(start, end, isBorder, pixelOff
     }
 };
 
+WaveformDrawer.prototype.sCurveFadeIn = function sCurveFadeIn(ctx, width) {
+    return Curves.createSCurveBuffer(width, (Math.PI/2));
+};
+
+WaveformDrawer.prototype.sCurveFadeOut = function sCurveFadeOut(ctx, width) {
+    return Curves.createSCurveBuffer(width, -(Math.PI/2));  
+};
+
+WaveformDrawer.prototype.logarithmicFadeIn = function logarithmicFadeIn(ctx, width) {
+    return Curves.createLogarithmicBuffer(width, 10, 1);
+};
+
+WaveformDrawer.prototype.logarithmicFadeOut = function logarithmicFadeOut(ctx, width) {
+    return Curves.createLogarithmicBuffer(width, 10, -1);  
+};
+
+WaveformDrawer.prototype.exponentialFadeIn = function exponentialFadeIn(ctx, width) {
+    return Curves.createExponentialBuffer(width, 1);
+};
+
+WaveformDrawer.prototype.exponentialFadeOut = function exponentialFadeOut(ctx, width) {
+    return Curves.createExponentialBuffer(width, -1);  
+};
+
+WaveformDrawer.prototype.linearFadeIn = function linearFadeIn(ctx, width) {
+    return Curves.createLinearBuffer(width, 1);
+};
+
+WaveformDrawer.prototype.linearFadeOut = function linearFadeOut(ctx, width) {
+    return Curves.createLinearBuffer(width, -1);  
+};
+
+WaveformDrawer.prototype.drawFadeCurve = function(ctx, shape, type, width) {
+    var method = shape+type,
+        fn = this[method],
+        colors = this.config.getColorScheme(),
+        curve,
+        i, len,
+        cHeight = this.height,
+        y;
+
+    ctx.fillStyle = colors.fadeColor;
+
+    curve = fn.call(this, ctx, width);
+
+    for (i = 0, len = curve.length; i < len; i++) {
+        y = cHeight - curve[i] * cHeight;
+        ctx.fillRect(i, y, 1, 1);
+    }
+};
+
+
 WaveformDrawer.prototype.drawFade = function(id, type, shape, start, end) {
     var div,
+        canv,
         width,
         left,
         fragment = document.createDocumentFragment(),
-        i, len;
+        i, len,
+        dup,
+        ctx,
+        tmpCtx;
 
         width = end - start + 1;
         left = start;
@@ -242,10 +298,22 @@ WaveformDrawer.prototype.drawFade = function(id, type, shape, start, end) {
         div.style.top = 0;
         div.style.left = left+"px";
 
+        canv = document.createElement("canvas");
+        canv.setAttribute('width', width);
+        canv.setAttribute('height', this.height);
+        ctx = canv.getContext('2d');
+
+        this.drawFadeCurve(ctx, shape, type, width);
+
+        div.appendChild(canv);
         fragment.appendChild(div);   
       
     for (i = 0, len = this.channels.length; i < len; i++) {
-        this.channels[i].div.appendChild(fragment.cloneNode(true));
+        dup = fragment.cloneNode(true);
+        tmpCtx = dup.querySelector('canvas').getContext('2d');
+        tmpCtx.drawImage(canv, 0, 0);
+
+        this.channels[i].div.appendChild(dup);
     }
 };
 
