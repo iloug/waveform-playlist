@@ -131,10 +131,12 @@ TrackEditor.prototype.timeShift = function(e) {
 */
 TrackEditor.prototype.selectStart = function(e) {
     var el = e.target,
-        startX = e.pageX,
-        prevX = e.pageX,
         editor = this,
-        pixelOffset = this.leftOffset / this.resolution;
+        pixelOffset = this.leftOffset / this.resolution,
+        scroll = this.config.getTrackScroll(),
+        scrollX = scroll.left,
+        startX = scrollX + e.pageX,
+        prevX = scrollX + e.pageX;
 
     this.selectedArea = {
         start: undefined,
@@ -145,11 +147,11 @@ TrackEditor.prototype.selectStart = function(e) {
     ToolBar.prototype.reset("createfade");
 
     editor.updateEditor(0);
-    editor.drawer.drawHighlight(startX, startX, true, pixelOffset);
+    editor.drawer.drawHighlight(startX, startX, false, pixelOffset);
 
     //dynamically put an event on the element.
     el.onmousemove = function(e) {
-        var currentX = e.pageX,
+        var currentX = scrollX + e.pageX,
             delta = currentX - prevX,
             min = Math.min(prevX, currentX, startX),
             max = Math.max(prevX, currentX, startX),
@@ -167,12 +169,11 @@ TrackEditor.prototype.selectStart = function(e) {
 
         editor.drawer.draw(0, pixelOffset, min, max);
         editor.drawer.drawHighlight(selectStart, selectEnd, false, pixelOffset);
-        editor.drawer.drawHighlight(startX, startX, true, pixelOffset);
-
+       
         prevX = currentX;
     };
     document.body.onmouseup = function(e) {
-        var endX = e.pageX;
+        var endX = scrollX + e.pageX;
 
         editor.selectedArea = {
             start: Math.min(startX, endX),
@@ -180,15 +181,16 @@ TrackEditor.prototype.selectStart = function(e) {
         };
 
         el.onmousemove = document.body.onmouseup = null;
-        editor.drawer.drawHighlight(endX, endX, true, pixelOffset);
-
+        
         //if more than one pixel is selected, listen to possible fade events.
         if (Math.abs(startX - endX)) {
             ToolBar.prototype.activateFades();
             ToolBar.prototype.on("createfade", "onCreateFade", editor);
+            editor.drawer.drawHighlight(endX, endX, false, pixelOffset);
         }
         else {
             ToolBar.prototype.deactivateFades();
+            editor.drawer.drawHighlight(endX, endX, true, pixelOffset);
         }
 
         editor.config.setCursorPos(Math.min(startX, endX));      

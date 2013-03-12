@@ -172,6 +172,14 @@ WaveformDrawer.prototype.draw = function(cursorPos, pixelOffset, start, end) {
         i = (start) ? start - pixelOffset : 0,
         len = (end) ? end - pixelOffset + 1 : peaks.length;
 
+    if (i < 0 && len < 0) {
+        return;
+    } 
+
+    if (i < 0) {
+        i = 0;
+    }
+
     if (len > peaks.length) {
         len = peaks.length;
     }
@@ -200,7 +208,6 @@ WaveformDrawer.prototype.clear = function(start, end) {
 };
 
 WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset) {
-    
     this.draw(cursorPos, pixelOffset);
 };
 

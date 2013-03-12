@@ -53,7 +53,7 @@ AudioPlayout.prototype.applyFades = function(relPos, now, delay) {
         startTime,
         duration;
 
-    this.gainNode.gain.cancelScheduledValues(0);
+    this.gainNode.gain.cancelScheduledValues(now);
 
     for (id in fades) {
 
