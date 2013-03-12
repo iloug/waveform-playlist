@@ -265,14 +265,19 @@ WaveformDrawer.prototype.drawFadeCurve = function(ctx, shape, type, width) {
         cHeight = this.height,
         y;
 
-    ctx.fillStyle = colors.fadeColor;
+    ctx.strokeStyle = colors.fadeColor;
 
     curve = fn.call(this, ctx, width);
 
-    for (i = 0, len = curve.length; i < len; i++) {
+    y = cHeight - curve[0] * cHeight;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+
+    for (i = 1, len = curve.length; i < len; i++) {
         y = cHeight - curve[i] * cHeight;
-        ctx.fillRect(i, y, 1, 1);
+        ctx.lineTo(i, y);
     }
+    ctx.stroke();
 };
 
 
