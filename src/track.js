@@ -266,6 +266,10 @@ TrackEditor.prototype.onStateChange = function() {
     this.setState(state);
 };
 
+TrackEditor.prototype.isPlaying = function() {
+    return this.playout.isScheduled() || this.playout.isPlaying();
+};
+
 //cursorPos (in pixels)
 TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, duration) { 
     var start,

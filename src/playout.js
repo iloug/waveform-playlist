@@ -98,6 +98,22 @@ AudioPlayout.prototype.loadData = function (audioData, cb) {
     );
 };
 
+AudioPlayout.prototype.isUnScheduled = function() {
+    return this.source.playbackState === this.source.UNSCHEDULED_STATE;
+};
+
+AudioPlayout.prototype.isScheduled = function() {
+    return this.source.playbackState === this.source.SCHEDULED_STATE;
+};
+
+AudioPlayout.prototype.isPlaying = function() {
+    return this.source.playbackState === this.source.PLAYING_STATE;
+};
+
+AudioPlayout.prototype.isFinished = function() {
+    return this.source.playbackState === this.source.FINISHED_STATE;
+};
+
 AudioPlayout.prototype.getDuration = function() {
     return this.buffer.duration;
 };

@@ -82,8 +82,21 @@ PlaylistEditor.prototype.rewind = function() {
     this.config.setCursorPos(0);
 };
 
+PlaylistEditor.prototype.isPlaying = function() {
+     var that = this,
+        editors = this.trackEditors,
+        i,
+        len,
+        isPlaying = false;
+
+    for(i = 0, len = editors.length; i < len; i++) {
+        isPlaying = isPlaying || editors[i].isPlaying();
+    }
+
+    return isPlaying;
+};
+
 PlaylistEditor.prototype.play = function() {
-    
     var that = this,
         editors = this.trackEditors,
         i,
@@ -102,7 +115,6 @@ PlaylistEditor.prototype.play = function() {
 };
 
 PlaylistEditor.prototype.stop = function() {
-
      var editors = this.trackEditors,
         i,
         len,
@@ -125,12 +137,18 @@ PlaylistEditor.prototype.updateEditor = function() {
         delta = elapsed * this.sampleRate / this.resolution,
         cursorPos = this.config.getCursorPos();
 
-    if (elapsed) {
-        cursorPos = ~~(cursorPos + delta);
+    if (this.isPlaying()) {
 
-        for(i = 0, len = editors.length; i < len; i++) {
-            editors[i].updateEditor(cursorPos);
+        if (elapsed) {
+            cursorPos = ~~(cursorPos + delta);
+
+            for(i = 0, len = editors.length; i < len; i++) {
+                editors[i].updateEditor(cursorPos);
+            }
         }
+    }
+    else {
+        clearInterval(this.interval);
     } 
 };
 
