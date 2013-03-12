@@ -56,6 +56,7 @@ PlaylistEditor.prototype.init = function(tracks) {
 
     PlaylistEditor.prototype.on("trackscroll", "onTrackScroll", timeScale);
 
+    ToolBar.prototype.on("rewindaudio", "rewind", this);
     ToolBar.prototype.on("playaudio", "play", this);
     ToolBar.prototype.on("stopaudio", "stop", this);
 };
@@ -73,6 +74,12 @@ PlaylistEditor.prototype.onTrackScroll = function(e) {
         that.fire('trackscroll', e);
         that.scrollTimeout = false;
     }, 25);   
+};
+
+PlaylistEditor.prototype.rewind = function() {
+  
+    this.stop();
+    this.config.setCursorPos(0);
 };
 
 PlaylistEditor.prototype.play = function() {
@@ -103,6 +110,7 @@ PlaylistEditor.prototype.stop = function() {
 
     for (i = 0, len = editors.length; i < len; i++) {
         editors[i].scheduleStop(currentTime);
+        editors[i].updateEditor(0);
     }
 
     clearInterval(this.interval);

@@ -12,6 +12,10 @@ ToolBar.prototype.classes = {
 };
 
 ToolBar.prototype.events = {
+   "btn_rewind": {
+        click: "rewindAudio"
+    },
+
    "btn_play": {
         click: "playAudio"
     },
@@ -84,6 +88,11 @@ ToolBar.prototype.deactivateFades = function() {
     for (i = 0, len = btns.length; i < len; i++) {
         btns[i].classList.add(classes["disabled"]);
     }
+};
+
+ToolBar.prototype.rewindAudio = function() {
+
+    this.fire('rewindaudio', this);
 };
 
 ToolBar.prototype.playAudio = function() {

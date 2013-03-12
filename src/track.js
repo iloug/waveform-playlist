@@ -187,6 +187,9 @@ TrackEditor.prototype.selectStart = function(e) {
             ToolBar.prototype.activateFades();
             ToolBar.prototype.on("createfade", "onCreateFade", editor);
         }
+        else {
+            ToolBar.prototype.deactivateFades();
+        }
 
         editor.config.setCursorPos(Math.min(startX, endX));      
     };
@@ -209,7 +212,10 @@ TrackEditor.prototype.onCreateFade = function(args) {
         endTime = end * this.resolution / this.sampleRate,
         id = this.getFadeId();
 
+    ToolBar.prototype.deactivateFades();
+    this.config.setCursorPos(0);
     this.playout.saveFade(id, args.type, args.shape, startTime, endTime);
+    this.drawer.draw(0, pixelOffset);
     this.drawer.drawFade(id, args.type, args.shape, start, end);  
 };
 
