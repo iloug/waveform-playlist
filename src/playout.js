@@ -14,7 +14,7 @@ AudioPlayout.prototype.init = function() {
     this.fadeMaker = new Fades();
     this.fadeMaker.init(this.ac.sampleRate);
     
-    this.gainNode = this.ac.createGainNode();
+    this.gainNode = undefined;
     this.destination = this.ac.destination;
     this.analyser = this.ac.createAnalyser();
     this.analyser.connect(this.destination);
@@ -53,7 +53,7 @@ AudioPlayout.prototype.applyFades = function(relPos, now, delay) {
         startTime,
         duration;
 
-    this.gainNode.gain.cancelScheduledValues(now);
+    this.gainNode = this.ac.createGainNode();
 
     for (id in fades) {
 
