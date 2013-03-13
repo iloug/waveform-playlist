@@ -18,35 +18,14 @@ AudioPlayout.prototype.init = function() {
     this.destination = this.ac.destination;
     this.analyser = this.ac.createAnalyser();
     this.analyser.connect(this.destination);
-
-    this.fades = {};
 };
-
-AudioPlayout.prototype.saveFade = function(id, type, shape, start, end) {
-    
-    this.fades[id] = {
-        type: type,
-        shape: shape,
-        start: start,
-        end: end
-    };
-
-    return id;
-};
-
-AudioPlayout.prototype.removeFade = function(id) {
-
-    delete this.fades[id];
-};
-
 
 /*
     param relPos: cursor position in seconds relative to this track.
         can be negative if the cursor is placed before the start of this track etc.
 */
-AudioPlayout.prototype.applyFades = function(relPos, now, delay) {
+AudioPlayout.prototype.applyFades = function(fades, relPos, now, delay) {
     var id,
-        fades = this.fades,
         fade,
         fn,
         options,

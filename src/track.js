@@ -14,14 +14,12 @@ TrackEditor.prototype.states = {
     }
 };
 
-TrackEditor.prototype.init = function(leftOffset) {
+TrackEditor.prototype.init = function(src, start, end, fades) {
     var that = this,
         fadeId = 0;
 
     this.config = new Config();
-
     this.container = document.createElement("div");
-    this.container.classList.add("channel-wrapper");
 
     this.drawer = new WaveformDrawer();
     this.drawer.init(this.container);
@@ -32,33 +30,46 @@ TrackEditor.prototype.init = function(leftOffset) {
     this.sampleRate = this.config.getSampleRate();
     this.resolution = this.config.getResolution();
 
-    this.leftOffset = leftOffset || 0; //value is measured in samples.
+    //value is a float in seconds
+    this.startTime = start || 0;
+    //value is a float in seconds
+    this.endTime = end || 0;
 
-    //value is a float in seconds
-    this.startTime = this.leftOffset / this.sampleRate;
-    //value is a float in seconds
-    this.endTime = 0;
+    this.leftOffset = this.startTime * this.sampleRate; //value is measured in samples.
 
     this.prevStateEvents = {};
-
     this.setState(this.config.getState());
 
     this.getFadeId = function() {
         return fadeId++;
-    }
+    };
+
+    this.fades = {};
 
     this.selectedArea = {
         start: undefined,
         end: undefined
     };
 
+    this.container.classList.add("channel-wrapper");
+    this.container.style.left = this.leftOffset;
+
     return this.container;
+};
+
+TrackEditor.prototype.loadTrack = function(track) {
+    var el;
+
+    el = this.init(track.src, track.start, track.end, track.fades);
+    this.loadBuffer(track.src);
+
+    return el;
 };
 
 /**
  * Loads an audio file via XHR.
  */
-TrackEditor.prototype.loadTrack = function(src) {
+TrackEditor.prototype.loadBuffer = function(src) {
     var that = this,
         xhr = new XMLHttpRequest();
 
@@ -76,6 +87,8 @@ TrackEditor.prototype.loadTrack = function(src) {
     }, false);
 
     xhr.addEventListener('load', function(e) {
+        that.src = src;
+
         that.playout.loadData(
             e.target.response,
             that.onTrackLoad.bind(that)
@@ -84,6 +97,17 @@ TrackEditor.prototype.loadTrack = function(src) {
 
     xhr.open('GET', src, true);
     xhr.send();
+};
+
+TrackEditor.prototype.onTrackLoad = function(buffer) {
+    var that = this;
+
+    this.endTime = buffer.length / this.sampleRate;
+
+    this.drawer.drawBuffer(buffer, this.leftOffset);
+
+    this.numSamples = buffer.length;
+    this.duration = buffer.duration;
 };
 
 /* start of state methods */
@@ -199,10 +223,21 @@ TrackEditor.prototype.selectStart = function(e) {
 
 /* end of state methods */
 
+TrackEditor.prototype.saveFade = function(id, type, shape, start, end) {
+    
+    this.fades[id] = {
+        type: type,
+        shape: shape,
+        start: start,
+        end: end
+    };
+
+    return id;
+};
+
 TrackEditor.prototype.removeFade = function(id) {
 
-    this.drawer.removeFade(id);
-    this.playout.removeFade(id);
+    delete this.fades[id];
 };
 
 TrackEditor.prototype.onCreateFade = function(args) {
@@ -216,20 +251,9 @@ TrackEditor.prototype.onCreateFade = function(args) {
 
     ToolBar.prototype.deactivateFades();
     this.config.setCursorPos(0);
-    this.playout.saveFade(id, args.type, args.shape, startTime, endTime);
+    this.saveFade(id, args.type, args.shape, startTime, endTime);
     this.drawer.draw(0, pixelOffset);
     this.drawer.drawFade(id, args.type, args.shape, start, end);  
-};
-
-TrackEditor.prototype.onTrackLoad = function(buffer) {
-    var that = this;
-
-    this.endTime = buffer.length / this.sampleRate;
-
-    this.drawer.drawBuffer(buffer, this.leftOffset);
-
-    this.numSamples = buffer.length;
-    this.duration = buffer.duration;
 };
 
 TrackEditor.prototype.setState = function(state) {
@@ -297,7 +321,7 @@ TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, duration) {
     }
 
     relPos = cursorTime - this.startTime;
-    this.playout.applyFades(relPos, now, delay);
+    this.playout.applyFades(this.fades, relPos, now, delay);
 
     end = this.duration - start;
     this.playout.play(when, start, end);
@@ -312,6 +336,19 @@ TrackEditor.prototype.updateEditor = function(cursorPos) {
     var pixelOffset = this.leftOffset / this.resolution;
 
     this.drawer.updateEditor(cursorPos, pixelOffset);
+};
+
+TrackEditor.prototype.getTrackDetails = function() {
+    var d;
+
+    d = {
+        start: this.startTime,
+        end: this.endTime,
+        fades: this.fades,
+        src: this.src
+    };
+
+    return d;
 };
 
 makePublisher(TrackEditor.prototype);

@@ -99,6 +99,7 @@ body {
 </style>
 
 <script type="text/javascript" src="../src/observer/observer.js"></script>
+<script type="text/javascript" src="../src/local_storage.js"></script>
 <script type="text/javascript" src="../src/config.js"></script>
 <script type="text/javascript" src="../src/curves.js"></script>
 <script type="text/javascript" src="../src/track_render.js"></script>
@@ -136,6 +137,10 @@ body {
         <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="exponential">Exponential</a>
       </div>
     </div>
+    <div class="btn-group">
+      <a id="btn_save" class="btn btn-inverse btn-small"><i class="icon-ok icon-white"></i></a>
+      <a id="btn_open" class="btn btn-inverse btn-small"><i class="icon-folder-open icon-white"></i></a>
+    </div>
   </div>
 </script>
 
@@ -159,23 +164,27 @@ body {
   </div>
 
 <script type="text/javascript">
-(function(exports){
+(function(){
 
     var container = document.getElementById("playlist");
 
 
     var tracks = [
-        {
-            url: "Beautiful.m4a"
-        },
+        //{
+        //    url: "Beautiful.m4a"
+        //},
 
         {
-            url: "Tangerine.wav"
+            src: "Tangerine.wav"
         },
     
         {
-            url: "WhiteQueen.wav"
+            src: "BreakOut.wav"
         }
+
+        //{
+        //    url: "Panic.wav"
+        //}
     ];
 
 
@@ -190,16 +199,15 @@ body {
 */
 
     var config = new Config(container, {
-        resolution: 8000,
-        mono: false
+        resolution: 10000,
+        mono: false,
+        waveHeight: 80
     });
 
     var playlistEditor = new PlaylistEditor();
     playlistEditor.init(tracks);
 
-    exports.playlistEditor = playlistEditor;
-
-})(window);
+})();
 </script>
 </body>
 </html>

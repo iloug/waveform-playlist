@@ -34,6 +34,14 @@ ToolBar.prototype.events = {
 
     "btns-fade": {
         click: "createFade"
+    },
+
+    "btn_save": {
+        click: "save"
+    },
+
+    "btn_open": {
+        click: "open"
     }
 };
 
@@ -64,8 +72,7 @@ ToolBar.prototype.init = function() {
             func = that[events[id][event]].bind(that);
             tmpEl.addEventListener(event, func);
         }
-    }
-    
+    } 
 };
 
 ToolBar.prototype.activateFades = function() {
@@ -88,6 +95,16 @@ ToolBar.prototype.deactivateFades = function() {
     for (i = 0, len = btns.length; i < len; i++) {
         btns[i].classList.add(classes["disabled"]);
     }
+};
+
+ToolBar.prototype.save = function() {
+
+    this.fire('playlistsave', this);
+};
+
+ToolBar.prototype.open = function() {
+
+    this.fire('playlistrestore', this);
 };
 
 ToolBar.prototype.rewindAudio = function() {

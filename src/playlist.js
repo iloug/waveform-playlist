@@ -18,6 +18,10 @@ PlaylistEditor.prototype.init = function(tracks) {
     div.className = div.className + " playlist-tracks";
 
     this.config = new Config();
+    this.storage = new Storage();
+
+
+    this.trackContainer = div;
     this.playlistContainer = this.config.getContainer();
     this.trackEditors = [];
 
@@ -34,12 +38,10 @@ PlaylistEditor.prototype.init = function(tracks) {
     for (i = 0, len = tracks.length; i < len; i++) {
 
         trackEditor = new TrackEditor();
-        trackElem = trackEditor.init();
-
+        trackElem = trackEditor.loadTrack(tracks[i]);
+    
         this.trackEditors.push(trackEditor);
-
         div.appendChild(trackElem);
-        trackEditor.loadTrack(tracks[i].url);
 
         ToolBar.prototype.on("changestate", "onStateChange", trackEditor);
     }
@@ -56,6 +58,8 @@ PlaylistEditor.prototype.init = function(tracks) {
 
     PlaylistEditor.prototype.on("trackscroll", "onTrackScroll", timeScale);
 
+    ToolBar.prototype.on("playlistsave", "save", this);
+    ToolBar.prototype.on("playlistrestore", "restore", this);
     ToolBar.prototype.on("rewindaudio", "rewind", this);
     ToolBar.prototype.on("playaudio", "play", this);
     ToolBar.prototype.on("stopaudio", "stop", this);
@@ -150,6 +154,28 @@ PlaylistEditor.prototype.updateEditor = function() {
     else {
         clearInterval(this.interval);
     } 
+};
+
+PlaylistEditor.prototype.save = function() {
+     var editors = this.trackEditors,
+        i,
+        len,
+        info = [];
+
+    for (i = 0, len = editors.length; i < len; i++) {
+        info.push(editors[i].getTrackDetails());
+    }
+
+    this.storage.save("test", info);
+};
+
+PlaylistEditor.prototype.restore = function() {
+    var state;
+
+    state = this.storage.restore("test");
+
+    this.trackContainer.innerHTML='';
+    this.init(state);
 };
 
 makePublisher(PlaylistEditor.prototype);
