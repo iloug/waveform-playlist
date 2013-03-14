@@ -93,7 +93,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 30px;
+  height: 70px;
 }
 
 </style>
@@ -144,6 +144,13 @@ body {
   </div>
 </script>
 
+<script id="bottom-bar-tmpl" type="text/template">
+  <form class="form-inline">
+    <input type="text" class="input-small">
+    <input type="text" class="input-small">
+  </form>
+</script>
+
 </head>
 <body>
 
@@ -151,16 +158,9 @@ body {
 
   <div id=playlist class="playlist">
     <div id=top-bar class="playlist-top-bar"></div>
-<!--
-    <div id=time-scale class="playlist-time-scale">
-      <canvas></canvas>
-    </div>
-
+    <div id=time-scale class="playlist-time-scale"></div>
     <div id=tracks class="playlist-tracks"></div>
--->
-<!--
     <div id=bottom-bar class="playlist-bottom-bar"></div>
--->
   </div>
 
 <script type="text/javascript">
@@ -180,11 +180,11 @@ body {
     
         {
             src: "BreakOut.wav"
-        }
+        },
 
-        //{
-        //    url: "Panic.wav"
-        //}
+        {
+            src: "Panic.wav"
+        }
     ];
 
 

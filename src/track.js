@@ -33,7 +33,7 @@ TrackEditor.prototype.init = function(src, start, end, fades) {
     //value is a float in seconds
     this.startTime = start || 0;
     //value is a float in seconds
-    this.endTime = end || 0;
+    this.endTime = end || 0; //set properly in onTrackLoad.
 
     this.leftOffset = this.startTime * this.sampleRate; //value is measured in samples.
 
@@ -102,7 +102,7 @@ TrackEditor.prototype.loadBuffer = function(src) {
 TrackEditor.prototype.onTrackLoad = function(buffer) {
     var that = this;
 
-    this.endTime = buffer.length / this.sampleRate;
+    this.endTime = (buffer.length / this.sampleRate) + this.startTime;
 
     this.drawer.drawBuffer(buffer, this.leftOffset);
     this.drawer.drawFades(this.fades);

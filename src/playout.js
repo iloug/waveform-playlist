@@ -32,6 +32,7 @@ AudioPlayout.prototype.applyFades = function(fades, relPos, now, delay) {
         startTime,
         duration;
 
+    this.gainNode && this.gainNode.disconnect();
     this.gainNode = this.ac.createGainNode();
 
     for (id in fades) {
@@ -78,19 +79,19 @@ AudioPlayout.prototype.loadData = function (audioData, cb) {
 };
 
 AudioPlayout.prototype.isUnScheduled = function() {
-    return this.source.playbackState === this.source.UNSCHEDULED_STATE;
+    return this.source && (this.source.playbackState === this.source.UNSCHEDULED_STATE);
 };
 
 AudioPlayout.prototype.isScheduled = function() {
-    return this.source.playbackState === this.source.SCHEDULED_STATE;
+    return this.source && (this.source.playbackState === this.source.SCHEDULED_STATE);
 };
 
 AudioPlayout.prototype.isPlaying = function() {
-    return this.source.playbackState === this.source.PLAYING_STATE;
+    return this.source && (this.source.playbackState === this.source.PLAYING_STATE);
 };
 
 AudioPlayout.prototype.isFinished = function() {
-    return this.source.playbackState === this.source.FINISHED_STATE;
+    return this.source && (this.source.playbackState === this.source.FINISHED_STATE);
 };
 
 AudioPlayout.prototype.getDuration = function() {
@@ -147,7 +148,7 @@ AudioPlayout.prototype.play = function(when, start, end) {
 
 AudioPlayout.prototype.stop = function(when) {
  
-    this.source.stop(when || 0);
+    this.source && this.source.stop(when || 0);
 };
 
 makePublisher(AudioPlayout.prototype);

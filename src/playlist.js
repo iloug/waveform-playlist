@@ -9,20 +9,17 @@ PlaylistEditor.prototype.init = function(tracks) {
     var that = this,
         i,
         len,
-        div = document.createElement("div"),
+        div = document.getElementById("tracks"),
+        fragment = document.createDocumentFragment(),
         trackEditor,
         trackElem,
         timeScale,
         toolBar;
 
-    div.className = div.className + " playlist-tracks";
-
     this.config = new Config();
     this.storage = new Storage();
 
-
     this.trackContainer = div;
-    this.playlistContainer = this.config.getContainer();
     this.trackEditors = [];
 
     toolBar = new ToolBar();
@@ -30,8 +27,6 @@ PlaylistEditor.prototype.init = function(tracks) {
 
     timeScale = new TimeScale();
     timeScale.init();
-
-    this.playlistContainer.appendChild(div);
 
     this.timeScale = timeScale;
     
@@ -41,11 +36,13 @@ PlaylistEditor.prototype.init = function(tracks) {
         trackElem = trackEditor.loadTrack(tracks[i]);
     
         this.trackEditors.push(trackEditor);
-        div.appendChild(trackElem);
+        fragment.appendChild(trackElem);
 
         ToolBar.prototype.on("changestate", "onStateChange", trackEditor);
     }
 
+    div.innerHTML = '';
+    div.appendChild(fragment);
     div.onscroll = this.onTrackScroll.bind(that);
 
     this.sampleRate = this.config.getSampleRate();
@@ -124,12 +121,12 @@ PlaylistEditor.prototype.stop = function() {
         len,
         currentTime = this.config.getCurrentTime();
 
+    clearInterval(this.interval);
+
     for (i = 0, len = editors.length; i < len; i++) {
         editors[i].scheduleStop(currentTime);
         editors[i].updateEditor(0);
     }
-
-    clearInterval(this.interval);
 };
 
 PlaylistEditor.prototype.updateEditor = function() {

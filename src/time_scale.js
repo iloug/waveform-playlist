@@ -7,28 +7,21 @@ var TimeScale = function() {
 TimeScale.prototype.init = function() {
 
     var that = this,
-        div = document.createElement("div"),
         canv = document.createElement("canvas");
-
-    div.className = div.className + " playlist-time-scale";
 
     this.canv = canv;
     this.context = canv.getContext('2d');
     
     this.config = new Config();
-    this.playlistContainer = this.config.getContainer();
-
+    
     this.resolution = this.config.getResolution();
     this.sampleRate = this.config.getSampleRate();
 
-    //div.appendChild(canv);
-    this.playlistContainer.appendChild(div);
-
-    this.container = div; //container for the main time scale.
+    this.container = document.getElementById("time-scale"); //container for the main time scale.
 
     //TODO check for window resizes to set these.
-    this.width = div.clientWidth;
-    this.height = div.clientHeight;
+    this.width = this.container.clientWidth;
+    this.height = this.container.clientHeight;
 
     canv.setAttribute('width', this.width);
     canv.setAttribute('height', this.height);
