@@ -329,5 +329,27 @@ WaveformDrawer.prototype.drawFade = function(id, type, shape, start, end) {
     }
 };
 
+WaveformDrawer.prototype.drawFades = function(fades) {
+    var id,
+        fade,
+        startPix,
+        endPix,
+        SR,
+        res;
+
+    SR = this.config.getSampleRate();
+    res = this.config.getResolution();
+
+    for (id in fades) {
+        fade = fades[id];
+
+        if (fades.hasOwnProperty(id)) {
+            startPix = fade.start * SR / res;
+            endPix = fade.end * SR / res;
+            this.drawFade(id, fade.type, fade.shape, startPix, endPix);
+        }
+    }
+};
+
 makePublisher(WaveformDrawer.prototype);
 

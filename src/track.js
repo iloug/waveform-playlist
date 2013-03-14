@@ -44,7 +44,7 @@ TrackEditor.prototype.init = function(src, start, end, fades) {
         return fadeId++;
     };
 
-    this.fades = {};
+    this.fades = fades || {};
 
     this.selectedArea = {
         start: undefined,
@@ -105,6 +105,7 @@ TrackEditor.prototype.onTrackLoad = function(buffer) {
     this.endTime = buffer.length / this.sampleRate;
 
     this.drawer.drawBuffer(buffer, this.leftOffset);
+    this.drawer.drawFades(this.fades);
 
     this.numSamples = buffer.length;
     this.duration = buffer.duration;
