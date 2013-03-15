@@ -150,6 +150,19 @@ TrackEditor.prototype.timeShift = function(e) {
     };
 };
 
+/*
+    start, end in pixels
+*/
+TrackEditor.prototype.notifySelectUpdate = function(start, end) {
+    var startSec = start * this.resolution / this.sampleRate,
+        endSec = end * this.resolution / this.sampleRate;
+
+    this.fire('changecursor', {
+        start: startSec,
+        end: endSec
+    });
+}; 
+
 /* 
     TODO check to see if this can be done on the containing div, not canvas element
     so that the mouse drag can be over any channel in the track.
@@ -173,6 +186,7 @@ TrackEditor.prototype.selectStart = function(e) {
 
     editor.updateEditor(0);
     editor.drawer.drawHighlight(startX, startX, false, pixelOffset);
+    editor.notifySelectUpdate(startX, startX);
 
     //dynamically put an event on the element.
     el.onmousemove = function(e) {
@@ -196,6 +210,7 @@ TrackEditor.prototype.selectStart = function(e) {
         editor.drawer.drawHighlight(selectStart, selectEnd, false, pixelOffset);
        
         prevX = currentX;
+        editor.notifySelectUpdate(min, max);
     };
     document.body.onmouseup = function(e) {
         var endX = scrollX + e.pageX;
@@ -218,7 +233,8 @@ TrackEditor.prototype.selectStart = function(e) {
             editor.drawer.drawHighlight(endX, endX, true, pixelOffset);
         }
 
-        editor.config.setCursorPos(Math.min(startX, endX));      
+        editor.config.setCursorPos(Math.min(startX, endX));
+        editor.notifySelectUpdate(editor.selectedArea.start, editor.selectedArea.end);    
     };
 };
 

@@ -4,9 +4,9 @@ var BottomBar = function() {
 
 };
 
-BottomBar.prototype.events = {
-   "btn_rewind": {
-        click: "rewindAudio"
+BottomBar.prototype.formatters = {
+   "seconds": function (value) {
+
     }
 };
 
@@ -24,14 +24,24 @@ BottomBar.prototype.init = function() {
     this.el = document.getElementById("bottom-bar");
     this.el.innerHTML = this.tmpl.innerHTML;
 
-    for (id in events) {
-    
-        tmpEl = document.getElementById(id);
-
-        for (event in events[id]) {
-
-            func = that[events[id][event]].bind(that);
-            tmpEl.addEventListener(event, func);
-        }
-    } 
+    this.audioStart = document.getElementById('audio_start');
+    this.audioEnd = document.getElementById('audio_end');
+    this.audioCurrent = document.getElementById('audio_pos');
 };
+
+/*
+    start, end in seconds
+*/
+BottomBar.prototype.onCursorSelection = function(args) {
+    this.audioStart.value = args.start;
+    this.audioEnd.value = args.end;
+};
+
+/*
+    currentTime in seconds
+*/
+BottomBar.prototype.onAudioUpdate = function(currentTime) {
+   
+};
+
+makePublisher(ToolBar.prototype);

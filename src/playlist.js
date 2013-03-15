@@ -14,7 +14,8 @@ PlaylistEditor.prototype.init = function(tracks) {
         trackEditor,
         trackElem,
         timeScale,
-        toolBar;
+        toolBar,
+        bottomBar;
 
     this.config = new Config();
     this.storage = new Storage();
@@ -28,6 +29,9 @@ PlaylistEditor.prototype.init = function(tracks) {
     timeScale = new TimeScale();
     timeScale.init();
 
+    bottomBar = new BottomBar();
+    bottomBar.init();
+
     this.timeScale = timeScale;
     
     for (i = 0, len = tracks.length; i < len; i++) {
@@ -39,6 +43,7 @@ PlaylistEditor.prototype.init = function(tracks) {
         fragment.appendChild(trackElem);
 
         ToolBar.prototype.on("changestate", "onStateChange", trackEditor);
+        trackEditor.on("changecursor", "onCursorSelection", bottomBar);
     }
 
     div.innerHTML = '';
