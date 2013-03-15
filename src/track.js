@@ -15,8 +15,7 @@ TrackEditor.prototype.states = {
 };
 
 TrackEditor.prototype.init = function(src, start, end, fades) {
-    var that = this,
-        fadeId = 0;
+    var that = this;
 
     this.config = new Config();
     this.container = document.createElement("div");
@@ -40,10 +39,6 @@ TrackEditor.prototype.init = function(src, start, end, fades) {
     this.prevStateEvents = {};
     this.setState(this.config.getState());
 
-    this.getFadeId = function() {
-        return fadeId++;
-    };
-
     this.fades = fades || {};
 
     this.selectedArea = {
@@ -55,6 +50,12 @@ TrackEditor.prototype.init = function(src, start, end, fades) {
     this.container.style.left = this.leftOffset;
 
     return this.container;
+};
+
+TrackEditor.prototype.getFadeId = function() {
+    var id = ""+Math.random();
+
+    return id.replace(".", "");
 };
 
 TrackEditor.prototype.loadTrack = function(track) {
@@ -120,7 +121,7 @@ TrackEditor.prototype.activate = function() {
 };
 
 TrackEditor.prototype.deactivate = function() {
-    this.drawer.draw(0, this.getPixelOffset());
+    this.drawer.draw(-1, this.getPixelOffset());
 };
 
 /* start of state methods */

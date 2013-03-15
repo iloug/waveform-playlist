@@ -43,6 +43,7 @@ PlaylistEditor.prototype.init = function(tracks) {
         fragment.appendChild(trackElem);
 
         ToolBar.prototype.on("changestate", "onStateChange", trackEditor);
+        ToolBar.prototype.on("changestate", "onStateChange", this);
         trackEditor.on("changecursor", "onCursorSelection", bottomBar);
         trackEditor.on("changecursor", "onCursorSelection", this);
     }
@@ -66,6 +67,18 @@ PlaylistEditor.prototype.init = function(tracks) {
     ToolBar.prototype.on("rewindaudio", "rewind", this);
     ToolBar.prototype.on("playaudio", "play", this);
     ToolBar.prototype.on("stopaudio", "stop", this);
+};
+
+PlaylistEditor.prototype.onStateChange = function() {
+     var that = this,
+        editors = this.trackEditors,
+        i,
+        len,
+        editor;
+
+    for(i = 0, len = editors.length; i < len; i++) {
+        editors[i].deactivate();
+    }
 };
 
 PlaylistEditor.prototype.onTrackScroll = function(e) {
