@@ -44,6 +44,7 @@ PlaylistEditor.prototype.init = function(tracks) {
 
         ToolBar.prototype.on("changestate", "onStateChange", trackEditor);
         trackEditor.on("changecursor", "onCursorSelection", bottomBar);
+        trackEditor.on("changecursor", "onCursorSelection", this);
     }
 
     div.innerHTML = '';
@@ -80,6 +81,29 @@ PlaylistEditor.prototype.onTrackScroll = function(e) {
         that.fire('trackscroll', e);
         that.scrollTimeout = false;
     }, 25);   
+};
+
+PlaylistEditor.prototype.activateTrack = function(trackEditor) {
+    var that = this,
+        editors = this.trackEditors,
+        i,
+        len,
+        editor;
+
+    for(i = 0, len = editors.length; i < len; i++) {
+        editor = editors[i];
+
+        if (editor === trackEditor) {
+            editor.activate();
+        }
+        else {
+            editor.deactivate();
+        }
+    }
+};
+
+PlaylistEditor.prototype.onCursorSelection = function(args) {
+    this.activateTrack(args.editor);
 };
 
 PlaylistEditor.prototype.rewind = function() {

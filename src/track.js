@@ -111,6 +111,18 @@ TrackEditor.prototype.onTrackLoad = function(buffer) {
     this.duration = buffer.duration;
 };
 
+TrackEditor.prototype.getPixelOffset = function() {
+    return this.leftOffset / this.resolution;
+};
+
+TrackEditor.prototype.activate = function() {
+    
+};
+
+TrackEditor.prototype.deactivate = function() {
+    this.drawer.draw(0, this.getPixelOffset());
+};
+
 /* start of state methods */
 
 //TODO modify this to work with scrolls.
@@ -159,7 +171,8 @@ TrackEditor.prototype.notifySelectUpdate = function(start, end) {
 
     this.fire('changecursor', {
         start: startSec,
-        end: endSec
+        end: endSec,
+        editor: this
     });
 }; 
 
@@ -170,7 +183,7 @@ TrackEditor.prototype.notifySelectUpdate = function(start, end) {
 TrackEditor.prototype.selectStart = function(e) {
     var el = e.target,
         editor = this,
-        pixelOffset = this.leftOffset / this.resolution,
+        pixelOffset = this.getPixelOffset(),
         scroll = this.config.getTrackScroll(),
         scrollX = scroll.left,
         startX = scrollX + e.pageX,
@@ -259,7 +272,7 @@ TrackEditor.prototype.removeFade = function(id) {
 
 TrackEditor.prototype.onCreateFade = function(args) {
     var selected = this.selectedArea,
-        pixelOffset = this.leftOffset / this.resolution,
+        pixelOffset = this.getPixelOffset(),
         start = selected.start - pixelOffset,
         end = selected.end - pixelOffset,
         startTime = start * this.resolution / this.sampleRate,
@@ -350,7 +363,7 @@ TrackEditor.prototype.scheduleStop = function(when) {
 };
 
 TrackEditor.prototype.updateEditor = function(cursorPos) {
-    var pixelOffset = this.leftOffset / this.resolution;
+    var pixelOffset = this.getPixelOffset();
 
     this.drawer.updateEditor(cursorPos, pixelOffset);
 };
