@@ -38,10 +38,10 @@ BottomBar.prototype.onCursorSelection = function(args) {
 };
 
 /*
-    currentTime in seconds
+    args {seconds, pixels}
 */
-BottomBar.prototype.onAudioUpdate = function(currentTime) {
-   
+BottomBar.prototype.onAudioUpdate = function(args) {
+    this.audioCurrent.value = args.seconds; 
 };
 
 makePublisher(ToolBar.prototype);

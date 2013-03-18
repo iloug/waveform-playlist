@@ -61,6 +61,7 @@ PlaylistEditor.prototype.init = function(tracks) {
     this.interval;
 
     PlaylistEditor.prototype.on("trackscroll", "onTrackScroll", timeScale);
+    PlaylistEditor.prototype.on("playbackcursor", "onAudioUpdate", bottomBar);
 
     ToolBar.prototype.on("playlistsave", "save", this);
     ToolBar.prototype.on("playlistrestore", "restore", this);
@@ -154,7 +155,7 @@ PlaylistEditor.prototype.play = function() {
 
     this.lastPlay = currentTime + delay;
 
-    this.interval = setInterval(that.updateEditor.bind(that), 200);
+    this.interval = setInterval(that.updateEditor.bind(that), 25);
 };
 
 PlaylistEditor.prototype.stop = function() {
@@ -178,16 +179,23 @@ PlaylistEditor.prototype.updateEditor = function() {
         currentTime = this.config.getCurrentTime(),
         elapsed = currentTime - this.lastPlay,
         delta = elapsed * this.sampleRate / this.resolution,
-        cursorPos = this.config.getCursorPos();
+        cursorPos = this.config.getCursorPos(),
+        playbackSec;
 
     if (this.isPlaying()) {
 
         if (elapsed) {
             cursorPos = ~~(cursorPos + delta);
+            playbackSec = cursorPos * this.resolution/ this.sampleRate;
 
             for(i = 0, len = editors.length; i < len; i++) {
                 editors[i].updateEditor(cursorPos);
             }
+
+            this.fire("playbackcursor", {
+                "seconds": playbackSec,
+                "pixels": cursorPos
+            });
         }
     }
     else {
