@@ -93,7 +93,10 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
         numChan = makeMono? 1 : buffer.numberOfChannels,
         numSamples = buffer.getChannelData(0).length,
         fragment = document.createDocumentFragment(),
-        wrapperHeight;    
+        wrapperHeight; 
+
+    this.container.innerHTML = "";
+    this.channels = [];  
 
     //width and height is per waveform canvas.
     this.width = Math.ceil(numSamples / res);
@@ -334,11 +337,8 @@ WaveformDrawer.prototype.drawFades = function(fades) {
         fade,
         startPix,
         endPix,
-        SR,
-        res;
-
-    SR = this.config.getSampleRate();
-    res = this.config.getResolution();
+        SR = this.config.getSampleRate(),
+        res = this.config.getResolution();
 
     for (id in fades) {
         fade = fades[id];

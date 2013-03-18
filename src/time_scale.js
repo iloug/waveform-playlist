@@ -13,9 +13,6 @@ TimeScale.prototype.init = function() {
     this.context = canv.getContext('2d');
     
     this.config = new Config();
-    
-    this.resolution = this.config.getResolution();
-    this.sampleRate = this.config.getSampleRate();
 
     this.container = document.getElementById("time-scale"); //container for the main time scale.
 
@@ -63,7 +60,9 @@ TimeScale.prototype.drawScale = function(offset) {
         canv = this.canv,
         colors = this.config.getColorScheme(),
         pix,
-        pixPerSec = this.sampleRate/this.resolution,
+        res = this.config.getResolution(),
+        SR = this.config.getSampleRate(),
+        pixPerSec = SR/res,
         pixOffset = offset || 0, //caused by scrolling horizontally
         i,
         end,
@@ -133,6 +132,13 @@ TimeScale.prototype.onTrackScroll = function() {
         this.prevScrollPos = scrollX;
         this.drawScale(scrollX);
     }
+};
+
+TimeScale.prototype.onResolutionChange = function() {
+    var scroll = this.config.getTrackScroll(),
+        scrollX = scroll.left;    
+
+    this.drawScale(scrollX);
 };
 
 makePublisher(TimeScale.prototype);

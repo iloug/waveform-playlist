@@ -27,6 +27,13 @@ BottomBar.prototype.init = function() {
     this.audioStart = document.getElementById('audio_start');
     this.audioEnd = document.getElementById('audio_end');
     this.audioCurrent = document.getElementById('audio_pos');
+    this.audioResolution = document.getElementById('audio_resolution');
+
+    this.audioResolution.onchange = function(e) {
+        var res = parseInt(e.target.value, 10);
+        that.config.setResolution(res);
+        that.fire("changeresolution", res);
+    };
 };
 
 /*
@@ -44,4 +51,4 @@ BottomBar.prototype.onAudioUpdate = function(args) {
     this.audioCurrent.value = args.seconds; 
 };
 
-makePublisher(ToolBar.prototype);
+makePublisher(BottomBar.prototype);

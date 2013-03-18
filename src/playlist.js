@@ -42,19 +42,21 @@ PlaylistEditor.prototype.init = function(tracks) {
         this.trackEditors.push(trackEditor);
         fragment.appendChild(trackElem);
 
-        ToolBar.prototype.on("changestate", "onStateChange", trackEditor);
-        ToolBar.prototype.on("changestate", "onStateChange", this);
+        toolBar.on("changestate", "onStateChange", trackEditor);
+        bottomBar.on("changeresolution", "onResolutionChange", trackEditor);
         trackEditor.on("changecursor", "onCursorSelection", bottomBar);
         trackEditor.on("changecursor", "onCursorSelection", this);
     }
+
+    bottomBar.on("changeresolution", "onResolutionChange", timeScale);
+    ToolBar.prototype.on("changestate", "onStateChange", this);
 
     div.innerHTML = '';
     div.appendChild(fragment);
     div.onscroll = this.onTrackScroll.bind(that);
 
     this.sampleRate = this.config.getSampleRate();
-    this.resolution = this.config.getResolution();
-
+   
     this.scrollTimeout = false;
 
     //for setInterval that's toggled during play/stop.
@@ -178,7 +180,8 @@ PlaylistEditor.prototype.updateEditor = function() {
         len,
         currentTime = this.config.getCurrentTime(),
         elapsed = currentTime - this.lastPlay,
-        delta = elapsed * this.sampleRate / this.resolution,
+        res = this.config.getResolution(),
+        delta = elapsed * this.sampleRate / res,
         cursorPos = this.config.getCursorPos(),
         playbackSec;
 
@@ -186,7 +189,7 @@ PlaylistEditor.prototype.updateEditor = function() {
 
         if (elapsed) {
             cursorPos = ~~(cursorPos + delta);
-            playbackSec = cursorPos * this.resolution/ this.sampleRate;
+            playbackSec = cursorPos * res / this.sampleRate;
 
             for(i = 0, len = editors.length; i < len; i++) {
                 editors[i].updateEditor(cursorPos);

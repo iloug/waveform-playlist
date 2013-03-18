@@ -58,6 +58,10 @@ TrackEditor.prototype.getFadeId = function() {
     return id.replace(".", "");
 };
 
+TrackEditor.prototype.getBuffer = function() {
+    return this.playout.buffer;
+};
+
 TrackEditor.prototype.loadTrack = function(track) {
     var el;
 
@@ -100,16 +104,18 @@ TrackEditor.prototype.loadBuffer = function(src) {
     xhr.send();
 };
 
-TrackEditor.prototype.onTrackLoad = function(buffer) {
-    var that = this;
-
-    this.endTime = (buffer.length / this.sampleRate) + this.startTime;
+TrackEditor.prototype.drawTrack = function(buffer) {
 
     this.drawer.drawBuffer(buffer, this.leftOffset);
     this.drawer.drawFades(this.fades);
+};
 
-    this.numSamples = buffer.length;
+TrackEditor.prototype.onTrackLoad = function(buffer) {
+   
+    this.endTime = (buffer.length / this.sampleRate) + this.startTime;
     this.duration = buffer.duration;
+
+    this.drawTrack(buffer);
 };
 
 TrackEditor.prototype.getPixelOffset = function() {
@@ -319,6 +325,12 @@ TrackEditor.prototype.onStateChange = function() {
     var state = this.config.getState();
 
     this.setState(state);
+};
+
+TrackEditor.prototype.onResolutionChange = function(res) {
+    this.resolution = res;
+
+    this.drawTrack(this.getBuffer());
 };
 
 TrackEditor.prototype.isPlaying = function() {
