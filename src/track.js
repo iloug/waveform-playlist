@@ -134,7 +134,7 @@ TrackEditor.prototype.deactivate = function() {
 
 //TODO modify this to work with scrolls.
 TrackEditor.prototype.timeShift = function(e) {
-    var el = e.target,
+    var el = e.currentTarget, //want the events placed on the channel wrapper.
         startX = e.pageX, 
         diffX = 0, 
         origX = 0,
@@ -188,7 +188,7 @@ TrackEditor.prototype.notifySelectUpdate = function(start, end) {
     so that the mouse drag can be over any channel in the track.
 */
 TrackEditor.prototype.selectStart = function(e) {
-    var el = e.target,
+    var el = e.currentTarget, //want the events placed on the channel wrapper.
         editor = this,
         pixelOffset = this.getPixelOffset(),
         scroll = this.config.getTrackScroll(),
