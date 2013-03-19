@@ -6,11 +6,23 @@ var TrackEditor = function() {
 
 TrackEditor.prototype.states = {
     select: {
-        mousedown: "selectStart"
+        events: {
+            mousedown: "selectStart"
+        },
+
+        classes: [
+            "state-select"
+        ]
     },
     
     shift: {
-        mousedown: "timeShift"
+        events: {
+            mousedown: "timeShift"
+        },
+
+        classes: [
+            "state-shift"
+        ]
     }
 };
 
@@ -295,19 +307,26 @@ TrackEditor.prototype.onCreateFade = function(args) {
 
 TrackEditor.prototype.setState = function(state) {
     var that = this,
-        stateEvents = this.states[state],
-        event,
+        stateEvents = this.states[state].events,
+        stateClasses = this.states[state].classes,
         container = this.container,
         prevState = this.currentState,
+        prevStateClasses,
         prevStateEvents = this.prevStateEvents,
-        func;
+        func, event, cl,
+        i, len;
 
     if (prevState) {
+        prevStateClasses = this.states[prevState].classes;
        
         for (event in prevStateEvents) {
             container.removeEventListener(event, prevStateEvents[event]);
         }
         this.prevStateEvents = {};
+
+        for (i = 0, len = prevStateClasses.length; i < len; i++) {
+            container.classList.remove(prevStateClasses[i]);
+        }
     }
 
     for (event in stateEvents) {
@@ -317,6 +336,9 @@ TrackEditor.prototype.setState = function(state) {
         this.prevStateEvents[event] = func;
         container.addEventListener(event, func);
     }
+    for (i = 0, len = stateClasses.length; i < len; i++) {
+            container.classList.add(stateClasses[i]);
+        }
 
     this.currentState = state;
 };

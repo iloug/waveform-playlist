@@ -97,6 +97,14 @@ body {
   height: 70px;
 }
 
+.state-select {
+  cursor: text;
+}
+
+.state-shift {
+  cursor: move;
+}
+
 </style>
 
 <script type="text/javascript" src="../src/observer/observer.js"></script>
@@ -153,9 +161,13 @@ body {
     <input id="audio_pos" type="text" class="input-small">
     <select id="audio_resolution">
       <option>1000</option>
+      <option>2000</option>
       <option>3000</option>
+      <option>4000</option>
       <option>5000</option>
+      <option>6000</option>
       <option>7000</option>
+      <option>8000</option>
       <option>9000</option>
       <option>10000</option>
     </select>
@@ -181,21 +193,25 @@ body {
 
 
     var tracks = [
+        {
+            src: "Beautiful.m4a"
+        },
+
+        {
+            src: "NothingElseMatters.m4a"
+        }
+
         //{
-        //    url: "Beautiful.m4a"
+        //    src: "Tangerine.wav"
+        //},
+    
+        //{
+        //    src: "BreakOut.wav"
         //},
 
-        {
-            src: "Tangerine.wav"
-        },
-    
-        {
-            src: "BreakOut.wav"
-        },
-
-        {
-            src: "Panic.wav"
-        }
+        //{
+        //    src: "Panic.wav"
+        //}
     ];
 
 

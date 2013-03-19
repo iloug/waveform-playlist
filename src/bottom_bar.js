@@ -6,7 +6,11 @@ var BottomBar = function() {
 
 BottomBar.prototype.formatters = {
    "seconds": function (value) {
+        return value.toFixed(0);
+    },
 
+    "thousandths": function (value) {
+        return value.toFixed(3);
     }
 };
 
@@ -34,21 +38,23 @@ BottomBar.prototype.init = function() {
         that.config.setResolution(res);
         that.fire("changeresolution", res);
     };
+
+    this.timeFormat = "thousandths";
 };
 
 /*
     start, end in seconds
 */
 BottomBar.prototype.onCursorSelection = function(args) {
-    this.audioStart.value = args.start;
-    this.audioEnd.value = args.end;
+    this.audioStart.value = this.formatters[this.timeFormat](args.start);
+    this.audioEnd.value = this.formatters[this.timeFormat](args.end);
 };
 
 /*
     args {seconds, pixels}
 */
 BottomBar.prototype.onAudioUpdate = function(args) {
-    this.audioCurrent.value = args.seconds; 
+    this.audioCurrent.value = this.formatters[this.timeFormat](args.seconds); 
 };
 
 makePublisher(BottomBar.prototype);
