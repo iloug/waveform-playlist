@@ -302,7 +302,7 @@ WaveformDrawer.prototype.drawFade = function(id, type, shape, start, end) {
         ctx,
         tmpCtx;
 
-        width = end - start + 1;
+        width = ~~(end - start + 1);
         left = start;
 
         div = document.createElement("div");
