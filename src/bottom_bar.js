@@ -33,6 +33,8 @@ BottomBar.prototype.init = function() {
     this.audioCurrent = document.getElementById('audio_pos');
     this.audioResolution = document.getElementById('audio_resolution');
 
+    this.audioResolution.value = this.config.getResolution();
+
     this.audioResolution.onchange = function(e) {
         var res = parseInt(e.target.value, 10);
         that.config.setResolution(res);
