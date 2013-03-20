@@ -358,33 +358,35 @@ TrackEditor.prototype.isPlaying = function() {
 TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, cursorEnd) { 
     var start,
         end,
-        cursorTime = cursorPos * this.resolution / this.sampleRate,
+        cursorStartTime = cursorPos * this.resolution / this.sampleRate,
+        cursorEndTime = (cursorEnd) ? cursorEnd * this.resolution / this.sampleRate : undefined,
         relPos,
         when = now + delay,
-        duration = (cursorEnd) ? cursorEnd * this.resolution / this.sampleRate : undefined;
+        window = (cursorEnd) ? (cursorEnd - cursorPos) * this.resolution / this.sampleRate : undefined;
 
     //track has no content to play.
-    if (this.endTime <= cursorTime) return;
+    if (this.endTime <= cursorStartTime) return;
 
     //track does not start in this selection.
-    if (duration && (cursorTime + duration) < this.startTime) return;
+    if (window && (cursorStartTime + window) < this.startTime) return;
 
 
     //track should have something to play if it gets here.
 
     //the track starts in the future of the cursor position
-    if (this.startTime >= cursorTime) {
+    if (this.startTime >= cursorStartTime) {
         start = 0;
-        when = when + this.startTime - cursorTime; //schedule additional delay for this audio node.
+        when = when + this.startTime - cursorStartTime; //schedule additional delay for this audio node.
+        window = window - (this.startTime - cursorStartTime);
+        end = (cursorEnd) ? Math.min(start + window, this.duration) : this.duration;
     }
     else {
-        start = cursorTime - this.startTime;
+        start = cursorStartTime - this.startTime;
+        end = (cursorEnd) ? Math.min(start + window, this.duration - start) : this.duration - start;
     }
 
-    relPos = cursorTime - this.startTime;
+    relPos = cursorStartTime - this.startTime;
     this.playout.applyFades(this.fades, relPos, now, delay);
-
-    end = (duration) ? duration - cursorTime : this.duration - start;
     this.playout.play(when, start, end);
 };
 

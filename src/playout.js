@@ -135,7 +135,7 @@ AudioPlayout.prototype.setSource = function(source) {
     it is playing slightly more samples than it has it won't play at all.
     Unfortunately it doesn't seem to work if you just give it a start time.
 */
-AudioPlayout.prototype.play = function(when, start, end) {
+AudioPlayout.prototype.play = function(when, start, duration) {
     if (!this.buffer) {
         console.error("no buffer to play");
         return;
@@ -143,7 +143,7 @@ AudioPlayout.prototype.play = function(when, start, end) {
 
     this.setSource(this.ac.createBufferSource());
   
-    this.source.start(when || 0, start, end);
+    this.source.start(when || 0, start, duration);
 };
 
 AudioPlayout.prototype.stop = function(when) {
