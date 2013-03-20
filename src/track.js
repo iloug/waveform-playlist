@@ -1,7 +1,7 @@
 'use strict';
 
-var TrackEditor = function() {
-
+var TrackEditor = function(playlistEditor) {
+    this.playlistEditor = playlistEditor;
 };
 
 TrackEditor.prototype.states = {
@@ -53,10 +53,7 @@ TrackEditor.prototype.init = function(src, start, end, fades) {
 
     this.fades = fades || {};
 
-    this.selectedArea = {
-        start: undefined,
-        end: undefined
-    };
+    this.selectedArea = undefined;
 
     this.container.classList.add("channel-wrapper");
     this.container.style.left = this.leftOffset;
@@ -136,6 +133,7 @@ TrackEditor.prototype.getPixelOffset = function() {
 
 TrackEditor.prototype.activate = function() {
     this.container.classList.add("active");
+    this.playlistEditor.setActiveTrack(this);
 };
 
 TrackEditor.prototype.deactivate = function() {
@@ -209,10 +207,7 @@ TrackEditor.prototype.selectStart = function(e) {
         startX = scrollX + e.pageX,
         prevX = scrollX + e.pageX;
 
-    this.selectedArea = {
-        start: undefined,
-        end: undefined
-    };
+    this.selectedArea = undefined;
 
     //remove previously listening track.
     ToolBar.prototype.reset("createfade");
@@ -360,12 +355,13 @@ TrackEditor.prototype.isPlaying = function() {
 };
 
 //cursorPos (in pixels)
-TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, duration) { 
+TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, cursorEnd) { 
     var start,
         end,
         cursorTime = cursorPos * this.resolution / this.sampleRate,
         relPos,
-        when = now + delay;
+        when = now + delay,
+        duration = (cursorEnd) ? cursorEnd * this.resolution / this.sampleRate : undefined;
 
     //track has no content to play.
     if (this.endTime <= cursorTime) return;
@@ -388,7 +384,7 @@ TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, duration) {
     relPos = cursorTime - this.startTime;
     this.playout.applyFades(this.fades, relPos, now, delay);
 
-    end = this.duration - start;
+    end = (duration) ? duration - cursorTime : this.duration - start;
     this.playout.play(when, start, end);
 };
 
@@ -397,10 +393,10 @@ TrackEditor.prototype.scheduleStop = function(when) {
     this.playout.stop(when); 
 };
 
-TrackEditor.prototype.updateEditor = function(cursorPos) {
+TrackEditor.prototype.updateEditor = function(cursorPos, start, end) {
     var pixelOffset = this.getPixelOffset();
 
-    this.drawer.updateEditor(cursorPos, pixelOffset);
+    this.drawer.updateEditor(cursorPos, pixelOffset, start, end);
 };
 
 TrackEditor.prototype.getTrackDetails = function() {

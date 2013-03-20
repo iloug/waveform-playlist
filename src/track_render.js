@@ -210,8 +210,8 @@ WaveformDrawer.prototype.clear = function(start, end) {
     }
 };
 
-WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset) {
-    this.draw(cursorPos, pixelOffset);
+WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, end) {
+    this.draw(cursorPos, pixelOffset, start, end);
 };
 
 /*

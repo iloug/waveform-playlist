@@ -36,7 +36,7 @@ PlaylistEditor.prototype.init = function(tracks) {
     
     for (i = 0, len = tracks.length; i < len; i++) {
 
-        trackEditor = new TrackEditor();
+        trackEditor = new TrackEditor(this);
         trackElem = trackEditor.loadTrack(tracks[i]);
     
         this.trackEditors.push(trackEditor);
@@ -70,6 +70,10 @@ PlaylistEditor.prototype.init = function(tracks) {
     ToolBar.prototype.on("rewindaudio", "rewind", this);
     ToolBar.prototype.on("playaudio", "play", this);
     ToolBar.prototype.on("stopaudio", "stop", this);
+};
+
+PlaylistEditor.prototype.setActiveTrack = function(track) {
+    this.activeTrack = track;
 };
 
 PlaylistEditor.prototype.onStateChange = function() {
@@ -128,6 +132,17 @@ PlaylistEditor.prototype.rewind = function() {
     this.config.setCursorPos(0);
 };
 
+PlaylistEditor.prototype.getSelected = function() {
+    var selected;
+
+    if (this.activeTrack) {
+        selected = this.activeTrack.selectedArea;
+        if (selected !== undefined && (selected.end > selected.start)) {
+            return selected;
+        }
+    }
+};
+
 PlaylistEditor.prototype.isPlaying = function() {
      var that = this,
         editors = this.trackEditors,
@@ -149,10 +164,17 @@ PlaylistEditor.prototype.play = function() {
         len,
         currentTime = this.config.getCurrentTime(),
         delay = 0.2,
-        cursorPos = this.config.getCursorPos();
+        cursorPos = this.config.getCursorPos(),
+        cursorEnd,
+        selected = this.getSelected();
+
+    if (selected !== undefined) {
+        cursorPos = selected.start;
+        cursorEnd = selected.end;
+    }
 
     for (i = 0, len = editors.length; i < len; i++) {
-        editors[i].schedulePlay(currentTime, delay, cursorPos);
+        editors[i].schedulePlay(currentTime, delay, cursorPos, cursorEnd);
     }
 
     this.lastPlay = currentTime + delay;
@@ -183,7 +205,14 @@ PlaylistEditor.prototype.updateEditor = function() {
         res = this.config.getResolution(),
         delta = elapsed * this.sampleRate / res,
         cursorPos = this.config.getCursorPos(),
-        playbackSec;
+        playbackSec,
+        selected = this.getSelected(), 
+        start, end;
+
+    if (selected !== undefined) {
+        start = selected.start;
+        end = selected.end;
+    }
 
     if (this.isPlaying()) {
 
@@ -192,7 +221,7 @@ PlaylistEditor.prototype.updateEditor = function() {
             playbackSec = cursorPos * res / this.sampleRate;
 
             for(i = 0, len = editors.length; i < len; i++) {
-                editors[i].updateEditor(cursorPos);
+                editors[i].updateEditor(cursorPos, start, end);
             }
 
             this.fire("playbackcursor", {
