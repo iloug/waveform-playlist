@@ -5,12 +5,27 @@ var BottomBar = function() {
 };
 
 BottomBar.prototype.formatters = {
-   "seconds": function (value) {
-        return value.toFixed(0);
+   "seconds": function (seconds) {
+        return seconds.toFixed(0);
     },
 
-    "thousandths": function (value) {
-        return value.toFixed(3);
+    "thousandths": function (seconds) {
+        return seconds.toFixed(3);
+    },
+
+    "hh:mm:ss": function (seconds) {
+        var hours,
+            minutes,
+            seconds,
+            result;
+
+        hours = parseInt(seconds / 3600, 10) % 24;
+        minutes = parseInt(seconds / 60, 10) % 60;
+        seconds = ~~(seconds % 60);
+
+        result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
+
+        return result;
     }
 };
 
@@ -41,7 +56,7 @@ BottomBar.prototype.init = function() {
         that.fire("changeresolution", res);
     };
 
-    this.timeFormat = "thousandths";
+    this.timeFormat = "hh:mm:ss";
 };
 
 /*

@@ -258,7 +258,6 @@ TrackEditor.prototype.selectStart = function(e) {
         if (Math.abs(startX - endX)) {
             ToolBar.prototype.activateFades();
             ToolBar.prototype.on("createfade", "onCreateFade", editor);
-            editor.drawer.drawHighlight(endX, endX, false, pixelOffset);
         }
         else {
             ToolBar.prototype.deactivateFades();
