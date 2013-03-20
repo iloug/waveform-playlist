@@ -106,7 +106,7 @@ PlaylistEditor.prototype.activateTrack = function(trackEditor) {
         len,
         editor;
 
-    for(i = 0, len = editors.length; i < len; i++) {
+    for (i = 0, len = editors.length; i < len; i++) {
         editor = editors[i];
 
         if (editor === trackEditor) {
@@ -135,7 +135,7 @@ PlaylistEditor.prototype.isPlaying = function() {
         len,
         isPlaying = false;
 
-    for(i = 0, len = editors.length; i < len; i++) {
+    for (i = 0, len = editors.length; i < len; i++) {
         isPlaying = isPlaying || editors[i].isPlaying();
     }
 
@@ -151,7 +151,7 @@ PlaylistEditor.prototype.play = function() {
         delay = 0.2,
         cursorPos = this.config.getCursorPos();
 
-    for(i = 0, len = editors.length; i < len; i++) {
+    for (i = 0, len = editors.length; i < len; i++) {
         editors[i].schedulePlay(currentTime, delay, cursorPos);
     }
 

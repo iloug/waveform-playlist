@@ -135,10 +135,11 @@ TrackEditor.prototype.getPixelOffset = function() {
 };
 
 TrackEditor.prototype.activate = function() {
-    
+    this.container.classList.add("active");
 };
 
 TrackEditor.prototype.deactivate = function() {
+    this.container.classList.remove("active");
     this.drawer.draw(-1, this.getPixelOffset());
 };
 
