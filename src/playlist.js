@@ -207,11 +207,13 @@ PlaylistEditor.prototype.updateEditor = function() {
         cursorPos = this.config.getCursorPos(),
         playbackSec,
         selected = this.getSelected(), 
-        start, end;
+        start, end,
+        highlighted = false;
 
     if (selected !== undefined) {
         start = selected.start;
         end = selected.end;
+        highlighted = true;
     }
 
     if (this.isPlaying()) {
@@ -221,7 +223,7 @@ PlaylistEditor.prototype.updateEditor = function() {
             playbackSec = cursorPos * res / this.sampleRate;
 
             for(i = 0, len = editors.length; i < len; i++) {
-                editors[i].updateEditor(cursorPos, start, end);
+                editors[i].updateEditor(cursorPos, start, end, highlighted);
             }
 
             this.fire("playbackcursor", {

@@ -210,8 +210,12 @@ WaveformDrawer.prototype.clear = function(start, end) {
     }
 };
 
-WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, end) {
+WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, end, highlighted) {
     this.draw(cursorPos, pixelOffset, start, end);
+
+    if (highlighted === true) {
+        this.drawHighlight(start, end, false, pixelOffset);
+    }
 };
 
 /*
@@ -222,7 +226,7 @@ WaveformDrawer.prototype.drawHighlight = function(start, end, isBorder, pixelOff
         colors = this.config.getColorScheme(),
         fillStyle,
         ctx,
-        startPix = start - pixelOffset,
+        startPix = ~~(start - pixelOffset),
         width = end - start + 1;
 
     fillStyle = (isBorder) ? colors.selectBorderColor : colors.selectBackgroundColor;

@@ -357,7 +357,7 @@ TrackEditor.prototype.isPlaying = function() {
 //cursorPos (in pixels)
 TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, cursorEnd) { 
     var start,
-        end,
+        duration,
         cursorStartTime = cursorPos * this.resolution / this.sampleRate,
         cursorEndTime = (cursorEnd) ? cursorEnd * this.resolution / this.sampleRate : undefined,
         relPos,
@@ -378,16 +378,16 @@ TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, cursorEnd) 
         start = 0;
         when = when + this.startTime - cursorStartTime; //schedule additional delay for this audio node.
         window = window - (this.startTime - cursorStartTime);
-        end = (cursorEnd) ? Math.min(start + window, this.duration) : this.duration;
+        duration = (cursorEnd) ? Math.min(window, this.duration) : this.duration;
     }
     else {
         start = cursorStartTime - this.startTime;
-        end = (cursorEnd) ? Math.min(start + window, this.duration - start) : this.duration - start;
+        duration = (cursorEnd) ? Math.min(window, this.duration - start) : this.duration - start;
     }
 
     relPos = cursorStartTime - this.startTime;
     this.playout.applyFades(this.fades, relPos, now, delay);
-    this.playout.play(when, start, end);
+    this.playout.play(when, start, duration);
 };
 
 TrackEditor.prototype.scheduleStop = function(when) {
@@ -395,10 +395,10 @@ TrackEditor.prototype.scheduleStop = function(when) {
     this.playout.stop(when); 
 };
 
-TrackEditor.prototype.updateEditor = function(cursorPos, start, end) {
+TrackEditor.prototype.updateEditor = function(cursorPos, start, end, highlighted) {
     var pixelOffset = this.getPixelOffset();
 
-    this.drawer.updateEditor(cursorPos, pixelOffset, start, end);
+    this.drawer.updateEditor(cursorPos, pixelOffset, start, end, highlighted);
 };
 
 TrackEditor.prototype.getTrackDetails = function() {
