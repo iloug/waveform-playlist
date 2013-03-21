@@ -17,7 +17,7 @@ BottomBar.prototype.formatters = function(format) {
         secs = seconds % 60;
         secs = secs.toFixed(decimals);
 
-        result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (secs  < 10 ? "0" + secs : secs);
+        result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (secs < 10 ? "0" + secs : secs);
 
         return result;
     }
@@ -71,11 +71,21 @@ BottomBar.prototype.init = function() {
     this.audioResolution.value = this.config.getResolution();
 
     this.timeFormat.onchange = function(e) {
-        var format = e.target.value;
+        var format = e.target.value,
+            func, start, end;
 
         format = (that.formatters(format) !== undefined) ? format : "hh:mm:ss";
         that.config.setTimeFormat(format);
         that.timeFormat = format;
+
+        if (that.currentSelectionValues !== undefined) {
+            func = that.formatters(format);
+            start = that.currentSelectionValues.start;
+            end = that.currentSelectionValues.end;
+
+            that.audioStart.value = func(start);
+            that.audioEnd.value = func(end);
+        }
     };
 
     this.audioResolution.onchange = function(e) {
@@ -85,14 +95,25 @@ BottomBar.prototype.init = function() {
     };
 
     this.timeFormat = "hh:mm:ss";
+
+    //Kept in seconds so time format change can update fields easily.
+    this.currentSelectionValues = undefined;
 };
 
 /*
     start, end in seconds
 */
 BottomBar.prototype.onCursorSelection = function(args) {
-    this.audioStart.value = this.formatters(this.timeFormat)(args.start);
-    this.audioEnd.value = this.formatters(this.timeFormat)(args.end);
+    var start = args.start,
+        end = args.end;
+
+    this.currentSelectionValues = {
+        start: start,
+        end:end
+    };
+
+    this.audioStart.value = this.formatters(this.timeFormat)(start);
+    this.audioEnd.value = this.formatters(this.timeFormat)(end);
 };
 
 /*
