@@ -23,15 +23,16 @@ var Config;
             ac: new (window.AudioContext || window.webkitAudioContext),
 
             resolution: 4096, //resolution - samples per pixel to draw.
+            timeFormat: 'hh:mm:ss',
             mono: true, //whether to draw multiple channels or combine them.
 
             waveColor: 'grey',
-            progressColor: 'purple',
+            progressColor: 'orange',
             loadingColor: 'purple',
             cursorColor: 'green',
             markerColor: 'green',
             selectBorderColor: 'red',
-            selectBackgroundColor: 'rgba(0,0,0,0.3)',
+            selectBackgroundColor: 'rgba(0,0,0,0.1)',
 
             timeColor: 'grey',
             fontColor: 'black',
@@ -44,7 +45,7 @@ var Config;
                 top: 0
             },
 
-            state: "select",
+            state: 'select',
 
             cursorPos: 0
         };
@@ -89,6 +90,10 @@ var Config;
             return params.ac.currentTime;
         };
 
+        that.getTimeFormat = function getTimeFormat() {
+            return params.timeFormat;
+        };
+
         that.getResolution = function getResolution() {
             return params.resolution;
         };
@@ -128,6 +133,10 @@ var Config;
 
         that.setResolution = function setResolution(resolution) {
             params.resolution = resolution;
+        };
+
+        that.setTimeFormat = function setTimeFormat(format) {
+            params.timeFormat = format;
         };
 
         that.setDisplayMono = function setDisplayMono(bool) {
