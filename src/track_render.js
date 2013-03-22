@@ -214,7 +214,8 @@ WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, 
     this.draw(cursorPos, pixelOffset, start, end);
 
     if (highlighted === true) {
-        this.drawHighlight(start, end, false, pixelOffset);
+        var border = (end - start === 0) ? true : false;
+        this.drawHighlight(start, end, border, pixelOffset);
     }
 };
 

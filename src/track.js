@@ -192,12 +192,19 @@ TrackEditor.prototype.notifySelectUpdate = function(start, end) {
         end: endSec,
         editor: this
     });
-}; 
+};
 
-/* 
-    TODO check to see if this can be done on the containing div, not canvas element
-    so that the mouse drag can be over any channel in the track.
+/*
+    start, end in pixels
 */
+TrackEditor.prototype.setSelectedArea = function(start, end) {
+    
+    this.selectedArea = {
+        start: start,
+        end: end
+    };
+};
+
 TrackEditor.prototype.selectStart = function(e) {
     var el = e.currentTarget, //want the events placed on the channel wrapper.
         editor = this,
@@ -243,10 +250,7 @@ TrackEditor.prototype.selectStart = function(e) {
     document.body.onmouseup = function(e) {
         var endX = scrollX + e.pageX;
 
-        editor.selectedArea = {
-            start: Math.min(startX, endX),
-            end: Math.max(startX, endX)
-        };
+        editor.setSelectedArea(Math.min(startX, endX), Math.max(startX, endX));
 
         el.onmousemove = document.body.onmouseup = null;
         

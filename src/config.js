@@ -23,7 +23,7 @@ var Config;
             ac: new (window.AudioContext || window.webkitAudioContext),
 
             resolution: 4096, //resolution - samples per pixel to draw.
-            timeFormat: 'hh:mm:ss',
+            timeFormat: 'hh:mm:ss.uuu',
             mono: true, //whether to draw multiple channels or combine them.
 
             waveColor: 'grey',

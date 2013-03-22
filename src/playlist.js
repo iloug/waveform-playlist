@@ -48,9 +48,6 @@ PlaylistEditor.prototype.init = function(tracks) {
         trackEditor.on("changecursor", "onCursorSelection", this);
     }
 
-    bottomBar.on("changeresolution", "onResolutionChange", timeScale);
-    ToolBar.prototype.on("changestate", "onStateChange", this);
-
     div.innerHTML = '';
     div.appendChild(fragment);
     div.onscroll = this.onTrackScroll.bind(that);
@@ -62,18 +59,38 @@ PlaylistEditor.prototype.init = function(tracks) {
     //for setInterval that's toggled during play/stop.
     this.interval;
 
-    PlaylistEditor.prototype.on("trackscroll", "onTrackScroll", timeScale);
-    PlaylistEditor.prototype.on("playbackcursor", "onAudioUpdate", bottomBar);
+    this.on("trackscroll", "onTrackScroll", timeScale);
+    this.on("playbackcursor", "onAudioUpdate", bottomBar);
 
-    ToolBar.prototype.on("playlistsave", "save", this);
-    ToolBar.prototype.on("playlistrestore", "restore", this);
-    ToolBar.prototype.on("rewindaudio", "rewind", this);
-    ToolBar.prototype.on("playaudio", "play", this);
-    ToolBar.prototype.on("stopaudio", "stop", this);
+    toolBar.on("playlistsave", "save", this);
+    toolBar.on("playlistrestore", "restore", this);
+    toolBar.on("rewindaudio", "rewind", this);
+    toolBar.on("playaudio", "play", this);
+    toolBar.on("stopaudio", "stop", this);
+    toolBar.on("changestate", "onStateChange", this);
+
+    bottomBar.on("changeresolution", "onResolutionChange", timeScale);
+    bottomBar.on("changeselection", "onSelectionChange", this);  
 };
 
 PlaylistEditor.prototype.setActiveTrack = function(track) {
     this.activeTrack = track;
+};
+
+PlaylistEditor.prototype.onSelectionChange = function(args) {
+    
+    if (this.activeTrack === undefined) {
+        return;
+    }
+
+    var res = this.config.getResolution(),
+        start = ~~(args.start * this.sampleRate / res),
+        end = ~~(args.end * this.sampleRate / res);
+
+    this.config.setCursorPos(start);
+    this.activeTrack.setSelectedArea(start, end);
+    this.activeTrack.updateEditor(-1);
+    this.activeTrack.updateEditor(-1, start, end, true);
 };
 
 PlaylistEditor.prototype.onStateChange = function() {

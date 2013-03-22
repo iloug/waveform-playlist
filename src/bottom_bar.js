@@ -4,6 +4,74 @@ var BottomBar = function() {
 
 };
 
+BottomBar.prototype.validate = function(value) {
+    var validators,
+        regex,
+        result;
+
+    validators = {
+        "seconds": /^\d+$/,
+
+        "thousandths": /^\d+\.\d{3}$/,
+
+        "hh:mm:ss": /^[0-9]{2,}:[0-5][0-9]:[0-5][0-9]$/,
+
+        "hh:mm:ss.uu": /^[0-9]{2,}:[0-5][0-9]:[0-5][0-9]\.\d{2}$/,
+
+        "hh:mm:ss.uuu": /^[0-9]{2,}:[0-5][0-9]:[0-5][0-9]\.\d{3}$/
+    };
+
+    regex = validators[this.timeFormat];
+    result = regex.test(value);
+
+    return result;
+};
+
+BottomBar.prototype.toSeconds = function(value) {
+    var converter,
+        func,
+        seconds;
+
+    function clockConverter(value) {
+        var data = value.split(":"),
+            hours = parseInt(data[0], 10) * 3600,
+            mins = parseInt(data[1], 10) * 60,
+            secs = parseFloat(data[2]),
+            seconds;
+
+        seconds = hours + mins + secs;
+
+        return seconds;
+    }
+
+    converter = {
+        "seconds": function(value) {
+            return parseInt(value, 10);
+        },
+
+        "thousandths": function(value) {
+            return parseFloat(value);
+        },
+
+        "hh:mm:ss": function(value) {
+            return clockConverter(value);
+        },
+
+        "hh:mm:ss.uu": function(value) {
+            return clockConverter(value);
+        },
+
+        "hh:mm:ss.uuu": function(value) {
+            return clockConverter(value);
+        } 
+    };
+
+    func = converter[this.timeFormat];
+    seconds = func(value);
+
+    return seconds;
+};
+
 BottomBar.prototype.formatters = function(format) {
 
     function clockFormat(seconds, decimals) {
@@ -94,26 +162,79 @@ BottomBar.prototype.init = function() {
         that.fire("changeresolution", res);
     };
 
-    this.timeFormat = "hh:mm:ss";
+    this.timeFormat = this.config.getTimeFormat();
 
     //Kept in seconds so time format change can update fields easily.
     this.currentSelectionValues = undefined;
+
+    this.audioStart.onblur = function(e) {
+        var value = e.target.value,
+            end,
+            startSecs;
+
+        if (that.validate(value)) {
+            end = that.currentSelectionValues.end;
+            startSecs = that.toSeconds(value);
+
+            if (startSecs <= end) {
+                that.notifySelectionUpdate(startSecs, end);
+                that.currentSelectionValues.start = startSecs;
+                return;
+            }
+        }
+
+        //time entered was otherwise invalid.
+        this.value = that.formatters(that.timeFormat)(that.currentSelectionValues.start);
+    };
+
+    this.audioEnd.onblur = function(e) {
+        var value = e.target.value,
+            start,
+            endSecs;
+
+        if (that.validate(value)) {
+            start = that.currentSelectionValues.start;
+            endSecs = that.toSeconds(value);
+
+            if (endSecs >= start) {
+                that.notifySelectionUpdate(start, endSecs);
+                that.currentSelectionValues.end = endSecs;
+                return;
+            }
+        }
+
+        //time entered was otherwise invalid.
+        this.value = that.formatters(that.timeFormat)(that.currentSelectionValues.end);
+    };
 };
 
 /*
     start, end in seconds
 */
+BottomBar.prototype.notifySelectionUpdate = function(start, end) {
+    
+    this.fire('changeselection', {
+        start: start,
+        end: end
+    });
+}; 
+
+/*
+    start, end in seconds
+*/
 BottomBar.prototype.onCursorSelection = function(args) {
-    var start = args.start,
-        end = args.end;
+    var startFormat = this.formatters(this.timeFormat)(args.start),
+        endFormat = this.formatters(this.timeFormat)(args.end),
+        start = this.toSeconds(startFormat),
+        end = this.toSeconds(endFormat);
 
     this.currentSelectionValues = {
         start: start,
         end:end
     };
 
-    this.audioStart.value = this.formatters(this.timeFormat)(start);
-    this.audioEnd.value = this.formatters(this.timeFormat)(end);
+    this.audioStart.value = startFormat;
+    this.audioEnd.value = endFormat;
 };
 
 /*
