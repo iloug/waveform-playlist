@@ -54,6 +54,7 @@ TrackEditor.prototype.init = function(src, start, end, fades) {
     this.fades = fades || {};
 
     this.selectedArea = undefined;
+    this.active = false;
 
     this.container.classList.add("channel-wrapper");
     this.container.style.left = this.leftOffset;
@@ -127,16 +128,26 @@ TrackEditor.prototype.onTrackLoad = function(buffer) {
     this.drawTrack(buffer);
 };
 
+TrackEditor.prototype.pixelsToSeconds = function(pixels) {
+    return pixels * this.resolution / this.sampleRate;
+};
+
+TrackEditor.prototype.secondsToPixels = function(seconds) {
+    return ~~(seconds * this.sampleRate / this.resolution);
+};
+
 TrackEditor.prototype.getPixelOffset = function() {
     return this.leftOffset / this.resolution;
 };
 
 TrackEditor.prototype.activate = function() {
+    this.active = true;
     this.container.classList.add("active");
     this.playlistEditor.setActiveTrack(this);
 };
 
 TrackEditor.prototype.deactivate = function() {
+    this.active = false;
     this.container.classList.remove("active");
     this.drawer.draw(-1, this.getPixelOffset());
 };
@@ -349,9 +360,23 @@ TrackEditor.prototype.onStateChange = function() {
 };
 
 TrackEditor.prototype.onResolutionChange = function(res) {
-    this.resolution = res;
+    var start, end;
 
+    if (this.active === true && this.selectedArea !== undefined) {
+        start = this.pixelsToSeconds(this.selectedArea.start);
+        end = this.pixelsToSeconds(this.selectedArea.end);
+    }
+
+    this.resolution = res;
     this.drawTrack(this.getBuffer());
+
+    if (this.active === true && this.selectedArea !== undefined) {
+        this.selectedArea.start = this.secondsToPixels(start);
+        this.selectedArea.end = this.secondsToPixels(end);
+
+        this.config.setCursorPos(this.selectedArea.start);
+        this.updateEditor(-1, this.selectedArea.start, this.selectedArea.end, true);
+    }
 };
 
 TrackEditor.prototype.isPlaying = function() {
