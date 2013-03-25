@@ -206,17 +206,27 @@ WaveformDrawer.prototype.clear = function(start, end) {
 
     for (i = 0, len = this.channels.length; i < len; i++) {
         this.channels[i].context.clearRect(start, 0, width, this.height);
-        this.channels[i].context.clearRect(start, 0, width, this.height);
     }
 };
 
 WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, end, highlighted) {
+    var i, len,
+        fragment = document.createDocumentFragment();
+
+    this.container.innerHTML = "";
+
     this.draw(cursorPos, pixelOffset, start, end);
 
     if (highlighted === true) {
         var border = (end - start === 0) ? true : false;
         this.drawHighlight(start, end, border, pixelOffset);
     }
+
+    for (i = 0, len = this.channels.length; i < len; i++) {  
+        fragment.appendChild(this.channels[i].div);
+    }
+
+    this.container.appendChild(fragment);
 };
 
 /*

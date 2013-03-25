@@ -208,11 +208,46 @@ TrackEditor.prototype.notifySelectUpdate = function(start, end) {
 /*
     start, end in pixels
 */
-TrackEditor.prototype.setSelectedArea = function(start, end) {
+TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
+    var left, 
+        right,
+        currentStart,
+        currentEnd;
+
+    //extending selected area since shift is pressed.
+    if (shiftKey && (end - start === 0) && (this.selectedArea !== undefined)) {
+
+        currentStart = this.selectedArea.start;
+        currentEnd = this.selectedArea.end;
+
+        if (start < currentStart) {
+            left = start;
+            right = currentEnd;
+        }
+        else if (end > currentEnd) {
+            left = currentStart;
+            right = end;
+        }
+        //it's ambigous otherwise, cut off the smaller duration.
+        else {
+            if ((start - currentStart) < (currentEnd - start)) {
+                left = start;
+                right = currentEnd;
+            }
+            else {
+                left = currentStart;
+                right = end;
+            }
+        }
+    }
+    else {
+        left = start;
+        right = end;
+    }
     
     this.selectedArea = {
-        start: start,
-        end: end
+        start: left,
+        end: right
     };
 };
 
@@ -225,12 +260,12 @@ TrackEditor.prototype.selectStart = function(e) {
         startX = scrollX + e.pageX,
         prevX = scrollX + e.pageX;
 
-    this.selectedArea = undefined;
+    //this.selectedArea = undefined;
 
     //remove previously listening track.
     ToolBar.prototype.reset("createfade");
 
-    editor.updateEditor(0);
+    editor.updateEditor(-1);
     editor.drawer.drawHighlight(startX, startX, false, pixelOffset);
     editor.notifySelectUpdate(startX, startX);
 
@@ -259,24 +294,29 @@ TrackEditor.prototype.selectStart = function(e) {
         editor.notifySelectUpdate(min, max);
     };
     document.body.onmouseup = function(e) {
-        var endX = scrollX + e.pageX;
+        var endX = scrollX + e.pageX,
+            start, end;
 
-        editor.setSelectedArea(Math.min(startX, endX), Math.max(startX, endX));
+        editor.setSelectedArea(Math.min(startX, endX), Math.max(startX, endX), e.shiftKey);
+
+        start = editor.selectedArea.start;
+        end = editor.selectedArea.end;
 
         el.onmousemove = document.body.onmouseup = null;
         
         //if more than one pixel is selected, listen to possible fade events.
-        if (Math.abs(startX - endX)) {
+        if (Math.abs(start - end)) {
             ToolBar.prototype.activateFades();
             ToolBar.prototype.on("createfade", "onCreateFade", editor);
+            editor.drawer.drawHighlight(start, end, false, pixelOffset);
         }
         else {
             ToolBar.prototype.deactivateFades();
-            editor.drawer.drawHighlight(endX, endX, true, pixelOffset);
+            editor.drawer.drawHighlight(start, end, true, pixelOffset);
         }
 
-        editor.config.setCursorPos(Math.min(startX, endX));
-        editor.notifySelectUpdate(editor.selectedArea.start, editor.selectedArea.end);    
+        editor.config.setCursorPos(start);
+        editor.notifySelectUpdate(start, end);    
     };
 };
 
