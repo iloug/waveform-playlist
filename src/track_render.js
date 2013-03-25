@@ -13,6 +13,11 @@ WaveformDrawer.prototype.init = function(container) {
     this.channels = []; //array of canvases, contexts, 1 for each channel displayed.
 };
 
+WaveformDrawer.prototype.loaderStates = {
+    "downloading": "progress progress-warning",
+    "decoding": "progress progress-success"
+};
+
 WaveformDrawer.prototype.getPeaks = function(buffer) {
     
     // Frames per pixel
@@ -80,6 +85,36 @@ WaveformDrawer.prototype.setTimeShift = function(pixels) {
     for (i = 0, len = this.channels.length; i < len; i++) {
         this.channels[i].div.style.left = pixels+"px";
     } 
+};
+
+WaveformDrawer.prototype.updateLoader = function(percent) {
+    this.loader.style.width = percent+"%";
+};
+
+WaveformDrawer.prototype.setLoaderState = function(state) {
+    this.progressDiv.className = this.loaderStates[state];
+};
+
+WaveformDrawer.prototype.drawLoading = function() {
+    var div,
+        loader;
+
+    this.height = this.config.getWaveHeight();
+
+    div = document.createElement("div");
+    
+    loader = document.createElement("div");
+    loader.classList.add("bar");
+
+    div.appendChild(loader);
+
+    this.progressDiv = div;
+    this.loader = loader;
+
+    this.setLoaderState("downloading");
+    this.updateLoader(0);
+
+    this.container.appendChild(div);
 };
 
 WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
@@ -209,7 +244,7 @@ WaveformDrawer.prototype.clear = function(start, end) {
     }
 };
 
-WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, end, highlighted) {
+WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, end, highlighted, selected) {
     var i, len,
         fragment = document.createDocumentFragment();
 
@@ -219,7 +254,7 @@ WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, 
 
     if (highlighted === true) {
         var border = (end - start === 0) ? true : false;
-        this.drawHighlight(start, end, border, pixelOffset);
+        this.drawHighlight(selected.start, selected.end, border, pixelOffset);
     }
 
     for (i = 0, len = this.channels.length; i < len; i++) {  

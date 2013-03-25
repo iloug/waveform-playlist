@@ -209,7 +209,7 @@ PlaylistEditor.prototype.stop = function() {
 
     for (i = 0, len = editors.length; i < len; i++) {
         editors[i].scheduleStop(currentTime);
-        editors[i].updateEditor(0);
+        editors[i].updateEditor(-1, undefined, undefined, true);
     }
 };
 

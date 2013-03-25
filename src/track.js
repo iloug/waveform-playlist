@@ -59,6 +59,8 @@ TrackEditor.prototype.init = function(src, start, end, fades) {
     this.container.classList.add("channel-wrapper");
     this.container.style.left = this.leftOffset;
 
+    this.drawer.drawLoading();
+
     return this.container;
 };
 
@@ -91,18 +93,22 @@ TrackEditor.prototype.loadBuffer = function(src) {
     xhr.responseType = 'arraybuffer';
 
     xhr.addEventListener('progress', function(e) {
+        var percentComplete;
+
         if (e.lengthComputable) {
-            var percentComplete = e.loaded / e.total;
+            percentComplete = e.loaded / e.total * 100;
         } 
         else {
             // TODO
             percentComplete = 0;
         }
-        //my.drawer.drawLoading(percentComplete);
+        that.drawer.updateLoader(percentComplete);
+
     }, false);
 
     xhr.addEventListener('load', function(e) {
         that.src = src;
+        that.drawer.setLoaderState("decoding");
 
         that.playout.loadData(
             e.target.response,
@@ -217,8 +223,8 @@ TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
     //extending selected area since shift is pressed.
     if (shiftKey && (end - start === 0) && (this.selectedArea !== undefined)) {
 
-        currentStart = this.selectedArea.start;
-        currentEnd = this.selectedArea.end;
+        currentStart = this.prevSelectedArea.start;
+        currentEnd = this.prevSelectedArea.end;
 
         if (start < currentStart) {
             left = start;
@@ -244,6 +250,8 @@ TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
         left = start;
         right = end;
     }
+
+    this.prevSelectedArea = this.selectedArea;
     
     this.selectedArea = {
         start: left,
@@ -260,13 +268,11 @@ TrackEditor.prototype.selectStart = function(e) {
         startX = scrollX + e.pageX,
         prevX = scrollX + e.pageX;
 
-    //this.selectedArea = undefined;
-
     //remove previously listening track.
     ToolBar.prototype.reset("createfade");
 
-    editor.updateEditor(-1);
-    editor.drawer.drawHighlight(startX, startX, false, pixelOffset);
+    editor.setSelectedArea(startX, startX);
+    editor.updateEditor(-1, undefined, undefined, true);
     editor.notifySelectUpdate(startX, startX);
 
     //dynamically put an event on the element.
@@ -287,11 +293,10 @@ TrackEditor.prototype.selectStart = function(e) {
             selectEnd = startX;
         }
 
-        editor.drawer.draw(0, pixelOffset, min, max);
-        editor.drawer.drawHighlight(selectStart, selectEnd, false, pixelOffset);
-       
-        prevX = currentX;
+        editor.setSelectedArea(selectStart, selectEnd);
+        editor.updateEditor(-1, min, max, true);
         editor.notifySelectUpdate(min, max);
+        prevX = currentX;
     };
     document.body.onmouseup = function(e) {
         var endX = scrollX + e.pageX,
@@ -308,13 +313,12 @@ TrackEditor.prototype.selectStart = function(e) {
         if (Math.abs(start - end)) {
             ToolBar.prototype.activateFades();
             ToolBar.prototype.on("createfade", "onCreateFade", editor);
-            editor.drawer.drawHighlight(start, end, false, pixelOffset);
         }
         else {
             ToolBar.prototype.deactivateFades();
-            editor.drawer.drawHighlight(start, end, true, pixelOffset);
         }
 
+        editor.updateEditor(-1, start, end, true);
         editor.config.setCursorPos(start);
         editor.notifySelectUpdate(start, end);    
     };
@@ -467,7 +471,7 @@ TrackEditor.prototype.scheduleStop = function(when) {
 TrackEditor.prototype.updateEditor = function(cursorPos, start, end, highlighted) {
     var pixelOffset = this.getPixelOffset();
 
-    this.drawer.updateEditor(cursorPos, pixelOffset, start, end, highlighted);
+    this.drawer.updateEditor(cursorPos, pixelOffset, start, end, highlighted, this.selectedArea);
 };
 
 TrackEditor.prototype.getTrackDetails = function() {
@@ -481,6 +485,20 @@ TrackEditor.prototype.getTrackDetails = function() {
     };
 
     return d;
+};
+
+/*
+    Will remove all audio samples from the track's buffer except for the currently selected area.
+*/
+TrackEditor.prototype.trim = function() {
+   
+};
+
+/*
+    Will remove all audio samples from the track's buffer in the currently selected area.
+*/
+TrackEditor.prototype.removeAudio = function() {
+   
 };
 
 makePublisher(TrackEditor.prototype);
