@@ -252,7 +252,7 @@ WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, 
 
     this.draw(cursorPos, pixelOffset, start, end);
 
-    if (highlighted === true) {
+    if (highlighted === true && selected !== undefined) {
         var border = (end - start === 0) ? true : false;
         this.drawHighlight(selected.start, selected.end, border, pixelOffset);
     }

@@ -97,12 +97,8 @@ TrackEditor.prototype.loadBuffer = function(src) {
 
         if (e.lengthComputable) {
             percentComplete = e.loaded / e.total * 100;
+            that.drawer.updateLoader(percentComplete);
         } 
-        else {
-            // TODO
-            percentComplete = 0;
-        }
-        that.drawer.updateLoader(percentComplete);
 
     }, false);
 
@@ -154,6 +150,7 @@ TrackEditor.prototype.activate = function() {
 
 TrackEditor.prototype.deactivate = function() {
     this.active = false;
+    this.selectedArea = undefined;
     this.container.classList.remove("active");
     this.drawer.draw(-1, this.getPixelOffset());
 };
