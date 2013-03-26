@@ -67,6 +67,8 @@ PlaylistEditor.prototype.init = function(tracks) {
     toolBar.on("rewindaudio", "rewind", this);
     toolBar.on("playaudio", "play", this);
     toolBar.on("stopaudio", "stop", this);
+    toolBar.on("trimaudio", "onTrimAudio", this);
+    toolBar.on("removeaudio", "onRemoveAudio", this);
     toolBar.on("changestate", "onStateChange", this);
 
     bottomBar.on("changeresolution", "onResolutionChange", timeScale);
@@ -75,6 +77,29 @@ PlaylistEditor.prototype.init = function(tracks) {
 
 PlaylistEditor.prototype.setActiveTrack = function(track) {
     this.activeTrack = track;
+};
+
+PlaylistEditor.prototype.onTrimAudio = function() {
+    var selected = this.getSelected(),
+        track = this.activeTrack,
+        start, end;
+
+    if (selected === undefined) {
+        return;
+    }
+
+    track.trim(selected.start, selected.end); 
+};
+
+PlaylistEditor.prototype.onRemoveAudio = function() {
+    var selected = this.getSelected(),
+        start, end;
+
+    if (selected === undefined) {
+        return;
+    }
+
+    this.activeTrack.removeAudio(selected.start, selected.end);
 };
 
 PlaylistEditor.prototype.onSelectionChange = function(args) {
@@ -149,13 +174,18 @@ PlaylistEditor.prototype.rewind = function() {
     this.config.setCursorPos(0);
 };
 
+/*
+    returns selected time in global (playlist relative) seconds.
+*/
 PlaylistEditor.prototype.getSelected = function() {
-    var selected;
+    var selected,
+        start,
+        end;
 
     if (this.activeTrack) {
         selected = this.activeTrack.selectedArea;
         if (selected !== undefined && (selected.end > selected.start)) {
-            return selected;
+            return this.activeTrack.getSelectedPlayTime();
         }
     }
 };
@@ -181,21 +211,20 @@ PlaylistEditor.prototype.play = function() {
         len,
         currentTime = this.config.getCurrentTime(),
         delay = 0.2,
-        cursorPos = this.config.getCursorPos(),
-        cursorEnd,
+        startTime = this.config.getCursorPos(),
+        endTime,
         selected = this.getSelected();
 
     if (selected !== undefined) {
-        cursorPos = selected.start;
-        cursorEnd = selected.end;
+        startTime = selected.startTime;
+        endTime = selected.endTime;
     }
 
     for (i = 0, len = editors.length; i < len; i++) {
-        editors[i].schedulePlay(currentTime, delay, cursorPos, cursorEnd);
+        editors[i].schedulePlay(currentTime, delay, startTime, endTime);
     }
 
     this.lastPlay = currentTime + delay;
-
     this.interval = setInterval(that.updateEditor.bind(that), 25);
 };
 
@@ -220,32 +249,32 @@ PlaylistEditor.prototype.updateEditor = function() {
         currentTime = this.config.getCurrentTime(),
         elapsed = currentTime - this.lastPlay,
         res = this.config.getResolution(),
-        delta = elapsed * this.sampleRate / res,
         cursorPos = this.config.getCursorPos(),
+        cursorPixel,
         playbackSec,
         selected = this.getSelected(), 
         start, end,
         highlighted = false;
 
     if (selected !== undefined) {
-        start = selected.start;
-        end = selected.end;
+        start = ~~(selected.startTime * this.sampleRate / res);
+        end = Math.ceil(selected.endTime * this.sampleRate / res);
         highlighted = true;
     }
 
     if (this.isPlaying()) {
 
         if (elapsed) {
-            cursorPos = ~~(cursorPos + delta);
-            playbackSec = cursorPos * res / this.sampleRate;
-
+            playbackSec = cursorPos + elapsed;
+            cursorPixel = Math.ceil(playbackSec * this.sampleRate / res);
+            
             for(i = 0, len = editors.length; i < len; i++) {
-                editors[i].updateEditor(cursorPos, start, end, highlighted);
+                editors[i].updateEditor(cursorPixel, start, end, highlighted);
             }
 
             this.fire("playbackcursor", {
                 "seconds": playbackSec,
-                "pixels": cursorPos
+                "pixels": cursorPixel
             });
         }
     }

@@ -47,7 +47,7 @@ var Config;
 
             state: 'select',
 
-            cursorPos: 0
+            cursorPos: 0 //value is kept in seconds.
         };
 
         params = Object.create(params);

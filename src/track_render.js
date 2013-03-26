@@ -253,8 +253,8 @@ WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, 
     this.draw(cursorPos, pixelOffset, start, end);
 
     if (highlighted === true && selected !== undefined) {
-        var border = (end - start === 0) ? true : false;
-        this.drawHighlight(selected.start, selected.end, border, pixelOffset);
+        var border = (selected.end - selected.start === 0) ? true : false;
+        this.drawHighlight(selected.start, selected.end, border);
     }
 
     for (i = 0, len = this.channels.length; i < len; i++) {  
@@ -267,12 +267,11 @@ WaveformDrawer.prototype.updateEditor = function(cursorPos, pixelOffset, start, 
 /*
     start, end in pixels.
 */
-WaveformDrawer.prototype.drawHighlight = function(start, end, isBorder, pixelOffset) {
+WaveformDrawer.prototype.drawHighlight = function(start, end, isBorder) {
     var i, len,
         colors = this.config.getColorScheme(),
         fillStyle,
         ctx,
-        startPix = ~~(start - pixelOffset),
         width = end - start + 1;
 
     fillStyle = (isBorder) ? colors.selectBorderColor : colors.selectBackgroundColor;
@@ -280,7 +279,7 @@ WaveformDrawer.prototype.drawHighlight = function(start, end, isBorder, pixelOff
     for (i = 0, len = this.channels.length; i < len; i++) {
         ctx = this.channels[i].context;
         ctx.fillStyle = fillStyle;
-        ctx.fillRect(startPix, 0, width, this.height);
+        ctx.fillRect(start, 0, width, this.height);
     }
 };
 

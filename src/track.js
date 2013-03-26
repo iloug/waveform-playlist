@@ -53,7 +53,7 @@ TrackEditor.prototype.init = function(src, start, end, fades) {
 
     this.fades = fades || {};
 
-    this.selectedArea = undefined;
+    this.selectedArea = undefined; //selected area of track stored as inclusive buffer indices to the audio buffer.
     this.active = false;
 
     this.container.classList.add("channel-wrapper");
@@ -71,8 +71,13 @@ TrackEditor.prototype.getFadeId = function() {
 };
 
 TrackEditor.prototype.getBuffer = function() {
-    return this.playout.buffer;
+    return this.playout.getBuffer();
 };
+
+TrackEditor.prototype.setBuffer = function(buffer) {
+    this.playout.setBuffer(buffer);
+};
+
 
 TrackEditor.prototype.loadTrack = function(track) {
     var el;
@@ -130,6 +135,22 @@ TrackEditor.prototype.onTrackLoad = function(buffer) {
     this.drawTrack(buffer);
 };
 
+TrackEditor.prototype.samplesToSeconds = function(samples) {
+    return samples / this.sampleRate;
+};
+
+TrackEditor.prototype.secondsToSamples = function(seconds) {
+    return Math.ceil(seconds * this.sampleRate);
+};
+
+TrackEditor.prototype.samplesToPixels = function(samples) {
+    return ~~(samples / this.resolution);
+};
+
+TrackEditor.prototype.pixelsToSamples = function(pixels) {
+    return ~~(pixels * this.resolution);
+};
+
 TrackEditor.prototype.pixelsToSeconds = function(pixels) {
     return pixels * this.resolution / this.sampleRate;
 };
@@ -178,15 +199,14 @@ TrackEditor.prototype.timeShift = function(e) {
         diffX = endX - startX;
         updatedX = origX + diffX;
         editor.drawer.setTimeShift(updatedX);
-        editor.leftOffset = updatedX * res;
+        editor.leftOffset = editor.pixelsToSamples(updatedX);
     };
     document.body.onmouseup = function() {
         var delta;
 
         el.onmousemove = document.body.onmouseup = null;
-        editor.leftOffset = updatedX * res;
-
-        delta = diffX * res / editor.sampleRate;
+        editor.leftOffset = editor.pixelsToSamples(updatedX);
+        delta = editor.pixelsToSeconds(diffX);
 
         //update track's start and end time relative to the playlist.
         editor.startTime = editor.startTime + delta;
@@ -195,17 +215,33 @@ TrackEditor.prototype.timeShift = function(e) {
 };
 
 /*
-    start, end in pixels
+    startTime, endTime in seconds.
 */
-TrackEditor.prototype.notifySelectUpdate = function(start, end) {
-    var startSec = start * this.resolution / this.sampleRate,
-        endSec = end * this.resolution / this.sampleRate;
-
+TrackEditor.prototype.notifySelectUpdate = function(startTime, endTime) {
+    
     this.fire('changecursor', {
-        start: startSec,
-        end: endSec,
+        start: startTime,
+        end: endTime,
         editor: this
     });
+};
+
+
+TrackEditor.prototype.getSelectedPlayTime = function() {
+    var selected = this.selectedArea,
+        offset = this.leftOffset,
+        start = this.samplesToSeconds(offset + selected.start),
+        end = this.samplesToSeconds(offset + selected.end);
+
+    return {
+        startTime: start,
+        endTime: end
+    }
+};
+
+
+TrackEditor.prototype.getSelectedArea = function() {
+    return this.selectedArea;
 };
 
 /*
@@ -215,13 +251,14 @@ TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
     var left, 
         right,
         currentStart,
-        currentEnd;
+        currentEnd,
+        pixelOffset = this.getPixelOffset();
 
     //extending selected area since shift is pressed.
-    if (shiftKey && (end - start === 0) && (this.selectedArea !== undefined)) {
+    if (shiftKey && (end - start === 0) && (this.prevSelectedArea !== undefined)) {
 
-        currentStart = this.prevSelectedArea.start;
-        currentEnd = this.prevSelectedArea.end;
+        currentStart = this.samplesToPixels(this.prevSelectedArea.start + pixelOffset);
+        currentEnd = this.samplesToPixels(this.prevSelectedArea.end + pixelOffset);
 
         if (start < currentStart) {
             left = start;
@@ -251,8 +288,8 @@ TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
     this.prevSelectedArea = this.selectedArea;
     
     this.selectedArea = {
-        start: left,
-        end: right
+        start: this.pixelsToSamples(left - pixelOffset),
+        end: this.pixelsToSamples(right - pixelOffset)
     };
 };
 
@@ -263,23 +300,28 @@ TrackEditor.prototype.selectStart = function(e) {
         scroll = this.config.getTrackScroll(),
         scrollX = scroll.left,
         startX = scrollX + e.pageX,
-        prevX = scrollX + e.pageX;
+        prevX = scrollX + e.pageX,
+        offset = this.leftOffset,
+        startTime;
 
     //remove previously listening track.
     ToolBar.prototype.reset("createfade");
 
     editor.setSelectedArea(startX, startX);
+    startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
+
     editor.updateEditor(-1, undefined, undefined, true);
-    editor.notifySelectUpdate(startX, startX);
+    editor.notifySelectUpdate(startTime, startTime);
 
     //dynamically put an event on the element.
     el.onmousemove = function(e) {
         var currentX = scrollX + e.pageX,
             delta = currentX - prevX,
-            min = Math.min(prevX, currentX, startX),
-            max = Math.max(prevX, currentX, startX),
+            minX = Math.min(prevX, currentX, startX),
+            maxX = Math.max(prevX, currentX, startX),
             selectStart,
-            selectEnd;
+            selectEnd,
+            startTime, endTime;
         
         if (currentX > startX) {
             selectStart = startX;
@@ -290,24 +332,32 @@ TrackEditor.prototype.selectStart = function(e) {
             selectEnd = startX;
         }
 
+        startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
+        endTime = editor.samplesToSeconds(offset + editor.selectedArea.end);
+
         editor.setSelectedArea(selectStart, selectEnd);
-        editor.updateEditor(-1, min, max, true);
-        editor.notifySelectUpdate(min, max);
+        editor.updateEditor(-1, minX, maxX, true);
+        editor.notifySelectUpdate(startTime, endTime);
         prevX = currentX;
     };
     document.body.onmouseup = function(e) {
         var endX = scrollX + e.pageX,
-            start, end;
+            minX, maxX,
+            cursorPos,
+            startTime, endTime;
 
-        editor.setSelectedArea(Math.min(startX, endX), Math.max(startX, endX), e.shiftKey);
+        minX = Math.min(startX, endX);
+        maxX = Math.max(startX, endX);
 
-        start = editor.selectedArea.start;
-        end = editor.selectedArea.end;
+        editor.setSelectedArea(minX, maxX, e.shiftKey);
+
+        minX = editor.samplesToPixels(offset + editor.selectedArea.start);
+        maxX = editor.samplesToPixels(offset + editor.selectedArea.end);
 
         el.onmousemove = document.body.onmouseup = null;
         
         //if more than one pixel is selected, listen to possible fade events.
-        if (Math.abs(start - end)) {
+        if (Math.abs(minX - maxX)) {
             ToolBar.prototype.activateFades();
             ToolBar.prototype.on("createfade", "onCreateFade", editor);
         }
@@ -315,9 +365,12 @@ TrackEditor.prototype.selectStart = function(e) {
             ToolBar.prototype.deactivateFades();
         }
 
-        editor.updateEditor(-1, start, end, true);
-        editor.config.setCursorPos(start);
-        editor.notifySelectUpdate(start, end);    
+        cursorPos = startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
+        endTime = editor.samplesToSeconds(offset + editor.selectedArea.end);
+
+        editor.updateEditor(-1, minX, maxX, true);
+        editor.config.setCursorPos(cursorPos);
+        editor.notifySelectUpdate(startTime, endTime);    
     };
 };
 
@@ -343,10 +396,10 @@ TrackEditor.prototype.removeFade = function(id) {
 TrackEditor.prototype.onCreateFade = function(args) {
     var selected = this.selectedArea,
         pixelOffset = this.getPixelOffset(),
-        start = selected.start - pixelOffset,
-        end = selected.end - pixelOffset,
-        startTime = start * this.resolution / this.sampleRate,
-        endTime = end * this.resolution / this.sampleRate,
+        start = this.samplesToPixels(selected.start),
+        end = this.samplesToPixels(selected.end),
+        startTime = this.samplesToSeconds(selected.start),
+        endTime = this.samplesToSeconds(selected.end),
         id = this.getFadeId();
 
     ToolBar.prototype.deactivateFades();
@@ -401,22 +454,14 @@ TrackEditor.prototype.onStateChange = function() {
 };
 
 TrackEditor.prototype.onResolutionChange = function(res) {
-    var start, end;
-
-    if (this.active === true && this.selectedArea !== undefined) {
-        start = this.pixelsToSeconds(this.selectedArea.start);
-        end = this.pixelsToSeconds(this.selectedArea.end);
-    }
+    var selected = this.selectedArea;
 
     this.resolution = res;
     this.drawTrack(this.getBuffer());
 
     if (this.active === true && this.selectedArea !== undefined) {
-        this.selectedArea.start = this.secondsToPixels(start);
-        this.selectedArea.end = this.secondsToPixels(end);
-
-        this.config.setCursorPos(this.selectedArea.start);
-        this.updateEditor(-1, this.selectedArea.start, this.selectedArea.end, true);
+        
+        this.updateEditor(-1, this.samplesToPixels(selected.start), this.samplesToPixels(selected.end), true);
     }
 };
 
@@ -424,38 +469,38 @@ TrackEditor.prototype.isPlaying = function() {
     return this.playout.isScheduled() || this.playout.isPlaying();
 };
 
-//cursorPos (in pixels)
-TrackEditor.prototype.schedulePlay = function(now, delay, cursorPos, cursorEnd) { 
+/*
+    startTime, endTime in seconds (float).
+*/
+TrackEditor.prototype.schedulePlay = function(now, delay, startTime, endTime) { 
     var start,
         duration,
-        cursorStartTime = cursorPos * this.resolution / this.sampleRate,
-        cursorEndTime = (cursorEnd) ? cursorEnd * this.resolution / this.sampleRate : undefined,
         relPos,
         when = now + delay,
-        window = (cursorEnd) ? (cursorEnd - cursorPos) * this.resolution / this.sampleRate : undefined;
+        window = (endTime) ? (endTime - startTime) : undefined;
 
     //track has no content to play.
-    if (this.endTime <= cursorStartTime) return;
+    if (this.endTime <= startTime) return;
 
     //track does not start in this selection.
-    if (window && (cursorStartTime + window) < this.startTime) return;
+    if (window && (startTime + window) < this.startTime) return;
 
 
     //track should have something to play if it gets here.
 
     //the track starts in the future of the cursor position
-    if (this.startTime >= cursorStartTime) {
+    if (this.startTime >= startTime) {
         start = 0;
-        when = when + this.startTime - cursorStartTime; //schedule additional delay for this audio node.
-        window = window - (this.startTime - cursorStartTime);
-        duration = (cursorEnd) ? Math.min(window, this.duration) : this.duration;
+        when = when + this.startTime - startTime; //schedule additional delay for this audio node.
+        window = window - (this.startTime - startTime);
+        duration = (endTime) ? Math.min(window, this.duration) : this.duration;
     }
     else {
-        start = cursorStartTime - this.startTime;
-        duration = (cursorEnd) ? Math.min(window, this.duration - start) : this.duration - start;
+        start = startTime - this.startTime;
+        duration = (endTime) ? Math.min(window, this.duration - start) : this.duration - start;
     }
 
-    relPos = cursorStartTime - this.startTime;
+    relPos = startTime - this.startTime;
     this.playout.applyFades(this.fades, relPos, now, delay);
     this.playout.play(when, start, duration);
 };
@@ -466,9 +511,18 @@ TrackEditor.prototype.scheduleStop = function(when) {
 };
 
 TrackEditor.prototype.updateEditor = function(cursorPos, start, end, highlighted) {
-    var pixelOffset = this.getPixelOffset();
+    var pixelOffset = this.getPixelOffset(),
+        selected;
+ 
+    if (this.selectedArea) {   
+        //must pass selected area in pixels.
+        selected = {
+            start: this.samplesToPixels(this.selectedArea.start),
+            end: this.samplesToPixels(this.selectedArea.end)
+        };
+    }
 
-    this.drawer.updateEditor(cursorPos, pixelOffset, start, end, highlighted, this.selectedArea);
+    this.drawer.updateEditor(cursorPos, pixelOffset, start, end, highlighted, selected);
 };
 
 TrackEditor.prototype.getTrackDetails = function() {
@@ -486,16 +540,41 @@ TrackEditor.prototype.getTrackDetails = function() {
 
 /*
     Will remove all audio samples from the track's buffer except for the currently selected area.
+
+    start, end are indices into the audio buffer and are inclusive.
 */
-TrackEditor.prototype.trim = function() {
-   
+TrackEditor.prototype.trim = function(start, end) {
+   var buffer = this.getBuffer();
+
+    this.setBuffer(buffer.subArray(start, end));
+    this.drawTrack(this.getBuffer());
 };
 
 /*
     Will remove all audio samples from the track's buffer in the currently selected area.
+
+    start, end are indices into the audio buffer and are inclusive.
 */
-TrackEditor.prototype.removeAudio = function() {
-   
+TrackEditor.prototype.removeAudio = function(start, end) {
+    var buffer = this.getBuffer(),
+        newBuffer = new Float32Array(buffer.length - (end - start + 1)),
+        left, right,
+        index = 0;
+
+
+    if (start > 0) {
+        left = buffer.subArray(0, start - 1);
+        newBuffer.set(left);
+        index = left.length;
+    }
+
+    if (end < buffer.length - 1) {
+        right = buffer.subArray(end + 1, buffer.length);
+        newBuffer.set(right, index);
+    }
+
+    this.setBuffer(newBuffer);
+    this.drawTrack(this.getBuffer());  
 };
 
 makePublisher(TrackEditor.prototype);
