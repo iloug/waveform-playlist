@@ -579,10 +579,11 @@ TrackEditor.prototype.getTrackDetails = function() {
     Cue points are stored internally in the editor as sample indices for highest precision.
 */
 TrackEditor.prototype.setCuePoints = function(cuein, cueout) {
+    var offset = this.cues ? this.cues.cuein : 0;
 
     this.cues = {
-        cuein: cuein,
-        cueout: cueout
+        cuein: offset + cuein,
+        cueout: offset + cueout
     };
 
     this.duration = (cueout - cuein) / this.sampleRate;
