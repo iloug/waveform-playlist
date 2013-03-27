@@ -123,15 +123,13 @@ TrackEditor.prototype.loadBuffer = function(src) {
 
 TrackEditor.prototype.drawTrack = function(buffer) {
 
-    this.drawer.drawBuffer(buffer, this.leftOffset);
+    this.drawer.drawBuffer(buffer, this.getPixelOffset(this.leftOffset), this.cues);
     this.drawer.drawFades(this.fades);
 };
 
 TrackEditor.prototype.onTrackLoad = function(buffer) {
    
-    this.endTime = (buffer.length / this.sampleRate) + this.startTime;
-    this.duration = buffer.duration;
-
+    this.setCuePoints(0, buffer.length - 1);
     this.drawTrack(buffer);
 };
 
@@ -245,6 +243,26 @@ TrackEditor.prototype.getSelectedArea = function() {
 };
 
 /*
+    start, end in samples.
+*/
+TrackEditor.prototype.adjustSelectedArea = function(start, end) {
+    var buffer = this.getBuffer();
+
+    if (start < 0) {
+        start = 0;
+    }
+
+    if (end > buffer.length - 1) {
+        end = buffer.length - 1;
+    }
+
+    return {
+        start: start,
+        end: end
+    };
+};
+
+/*
     start, end in pixels
 */
 TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
@@ -286,11 +304,7 @@ TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
     }
 
     this.prevSelectedArea = this.selectedArea;
-    
-    this.selectedArea = {
-        start: this.pixelsToSamples(left - pixelOffset),
-        end: this.pixelsToSamples(right - pixelOffset)
-    };
+    this.selectedArea = this.adjustSelectedArea(this.pixelsToSamples(left - pixelOffset), this.pixelsToSamples(right - pixelOffset));
 };
 
 TrackEditor.prototype.selectStart = function(e) {
@@ -305,7 +319,7 @@ TrackEditor.prototype.selectStart = function(e) {
         startTime;
 
     //remove previously listening track.
-    ToolBar.prototype.reset("createfade");
+    ToolBar.prototype.reset("trackedit");
 
     editor.setSelectedArea(startX, startX);
     startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
@@ -358,11 +372,11 @@ TrackEditor.prototype.selectStart = function(e) {
         
         //if more than one pixel is selected, listen to possible fade events.
         if (Math.abs(minX - maxX)) {
-            ToolBar.prototype.activateFades();
-            ToolBar.prototype.on("createfade", "onCreateFade", editor);
+            ToolBar.prototype.activateAudioSelection();
+            ToolBar.prototype.on("trackedit", "onTrackEdit", editor);
         }
         else {
-            ToolBar.prototype.deactivateFades();
+            ToolBar.prototype.deactivateAudioSelection();
         }
 
         cursorPos = startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
@@ -393,6 +407,15 @@ TrackEditor.prototype.removeFade = function(id) {
     delete this.fades[id];
 };
 
+TrackEditor.prototype.onTrackEdit = function(event) {
+    var type = event.type,
+        method = "on" + type.charAt(0).toUpperCase() + type.slice(1);
+
+    this[method].call(this, event.args);
+
+    ToolBar.prototype.deactivateAudioSelection();
+};
+
 TrackEditor.prototype.onCreateFade = function(args) {
     var selected = this.selectedArea,
         pixelOffset = this.getPixelOffset(),
@@ -402,11 +425,22 @@ TrackEditor.prototype.onCreateFade = function(args) {
         endTime = this.samplesToSeconds(selected.end),
         id = this.getFadeId();
 
-    ToolBar.prototype.deactivateFades();
     this.config.setCursorPos(0);
     this.saveFade(id, args.type, args.shape, startTime, endTime);
     this.drawer.draw(0, pixelOffset);
     this.drawer.drawFade(id, args.type, args.shape, start, end);  
+};
+
+TrackEditor.prototype.onTrimAudio = function() {
+    var selected = this.getSelectedArea();
+
+    this.trim(selected.start, selected.end);
+};
+
+TrackEditor.prototype.onRemoveAudio = function() {
+    var selected = this.getSelectedArea();
+
+    this.removeAudio(selected.start, selected.end);
 };
 
 TrackEditor.prototype.setState = function(state) {
@@ -477,7 +511,8 @@ TrackEditor.prototype.schedulePlay = function(now, delay, startTime, endTime) {
         duration,
         relPos,
         when = now + delay,
-        window = (endTime) ? (endTime - startTime) : undefined;
+        window = (endTime) ? (endTime - startTime) : undefined,
+        cueOffset = this.cues.cuein / this.sampleRate;
 
     //track has no content to play.
     if (this.endTime <= startTime) return;
@@ -499,6 +534,8 @@ TrackEditor.prototype.schedulePlay = function(now, delay, startTime, endTime) {
         start = startTime - this.startTime;
         duration = (endTime) ? Math.min(window, this.duration - start) : this.duration - start;
     }
+
+    start = start + cueOffset;
 
     relPos = startTime - this.startTime;
     this.playout.applyFades(this.fades, relPos, now, delay);
@@ -539,14 +576,30 @@ TrackEditor.prototype.getTrackDetails = function() {
 };
 
 /*
+    Cue points are stored internally in the editor as sample indices for highest precision.
+*/
+TrackEditor.prototype.setCuePoints = function(cuein, cueout) {
+
+    this.cues = {
+        cuein: cuein,
+        cueout: cueout
+    };
+
+    this.duration = (cueout - cuein) / this.sampleRate;
+    this.endTime = this.duration + this.startTime;
+};
+
+/*
     Will remove all audio samples from the track's buffer except for the currently selected area.
+    Used to set cuein / cueout points in the audio.
 
     start, end are indices into the audio buffer and are inclusive.
 */
 TrackEditor.prototype.trim = function(start, end) {
-   var buffer = this.getBuffer();
-
-    this.setBuffer(buffer.subArray(start, end));
+    
+    this.setCuePoints(start, end+1);
+    this.selectedArea = undefined;
+    this.config.setCursorPos(0);
     this.drawTrack(this.getBuffer());
 };
 
@@ -556,25 +609,7 @@ TrackEditor.prototype.trim = function(start, end) {
     start, end are indices into the audio buffer and are inclusive.
 */
 TrackEditor.prototype.removeAudio = function(start, end) {
-    var buffer = this.getBuffer(),
-        newBuffer = new Float32Array(buffer.length - (end - start + 1)),
-        left, right,
-        index = 0;
-
-
-    if (start > 0) {
-        left = buffer.subArray(0, start - 1);
-        newBuffer.set(left);
-        index = left.length;
-    }
-
-    if (end < buffer.length - 1) {
-        right = buffer.subArray(end + 1, buffer.length);
-        newBuffer.set(right, index);
-    }
-
-    this.setBuffer(newBuffer);
-    this.drawTrack(this.getBuffer());  
+    
 };
 
 makePublisher(TrackEditor.prototype);

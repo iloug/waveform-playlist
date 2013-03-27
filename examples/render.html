@@ -84,7 +84,7 @@ body {
 
 .playlist-fade {
   position: absolute;
-  background-color: rgba(0,0,0,0.2);
+  background-color: rgba(0,0,0,0.1);
   z-index: 1000;
 }
 
@@ -105,9 +105,6 @@ body {
   cursor: move;
 }
 
-.channel-wrapper.active .channel {
-  
-}
 
 </style>
 
@@ -137,7 +134,7 @@ body {
       <a id="btn_select" class="btn btn-mini" data-state="select"><i class="icon-italic"></i></a>
       <a id="btn_shift" class="btn btn-mini" data-state="shift"><i class="icon-resize-horizontal"></i></a>
     </div>
-    <div id="btns-fade" class="btn-group">
+    <div id="btns_fade" class="btn-group">
       <div class="btn-group fade-in">
         <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="linear">Linear</a>
         <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="logarithmic">Logarithmic</a>
@@ -152,8 +149,11 @@ body {
       </div>
     </div>
     <div class="btn-group">
-      <a id="btn_save" class="btn btn-inverse btn-small"><i class="icon-ok icon-white"></i></a>
+      <a id="btn_save" class="btn btn-inverse btn-small "><i class="icon-ok icon-white"></i></a>
       <a id="btn_open" class="btn btn-inverse btn-small"><i class="icon-folder-open icon-white"></i></a>
+    </div>
+    <div id="btns_audio_tools" class="btn-group">
+      <a id="btn_trim_audio" class="btn btn-inverse btn-small disabled">Trim Audio</a>
     </div>
   </div>
 </script>
@@ -171,6 +171,7 @@ body {
     <input id="audio_end" type="text" class="input-small">
     <input id="audio_pos" type="text" class="input-small">
     <select id="audio_resolution">
+      <option>250</option>
       <option>500</option>
       <option>1000</option>
       <option>2000</option>
@@ -205,12 +206,16 @@ body {
 
 
     var tracks = [
-        {
-            src: "Beautiful.m4a"
-        },
+        //{
+        //    src: "490.mp3"
+        //},
+
+        //{
+        //   src: "NothingElseMatters.m4a"
+        //},
 
         {
-            src: "NothingElseMatters.m4a"
+           src: "Beautiful.m4a"
         }
 
         //{

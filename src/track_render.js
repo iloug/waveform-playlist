@@ -15,16 +15,16 @@ WaveformDrawer.prototype.init = function(container) {
 
 WaveformDrawer.prototype.loaderStates = {
     "downloading": "progress progress-warning",
-    "decoding": "progress progress-success"
+    "decoding": "progress progress-success progress-striped active"
 };
 
-WaveformDrawer.prototype.getPeaks = function(buffer) {
+WaveformDrawer.prototype.getPeaks = function(buffer, cues) {
     
     // Frames per pixel
     var res = this.config.getResolution(),
         peaks = [],
         i, c, p, l,
-        chanLength = buffer.getChannelData(0).length,
+        chanLength = cues.cueout - cues.cuein,
         pixels = Math.ceil(chanLength / res),
         numChan = buffer.numberOfChannels,
         weight = 1 / (numChan),
@@ -44,6 +44,8 @@ WaveformDrawer.prototype.getPeaks = function(buffer) {
         for (c = 0; c < numChan; c++) {
 
             chan = buffer.getChannelData(c);
+            chan = chan.subarray(cues.cuein, cues.cueout);
+
             start = i * res;
             end = (i + 1) * res > chanLength ? chanLength : (i + 1) * res;
             vals = chan.subarray(start, end);
@@ -117,7 +119,7 @@ WaveformDrawer.prototype.drawLoading = function() {
     this.container.appendChild(div);
 };
 
-WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
+WaveformDrawer.prototype.drawBuffer = function(buffer, pixelOffset, cues) {
     var canv,
         div,
         i,
@@ -126,7 +128,7 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
         makeMono = this.config.isDisplayMono(),
         res = this.config.getResolution(),
         numChan = makeMono? 1 : buffer.numberOfChannels,
-        numSamples = buffer.getChannelData(0).length,
+        numSamples = cues.cueout - cues.cuein + 1,
         fragment = document.createDocumentFragment(),
         wrapperHeight; 
 
@@ -168,10 +170,10 @@ WaveformDrawer.prototype.drawBuffer = function(buffer, sampleOffset) {
     this.container.appendChild(fragment);
     
 
-    this.getPeaks(buffer);
+    this.getPeaks(buffer, cues);
     this.updateEditor();
 
-    this.setTimeShift(sampleOffset/res);
+    this.setTimeShift(pixelOffset);
 };
 
 WaveformDrawer.prototype.drawFrame = function(chanNum, index, peaks, maxPeak, cursorPos, pixelOffset) {

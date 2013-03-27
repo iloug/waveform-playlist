@@ -4,6 +4,10 @@ var ToolBar = function() {
 
 };
 
+ToolBar.prototype.groups = {
+    "audio-select": ["btns_audio_tools", "btns_fade"]
+};
+
 ToolBar.prototype.classes = {
     "btn-state-active": "btn btn-mini active",
     "btn-state-default": "btn btn-mini",
@@ -32,7 +36,7 @@ ToolBar.prototype.events = {
         click: "changeState"
     },
 
-    "btns-fade": {
+    "btns_fade": {
         click: "createFade"
     },
 
@@ -42,6 +46,10 @@ ToolBar.prototype.events = {
 
     "btn_open": {
         click: "open"
+    },
+    
+    "btn_trim_audio": {
+        click: "trimAudio"
     }
 };
 
@@ -75,8 +83,8 @@ ToolBar.prototype.init = function() {
     } 
 };
 
-ToolBar.prototype.activateFades = function() {
-    var el = document.getElementById("btns-fade"),
+ToolBar.prototype.activateButtonGroup = function(id) {
+    var el = document.getElementById(id),
         btns = el.getElementsByTagName("a"),
         classes = this.classes,
         i, len;
@@ -86,14 +94,32 @@ ToolBar.prototype.activateFades = function() {
     }
 };
 
-ToolBar.prototype.deactivateFades = function() {
-    var el = document.getElementById("btns-fade"),
+ToolBar.prototype.deactivateButtonGroup = function(id) {
+    var el = document.getElementById(id),
         btns = el.getElementsByTagName("a"),
         classes = this.classes,
         i, len;
 
     for (i = 0, len = btns.length; i < len; i++) {
         btns[i].classList.add(classes["disabled"]);
+    }
+};
+
+ToolBar.prototype.activateAudioSelection = function() {
+    var ids = this.groups["audio-select"],
+        i, len;
+
+    for (i = 0, len = ids.length; i < len; i++) {
+        this.activateButtonGroup(ids[i]);
+    }
+};
+
+ToolBar.prototype.deactivateAudioSelection = function() {
+    var ids = this.groups["audio-select"],
+        i, len;
+
+    for (i = 0, len = ids.length; i < len; i++) {
+        this.deactivateButtonGroup(ids[i]);
     }
 };
 
@@ -135,6 +161,34 @@ ToolBar.prototype.changeState = function(e) {
     this.fire('changestate', this);
 };
 
+ToolBar.prototype.trimAudio = function(e) {
+    var el = e.target,
+        disabled,
+        classes = this.classes;
+
+    disabled = el.classList.contains(classes["disabled"]);
+
+    if (!disabled) {
+        this.fire('trackedit', {
+            type: "trimAudio"
+        });
+    }  
+};
+
+ToolBar.prototype.removeAudio = function(e) {
+    var el = e.target,
+        disabled,
+        classes = this.classes;
+
+    disabled = el.classList.contains(classes["disabled"]);
+
+    if (!disabled) {
+        this.fire('trackedit', {
+            type: "removeAudio"
+        });
+    }  
+};
+
 ToolBar.prototype.createFade = function(e) {
     var el = e.target,
         shape = el.dataset.shape,
@@ -145,9 +199,12 @@ ToolBar.prototype.createFade = function(e) {
     disabled = el.classList.contains(classes["disabled"]);
 
     if (!disabled) {
-        this.fire('createfade', {
-            type: type, 
-            shape: shape
+        this.fire('trackedit', {
+            type: "createFade",
+            args: {
+                type: type, 
+                shape: shape
+            }
         });
     }  
 };

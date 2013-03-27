@@ -80,8 +80,8 @@ PlaylistEditor.prototype.setActiveTrack = function(track) {
 };
 
 PlaylistEditor.prototype.onTrimAudio = function() {
-    var selected = this.getSelected(),
-        track = this.activeTrack,
+    var track = this.activeTrack,
+        selected = track.getSelectedArea(),
         start, end;
 
     if (selected === undefined) {
@@ -92,14 +92,15 @@ PlaylistEditor.prototype.onTrimAudio = function() {
 };
 
 PlaylistEditor.prototype.onRemoveAudio = function() {
-    var selected = this.getSelected(),
+    var track = this.activeTrack,
+        selected = track.getSelectedArea(),
         start, end;
 
     if (selected === undefined) {
         return;
     }
 
-    this.activeTrack.removeAudio(selected.start, selected.end);
+    track.removeAudio(selected.start, selected.end);
 };
 
 PlaylistEditor.prototype.onSelectionChange = function(args) {
@@ -172,6 +173,8 @@ PlaylistEditor.prototype.rewind = function() {
   
     this.stop();
     this.config.setCursorPos(0);
+    this.activeTrack.selectedArea = undefined;
+    this.activeTrack.updateEditor(-1);
 };
 
 /*
