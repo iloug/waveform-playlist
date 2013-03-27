@@ -289,8 +289,8 @@ TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
     //extending selected area since shift is pressed.
     if (shiftKey && (end - start === 0) && (this.prevSelectedArea !== undefined)) {
 
-        currentStart = this.samplesToPixels(this.prevSelectedArea.start + pixelOffset);
-        currentEnd = this.samplesToPixels(this.prevSelectedArea.end + pixelOffset);
+        currentStart = this.samplesToPixels(this.prevSelectedArea.start + this.leftOffset);
+        currentEnd = this.samplesToPixels(this.prevSelectedArea.end + this.leftOffset);
 
         if (start < currentStart) {
             left = start;
