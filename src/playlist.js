@@ -44,8 +44,6 @@ PlaylistEditor.prototype.init = function(tracks) {
 
         toolBar.on("changestate", "onStateChange", trackEditor);
         bottomBar.on("changeresolution", "onResolutionChange", trackEditor);
-        trackEditor.on("changecursor", "onCursorSelection", bottomBar);
-        trackEditor.on("changecursor", "onCursorSelection", this);
     }
 
     div.innerHTML = '';
@@ -61,6 +59,7 @@ PlaylistEditor.prototype.init = function(tracks) {
 
     this.on("trackscroll", "onTrackScroll", timeScale);
     this.on("playbackcursor", "onAudioUpdate", bottomBar);
+    this.on("changecursor", "onCursorSelection", bottomBar);
 
     toolBar.on("playlistsave", "save", this);
     toolBar.on("playlistrestore", "restore", this);
@@ -165,16 +164,36 @@ PlaylistEditor.prototype.activateTrack = function(trackEditor) {
     }
 };
 
+/*
+    startTime, endTime in seconds.
+*/
+PlaylistEditor.prototype.notifySelectUpdate = function(startTime, endTime) {
+    
+    this.fire('changecursor', {
+        start: startTime,
+        end: endTime
+    });
+};
+
+PlaylistEditor.prototype.resetCursor = function() {
+    this.config.setCursorPos(0);
+    this.notifySelectUpdate(0, 0);
+};
+
 PlaylistEditor.prototype.onCursorSelection = function(args) {
     this.activateTrack(args.editor);
 };
 
 PlaylistEditor.prototype.rewind = function() {
-  
+    
+    if (this.activeTrack !== undefined) {
+        this.activeTrack.resetCursor();
+    }
+    else {
+        this.resetCursor();
+    } 
+
     this.stop();
-    this.config.setCursorPos(0);
-    this.activeTrack.selectedArea = undefined;
-    this.activeTrack.updateEditor(-1);
 };
 
 /*

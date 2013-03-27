@@ -26,7 +26,7 @@ TrackEditor.prototype.states = {
     }
 };
 
-TrackEditor.prototype.init = function(src, start, end, fades) {
+TrackEditor.prototype.init = function(src, start, end, fades, cues) {
     var that = this;
 
     this.config = new Config();
@@ -46,13 +46,17 @@ TrackEditor.prototype.init = function(src, start, end, fades) {
     //value is a float in seconds
     this.endTime = end || 0; //set properly in onTrackLoad.
 
-    this.leftOffset = this.startTime * this.sampleRate; //value is measured in samples.
+    this.leftOffset = this.secondsToSamples(this.startTime); //value is measured in samples.
 
     this.prevStateEvents = {};
     this.setState(this.config.getState());
 
     this.fades = fades || {};
 
+    if (cues.cuein !== undefined) {
+        this.setCuePoints(this.secondsToSamples(cues.cuein), this.secondsToSamples(cues.cueout));
+    }
+    
     this.selectedArea = undefined; //selected area of track stored as inclusive buffer indices to the audio buffer.
     this.active = false;
 
@@ -82,7 +86,16 @@ TrackEditor.prototype.setBuffer = function(buffer) {
 TrackEditor.prototype.loadTrack = function(track) {
     var el;
 
-    el = this.init(track.src, track.start, track.end, track.fades);
+    el = this.init(
+        track.src, 
+        track.start, 
+        track.end, 
+        track.fades,
+        {
+            cuein: track.cuein,
+            cueout: track.cueout
+        }
+    );
     this.loadBuffer(track.src);
 
     return el;
@@ -129,7 +142,10 @@ TrackEditor.prototype.drawTrack = function(buffer) {
 
 TrackEditor.prototype.onTrackLoad = function(buffer) {
    
-    this.setCuePoints(0, buffer.length - 1);
+    if (this.cues === undefined) {
+        this.setCuePoints(0, buffer.length - 1);
+    }
+    
     this.drawTrack(buffer);
 };
 
@@ -216,12 +232,10 @@ TrackEditor.prototype.timeShift = function(e) {
     startTime, endTime in seconds.
 */
 TrackEditor.prototype.notifySelectUpdate = function(startTime, endTime) {
-    
-    this.fire('changecursor', {
-        start: startTime,
-        end: endTime,
-        editor: this
-    });
+    var playlist = this.playlistEditor;
+
+    playlist.activateTrack(this);
+    playlist.notifySelectUpdate(startTime, endTime);
 };
 
 
@@ -425,7 +439,7 @@ TrackEditor.prototype.onCreateFade = function(args) {
         endTime = this.samplesToSeconds(selected.end),
         id = this.getFadeId();
 
-    this.config.setCursorPos(0);
+    this.resetCursor();
     this.saveFade(id, args.type, args.shape, startTime, endTime);
     this.drawer.draw(0, pixelOffset);
     this.drawer.drawFade(id, args.type, args.shape, start, end);  
@@ -547,6 +561,12 @@ TrackEditor.prototype.scheduleStop = function(when) {
     this.playout.stop(when); 
 };
 
+TrackEditor.prototype.resetCursor = function() {
+    this.selectedArea = undefined;
+    this.config.setCursorPos(0);
+    this.notifySelectUpdate(0, 0);
+};
+
 TrackEditor.prototype.updateEditor = function(cursorPos, start, end, highlighted) {
     var pixelOffset = this.getPixelOffset(),
         selected;
@@ -563,13 +583,16 @@ TrackEditor.prototype.updateEditor = function(cursorPos, start, end, highlighted
 };
 
 TrackEditor.prototype.getTrackDetails = function() {
-    var d;
+    var d,
+        cues = this.cues;
 
     d = {
         start: this.startTime,
         end: this.endTime,
         fades: this.fades,
-        src: this.src
+        src: this.src,
+        cuein: this.samplesToSeconds(cues.cuein),
+        cueout: this.samplesToSeconds(cues.cueout)
     };
 
     return d;
@@ -577,6 +600,8 @@ TrackEditor.prototype.getTrackDetails = function() {
 
 /*
     Cue points are stored internally in the editor as sample indices for highest precision.
+
+    sample at index cueout is not included.
 */
 TrackEditor.prototype.setCuePoints = function(cuein, cueout) {
     var offset = this.cues ? this.cues.cuein : 0;
@@ -599,8 +624,7 @@ TrackEditor.prototype.setCuePoints = function(cuein, cueout) {
 TrackEditor.prototype.trim = function(start, end) {
     
     this.setCuePoints(start, end+1);
-    this.selectedArea = undefined;
-    this.config.setCursorPos(0);
+    this.resetCursor();
     this.drawTrack(this.getBuffer());
 };
 

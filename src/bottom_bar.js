@@ -206,6 +206,11 @@ BottomBar.prototype.init = function() {
         //time entered was otherwise invalid.
         this.value = that.formatters(that.timeFormat)(that.currentSelectionValues.end);
     };
+
+    this.onCursorSelection({
+        start: 0,
+        end: 0
+    });
 };
 
 /*
