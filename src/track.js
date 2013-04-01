@@ -421,13 +421,51 @@ TrackEditor.prototype.removeFade = function(id) {
     delete this.fades[id];
 };
 
+/*
+    Cue points are stored internally in the editor as sample indices for highest precision.
+
+    sample at index cueout is not included.
+*/
+TrackEditor.prototype.setCuePoints = function(cuein, cueout) {
+    var offset = this.cues ? this.cues.cuein : 0;
+
+    this.cues = {
+        cuein: offset + cuein,
+        cueout: offset + cueout
+    };
+
+    this.duration = (cueout - cuein) / this.sampleRate;
+    this.endTime = this.duration + this.startTime;
+};
+
+/*
+    Will remove all audio samples from the track's buffer except for the currently selected area.
+    Used to set cuein / cueout points in the audio.
+
+    start, end are indices into the audio buffer and are inclusive.
+*/
+TrackEditor.prototype.trim = function(start, end) {
+    
+    this.setCuePoints(start, end+1);
+    this.resetCursor();
+    this.drawTrack(this.getBuffer());
+};
+
+
+/*
+    Will remove all audio samples from the track's buffer in the currently selected area.
+
+    start, end are indices into the audio buffer and are inclusive.
+*/
+TrackEditor.prototype.removeAudio = function(start, end) {
+    
+};
+
 TrackEditor.prototype.onTrackEdit = function(event) {
     var type = event.type,
         method = "on" + type.charAt(0).toUpperCase() + type.slice(1);
 
     this[method].call(this, event.args);
-
-    ToolBar.prototype.deactivateAudioSelection();
 };
 
 TrackEditor.prototype.onCreateFade = function(args) {
@@ -442,19 +480,39 @@ TrackEditor.prototype.onCreateFade = function(args) {
     this.resetCursor();
     this.saveFade(id, args.type, args.shape, startTime, endTime);
     this.drawer.draw(0, pixelOffset);
-    this.drawer.drawFade(id, args.type, args.shape, start, end);  
+    this.drawer.drawFade(id, args.type, args.shape, start, end);
+
+    ToolBar.prototype.deactivateAudioSelection();
+};
+
+TrackEditor.prototype.onZeroCrossing = function() {
+    var selected = this.getSelectedArea(),
+        startTime,
+        endTime,
+        offset = this.leftOffset;
+
+    this.selectedArea = this.findNearestZeroCrossing(selected.start, selected.end);
+
+    startTime = this.samplesToSeconds(offset + this.selectedArea.start);
+    endTime = this.samplesToSeconds(offset + this.selectedArea.end);
+    this.notifySelectUpdate(startTime, endTime);
+    this.updateEditor(-1, undefined, undefined, true);
 };
 
 TrackEditor.prototype.onTrimAudio = function() {
     var selected = this.getSelectedArea();
 
     this.trim(selected.start, selected.end);
+
+    ToolBar.prototype.deactivateAudioSelection();
 };
 
 TrackEditor.prototype.onRemoveAudio = function() {
     var selected = this.getSelectedArea();
 
     this.removeAudio(selected.start, selected.end);
+
+    ToolBar.prototype.deactivateAudioSelection();
 };
 
 TrackEditor.prototype.setState = function(state) {
@@ -596,45 +654,6 @@ TrackEditor.prototype.getTrackDetails = function() {
     };
 
     return d;
-};
-
-/*
-    Cue points are stored internally in the editor as sample indices for highest precision.
-
-    sample at index cueout is not included.
-*/
-TrackEditor.prototype.setCuePoints = function(cuein, cueout) {
-    var offset = this.cues ? this.cues.cuein : 0;
-
-    this.cues = {
-        cuein: offset + cuein,
-        cueout: offset + cueout
-    };
-
-    this.duration = (cueout - cuein) / this.sampleRate;
-    this.endTime = this.duration + this.startTime;
-};
-
-/*
-    Will remove all audio samples from the track's buffer except for the currently selected area.
-    Used to set cuein / cueout points in the audio.
-
-    start, end are indices into the audio buffer and are inclusive.
-*/
-TrackEditor.prototype.trim = function(start, end) {
-    
-    this.setCuePoints(start, end+1);
-    this.resetCursor();
-    this.drawTrack(this.getBuffer());
-};
-
-/*
-    Will remove all audio samples from the track's buffer in the currently selected area.
-
-    start, end are indices into the audio buffer and are inclusive.
-*/
-TrackEditor.prototype.removeAudio = function(start, end) {
-    
 };
 
 makePublisher(TrackEditor.prototype);
