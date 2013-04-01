@@ -479,7 +479,7 @@ TrackEditor.prototype.onCreateFade = function(args) {
 
     this.resetCursor();
     this.saveFade(id, args.type, args.shape, startTime, endTime);
-    this.drawer.draw(0, pixelOffset);
+    this.drawer.draw(-1, pixelOffset);
     this.drawer.drawFade(id, args.type, args.shape, start, end);
 
     ToolBar.prototype.deactivateAudioSelection();
