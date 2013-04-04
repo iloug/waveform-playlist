@@ -490,7 +490,7 @@ TrackEditor.prototype.onCreateFade = function(args) {
     this.drawer.draw(-1, pixelOffset);
     this.drawer.drawFade(id, args.type, args.shape, start, end);
 
-    this.prototype.deactivateAudioSelection();
+    this.deactivateAudioSelection();
 };
 
 TrackEditor.prototype.onZeroCrossing = function() {
