@@ -1,7 +1,7 @@
 'use strict';
 
-var TrackEditor = function(playlistEditor) {
-    this.playlistEditor = playlistEditor;
+var TrackEditor = function() {
+
 };
 
 TrackEditor.prototype.states = {
@@ -180,7 +180,6 @@ TrackEditor.prototype.getPixelOffset = function() {
 TrackEditor.prototype.activate = function() {
     this.active = true;
     this.container.classList.add("active");
-    this.playlistEditor.setActiveTrack(this);
 };
 
 TrackEditor.prototype.deactivate = function() {
@@ -232,10 +231,12 @@ TrackEditor.prototype.timeShift = function(e) {
     startTime, endTime in seconds.
 */
 TrackEditor.prototype.notifySelectUpdate = function(startTime, endTime) {
-    var playlist = this.playlistEditor;
-
-    playlist.activateTrack(this);
-    playlist.notifySelectUpdate(startTime, endTime);
+   
+    this.fire('changecursor', {
+        start: startTime,
+        end: endTime,
+        editor: this
+    });
 };
 
 

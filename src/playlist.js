@@ -48,6 +48,8 @@ PlaylistEditor.prototype.init = function(tracks) {
 
         trackEditor.on("activateSelection", "onAudioSelection", toolBar);
         trackEditor.on("deactivateSelection", "onAudioDeselection", toolBar);
+        trackEditor.on("changecursor", "onCursorSelection", bottomBar);
+        trackEditor.on("changecursor", "onSelectUpdate", this);
     }
 
     div.innerHTML = '';
@@ -63,7 +65,6 @@ PlaylistEditor.prototype.init = function(tracks) {
 
     this.on("trackscroll", "onTrackScroll", timeScale);
     this.on("playbackcursor", "onAudioUpdate", bottomBar);
-    this.on("changecursor", "onCursorSelection", bottomBar);
 
     toolBar.on("playlistsave", "save", this);
     toolBar.on("playlistrestore", "restore", this);
@@ -76,10 +77,6 @@ PlaylistEditor.prototype.init = function(tracks) {
 
     bottomBar.on("changeresolution", "onResolutionChange", timeScale);
     bottomBar.on("changeselection", "onSelectionChange", this);  
-};
-
-PlaylistEditor.prototype.setActiveTrack = function(track) {
-    this.activeTrack = track;
 };
 
 PlaylistEditor.prototype.onTrimAudio = function() {
@@ -161,6 +158,7 @@ PlaylistEditor.prototype.activateTrack = function(trackEditor) {
 
         if (editor === trackEditor) {
             editor.activate();
+            this.activeTrack = trackEditor;
         }
         else {
             editor.deactivate();
@@ -168,15 +166,9 @@ PlaylistEditor.prototype.activateTrack = function(trackEditor) {
     }
 };
 
-/*
-    startTime, endTime in seconds.
-*/
-PlaylistEditor.prototype.notifySelectUpdate = function(startTime, endTime) {
+PlaylistEditor.prototype.onSelectUpdate = function(event) {
     
-    this.fire('changecursor', {
-        start: startTime,
-        end: endTime
-    });
+    this.activateTrack(event.editor);
 };
 
 PlaylistEditor.prototype.resetCursor = function() {
