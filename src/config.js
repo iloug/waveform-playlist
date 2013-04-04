@@ -50,6 +50,7 @@ var Config;
             cursorPos: 0 //value is kept in seconds.
         };
 
+        params = params || {};
         params = Object.create(params);
         Object.keys(defaultParams).forEach(function(key) {
             if (!(key in params)) { 

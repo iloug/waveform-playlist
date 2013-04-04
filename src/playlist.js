@@ -43,7 +43,11 @@ PlaylistEditor.prototype.init = function(tracks) {
         fragment.appendChild(trackElem);
 
         toolBar.on("changestate", "onStateChange", trackEditor);
+        toolBar.on("trackedit", "onTrackEdit", trackEditor);
         bottomBar.on("changeresolution", "onResolutionChange", trackEditor);
+
+        trackEditor.on("activateSelection", "onAudioSelection", toolBar);
+        trackEditor.on("deactivateSelection", "onAudioDeselection", toolBar);
     }
 
     div.innerHTML = '';

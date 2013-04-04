@@ -283,14 +283,13 @@ TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
     var left, 
         right,
         currentStart,
-        currentEnd,
-        pixelOffset = this.getPixelOffset();
+        currentEnd;
 
     //extending selected area since shift is pressed.
     if (shiftKey && (end - start === 0) && (this.prevSelectedArea !== undefined)) {
 
-        currentStart = this.samplesToPixels(this.prevSelectedArea.start + this.leftOffset);
-        currentEnd = this.samplesToPixels(this.prevSelectedArea.end + this.leftOffset);
+        currentStart = this.samplesToPixels(this.prevSelectedArea.start);
+        currentEnd = this.samplesToPixels(this.prevSelectedArea.end);
 
         if (start < currentStart) {
             left = start;
@@ -318,22 +317,30 @@ TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
     }
 
     this.prevSelectedArea = this.selectedArea;
-    this.selectedArea = this.adjustSelectedArea(this.pixelsToSamples(left - pixelOffset), this.pixelsToSamples(right - pixelOffset));
+    this.selectedArea = this.adjustSelectedArea(this.pixelsToSamples(left), this.pixelsToSamples(right));
+};
+
+TrackEditor.prototype.activateAudioSelection = function() {
+
+    this.fire("activateSelection");
+};
+
+TrackEditor.prototype.deactivateAudioSelection = function() {
+
+    this.fire("deactivateSelection");
 };
 
 TrackEditor.prototype.selectStart = function(e) {
     var el = e.currentTarget, //want the events placed on the channel wrapper.
         editor = this,
-        pixelOffset = this.getPixelOffset(),
-        scroll = this.config.getTrackScroll(),
-        scrollX = scroll.left,
-        startX = scrollX + e.pageX,
-        prevX = scrollX + e.pageX,
+        startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
+        prevX = e.layerX || e.offsetX,
         offset = this.leftOffset,
         startTime;
 
-    //remove previously listening track.
-    ToolBar.prototype.reset("trackedit");
+    if (e.target.tagName !== "CANVAS") {
+        return;
+    }
 
     editor.setSelectedArea(startX, startX);
     startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
@@ -343,7 +350,7 @@ TrackEditor.prototype.selectStart = function(e) {
 
     //dynamically put an event on the element.
     el.onmousemove = function(e) {
-        var currentX = scrollX + e.pageX,
+        var currentX = e.layerX || e.offsetX,
             delta = currentX - prevX,
             minX = Math.min(prevX, currentX, startX),
             maxX = Math.max(prevX, currentX, startX),
@@ -364,12 +371,12 @@ TrackEditor.prototype.selectStart = function(e) {
         endTime = editor.samplesToSeconds(offset + editor.selectedArea.end);
 
         editor.setSelectedArea(selectStart, selectEnd);
-        editor.updateEditor(-1, minX, maxX, true);
+        editor.updateEditor(-1, undefined, undefined, true);
         editor.notifySelectUpdate(startTime, endTime);
         prevX = currentX;
     };
     document.body.onmouseup = function(e) {
-        var endX = scrollX + e.pageX,
+        var endX = e.layerX || e.offsetX,
             minX, maxX,
             cursorPos,
             startTime, endTime;
@@ -386,17 +393,16 @@ TrackEditor.prototype.selectStart = function(e) {
         
         //if more than one pixel is selected, listen to possible fade events.
         if (Math.abs(minX - maxX)) {
-            ToolBar.prototype.activateAudioSelection();
-            ToolBar.prototype.on("trackedit", "onTrackEdit", editor);
+            editor.activateAudioSelection();
         }
         else {
-            ToolBar.prototype.deactivateAudioSelection();
+            editor.deactivateAudioSelection();
         }
 
         cursorPos = startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
         endTime = editor.samplesToSeconds(offset + editor.selectedArea.end);
 
-        editor.updateEditor(-1, minX, maxX, true);
+        editor.updateEditor(-1, undefined, undefined, true);
         editor.config.setCursorPos(cursorPos);
         editor.notifySelectUpdate(startTime, endTime);    
     };
@@ -465,7 +471,9 @@ TrackEditor.prototype.onTrackEdit = function(event) {
     var type = event.type,
         method = "on" + type.charAt(0).toUpperCase() + type.slice(1);
 
-    this[method].call(this, event.args);
+    if (this.active === true) {
+        this[method].call(this, event.args);
+    }
 };
 
 TrackEditor.prototype.onCreateFade = function(args) {
@@ -482,7 +490,7 @@ TrackEditor.prototype.onCreateFade = function(args) {
     this.drawer.draw(-1, pixelOffset);
     this.drawer.drawFade(id, args.type, args.shape, start, end);
 
-    ToolBar.prototype.deactivateAudioSelection();
+    this.prototype.deactivateAudioSelection();
 };
 
 TrackEditor.prototype.onZeroCrossing = function() {
@@ -503,16 +511,14 @@ TrackEditor.prototype.onTrimAudio = function() {
     var selected = this.getSelectedArea();
 
     this.trim(selected.start, selected.end);
-
-    ToolBar.prototype.deactivateAudioSelection();
+    this.deactivateAudioSelection();
 };
 
 TrackEditor.prototype.onRemoveAudio = function() {
     var selected = this.getSelectedArea();
 
     this.removeAudio(selected.start, selected.end);
-
-    ToolBar.prototype.deactivateAudioSelection();
+    this.deactivateAudioSelection();
 };
 
 TrackEditor.prototype.setState = function(state) {

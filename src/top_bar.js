@@ -223,4 +223,12 @@ ToolBar.prototype.createFade = function(e) {
     }  
 };
 
+ToolBar.prototype.onAudioSelection = function() {
+    this.activateAudioSelection();
+};
+
+ToolBar.prototype.onAudioDeselection = function() {
+    this.deactivateAudioSelection();
+};
+
 makePublisher(ToolBar.prototype);
