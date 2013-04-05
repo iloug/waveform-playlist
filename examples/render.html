@@ -121,112 +121,112 @@ body {
 <script type="text/javascript" src="../src/bottom_bar.js"></script>
 <script type="text/javascript" src="../src/playlist.js"></script>
 
-<script id="top-bar-tmpl" type="text/template">
-  
-  <div class="btn-toolbar">
-    <div class="btn-group">
-      <a id="btn_open" class="btn btn-inverse btn-small"><i class="icon-folder-open icon-white"></i></a>
-      <a id="btn_save" class="btn btn-inverse btn-small "><i class="icon-ok icon-white"></i></a>
-    </div>
-    <div class="btn-group">
-      <a id="btn_rewind" class="btn btn-success"><i class="icon-fast-backward icon-white"></i></a>
-      <a id="btn_play" class="btn btn-success"><i class="icon-play icon-white"></i></a>
-      <a id="btn_pause" class="btn btn-warning"><i class="icon-pause icon-white"></i></a>
-      <a id="btn_stop" class="btn btn-danger"><i class="icon-stop icon-white"></i></a>
-    </div>
-    <div class="btn-group">
-      <a id="btn_select" class="btn btn-mini" data-state="select"><i class="icon-italic"></i></a>
-      <a id="btn_shift" class="btn btn-mini" data-state="shift"><i class="icon-resize-horizontal"></i></a>
-    </div>
-    <div id="btns_fade" class="btn-group">
-      <div class="btn-group fade-in">
-        <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="linear">Linear</a>
-        <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="logarithmic">Logarithmic</a>
-        <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="sCurve">S-Curve</a>
-        <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="exponential">Exponential</a>
-      </div>
-      <div class="btn-group fade-out">
-        <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="linear">Linear</a>
-        <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="logarithmic">Logarithmic</a>
-        <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="sCurve">S-Curve</a>
-        <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="exponential">Exponential</a>
-      </div>
-    </div>
-    <div id="btns_audio_tools" class="btn-group">
-      <a id="btn_trim_audio" class="btn btn-inverse btn-small disabled">Trim Audio</a>
-    </div>
-  </div>
-</script>
-
-<script id="bottom-bar-tmpl" type="text/template">
-  <form class="form-inline">
-    <select id="time_format">
-      <option value="seconds">seconds</option>
-      <option value="thousandths">thousandths</option>
-      <option value="hh:mm:ss">hh:mm:ss</option>
-      <option value="hh:mm:ss.uu">hh:mm:ss + hundredths</option>
-      <option value="hh:mm:ss.uuu">hh:mm:ss + milliseconds</option>
-    </select>
-    <input id="audio_start" type="text" class="input-small">
-    <input id="audio_end" type="text" class="input-small">
-    <input id="audio_pos" type="text" class="input-small">
-    <select id="audio_resolution">
-      <option>4000</option>
-      <option>5000</option>
-      <option>6000</option>
-      <option>7000</option>
-      <option>8000</option>
-      <option>9000</option>
-      <option>10000</option>
-      <option>11000</option>
-      <option>12000</option>
-      <option>15000</option>
-      <option>20000</option>
-    </select>
-  </form>
-</script>
-
 </head>
 <body>
 
   
 
   <div id=playlist class="playlist">
-    <div id=top-bar class="playlist-top-bar"></div>
+    <div id=top-bar class="playlist-top-bar">
+      <div class="btn-toolbar">
+        <div class="btn-group">
+          <a id="btn_open" class="btn btn-inverse btn-small"><i class="icon-folder-open icon-white"></i></a>
+          <a id="btn_save" class="btn btn-inverse btn-small "><i class="icon-ok icon-white"></i></a>
+        </div>
+        <div class="btn-group">
+          <a id="btn_rewind" class="btn btn-success"><i class="icon-fast-backward icon-white"></i></a>
+          <a id="btn_play" class="btn btn-success"><i class="icon-play icon-white"></i></a>
+          <a id="btn_pause" class="btn btn-warning"><i class="icon-pause icon-white"></i></a>
+          <a id="btn_stop" class="btn btn-danger"><i class="icon-stop icon-white"></i></a>
+        </div>
+        <div class="btn-group">
+          <a id="btn_select" class="btn btn-mini" data-state="select"><i class="icon-italic"></i></a>
+          <a id="btn_shift" class="btn btn-mini" data-state="shift"><i class="icon-resize-horizontal"></i></a>
+        </div>
+        <div id="btns_fade" class="btn-group">
+          <div class="btn-group fade-in">
+            <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="linear">Linear</a>
+            <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="logarithmic">Logarithmic</a>
+            <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="sCurve">S-Curve</a>
+            <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="exponential">Exponential</a>
+          </div>
+          <div class="btn-group fade-out">
+            <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="linear">Linear</a>
+            <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="logarithmic">Logarithmic</a>
+            <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="sCurve">S-Curve</a>
+            <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="exponential">Exponential</a>
+          </div>
+        </div>
+        <div id="btns_audio_tools" class="btn-group">
+          <a id="btn_trim_audio" class="btn btn-inverse btn-small disabled">Trim Audio</a>
+        </div>
+      </div>
+    </div>
     <div id=time-scale class="playlist-time-scale"></div>
     <div id=tracks class="playlist-tracks"></div>
-    <div id=bottom-bar class="playlist-bottom-bar"></div>
+    <div id=bottom-bar class="playlist-bottom-bar">
+      <form class="form-inline">
+        <select id="time_format">
+          <option value="seconds">seconds</option>
+          <option value="thousandths">thousandths</option>
+          <option value="hh:mm:ss">hh:mm:ss</option>
+          <option value="hh:mm:ss.uu">hh:mm:ss + hundredths</option>
+          <option value="hh:mm:ss.uuu">hh:mm:ss + milliseconds</option>
+        </select>
+        <input id="audio_start" type="text" class="input-small">
+        <input id="audio_end" type="text" class="input-small">
+        <input id="audio_pos" type="text" class="input-small">
+        <select id="audio_resolution">
+          <option>4000</option>
+          <option>5000</option>
+          <option>6000</option>
+          <option>7000</option>
+          <option>8000</option>
+          <option>9000</option>
+          <option>10000</option>
+          <option>11000</option>
+          <option>12000</option>
+          <option>15000</option>
+          <option>20000</option>
+        </select>
+      </form>
+    </div>
   </div>
 
 <script type="text/javascript">
 (function(){
-
-    var container = document.getElementById("playlist");
-
 
     var tracks = [
         //{
         //    src: "490.mp3"
         //},
 
-        {
-           src: "NothingElseMatters.m4a"
-        }
+        //{
+        //   src: "NothingElseMatters.m4a"
+        //},
 
         //{
         //   src: "Beautiful.m4a"
-        //}
-
-        //{
-        //    src: "Tangerine.wav"
         //},
+
+        {
+            src: "Tangerine.wav"
+        }
     
         //{
         //    src: "BreakOut.wav"
-        //},
+        //}
 
         //{
         //    src: "Panic.wav"
+        //},
+
+        //{
+        //    src: "WhiteQueen.mp3"
+        //},
+
+        //{
+        //    src: "versa.mp3"
         //}
     ];
 
@@ -241,13 +241,14 @@ body {
     ];
 */
 
-    var config = new Config(container, {
+    var config = new Config({
         resolution: 10000,
         mono: false,
         waveHeight: 80
     });
 
     var playlistEditor = new PlaylistEditor();
+    playlistEditor.setConfig(config);
     playlistEditor.init(tracks);
 
 })();

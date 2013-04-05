@@ -4,6 +4,10 @@ var PlaylistEditor = function() {
 
 };
 
+PlaylistEditor.prototype.setConfig = function(config) {
+    this.config = config;
+};
+
 PlaylistEditor.prototype.init = function(tracks) {
 
     var that = this,
@@ -17,26 +21,26 @@ PlaylistEditor.prototype.init = function(tracks) {
         toolBar,
         bottomBar;
 
-    this.config = new Config();
     this.storage = new Storage();
 
     this.trackContainer = div;
     this.trackEditors = [];
 
     toolBar = new ToolBar();
-    toolBar.init();
+    toolBar.init(this.config);
 
     timeScale = new TimeScale();
-    timeScale.init();
+    timeScale.init(this.config);
 
     bottomBar = new BottomBar();
-    bottomBar.init();
+    bottomBar.init(this.config);
 
     this.timeScale = timeScale;
     
     for (i = 0, len = tracks.length; i < len; i++) {
 
-        trackEditor = new TrackEditor(this);
+        trackEditor = new TrackEditor();
+        trackEditor.setConfig(this.config);
         trackElem = trackEditor.loadTrack(tracks[i]);
     
         this.trackEditors.push(trackEditor);

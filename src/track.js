@@ -26,17 +26,24 @@ TrackEditor.prototype.states = {
     }
 };
 
+TrackEditor.prototype.setConfig = function(config) {
+    this.config = config;
+};
+
+TrackEditor.prototype.setWidth = function(width) {
+    this.width = width;
+};
+
 TrackEditor.prototype.init = function(src, start, end, fades, cues) {
     var that = this;
 
-    this.config = new Config();
     this.container = document.createElement("div");
 
     this.drawer = new WaveformDrawer();
-    this.drawer.init(this.container);
+    this.drawer.init(this.container, this.config);
 
     this.playout = new AudioPlayout();
-    this.playout.init();
+    this.playout.init(this.config);
 
     this.sampleRate = this.config.getSampleRate();
     this.resolution = this.config.getResolution();
@@ -141,11 +148,19 @@ TrackEditor.prototype.drawTrack = function(buffer) {
 };
 
 TrackEditor.prototype.onTrackLoad = function(buffer) {
-   
+    var res;
+
     if (this.cues === undefined) {
         this.setCuePoints(0, buffer.length - 1);
     }
-    
+
+    if (this.width !== undefined) {
+        res = Math.ceil(buffer.length / this.width);
+
+        this.config.setResolution(res);
+        this.resolution = res;
+    }
+   
     this.drawTrack(buffer);
 };
 

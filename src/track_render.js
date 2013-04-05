@@ -4,11 +4,11 @@ var WaveformDrawer = function() {
 
 };
 
-WaveformDrawer.prototype.init = function(container) {
+WaveformDrawer.prototype.init = function(container, config) {
 
     var that = this;
 
-    this.config = new Config();
+    this.config = config;
     this.container = container;
     this.channels = []; //array of canvases, contexts, 1 for each channel displayed.
 };

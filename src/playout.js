@@ -4,11 +4,11 @@ var AudioPlayout = function() {
 
 };
 
-AudioPlayout.prototype.init = function() {
+AudioPlayout.prototype.init = function(config) {
 
     var that = this;
 
-    this.config = new Config();
+    this.config = config;
     this.ac = this.config.getAudioContext();
 
     this.fadeMaker = new Fades();

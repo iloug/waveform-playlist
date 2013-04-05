@@ -115,7 +115,7 @@ BottomBar.prototype.formatters = function(format) {
     return formats[format];
 };
 
-BottomBar.prototype.init = function() {
+BottomBar.prototype.init = function(config) {
     var that = this,
         id,
         event,
@@ -123,11 +123,7 @@ BottomBar.prototype.init = function() {
         tmpEl,
         func;
 
-    this.config = new Config();
-    
-    this.tmpl = document.getElementById("bottom-bar-tmpl");
-    this.el = document.getElementById("bottom-bar");
-    this.el.innerHTML = this.tmpl.innerHTML;
+    this.config = config;
 
     this.timeFormat = document.getElementById('time_format');
     this.audioStart = document.getElementById('audio_start');

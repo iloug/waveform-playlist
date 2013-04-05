@@ -4,7 +4,7 @@ var TimeScale = function() {
 
 };
 
-TimeScale.prototype.init = function() {
+TimeScale.prototype.init = function(config) {
 
     var that = this,
         canv = document.createElement("canvas");
@@ -12,7 +12,7 @@ TimeScale.prototype.init = function() {
     this.canv = canv;
     this.context = canv.getContext('2d');
     
-    this.config = new Config();
+    this.config = config;
 
     this.container = document.getElementById("time-scale"); //container for the main time scale.
 

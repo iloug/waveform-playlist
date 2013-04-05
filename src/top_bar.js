@@ -53,7 +53,7 @@ ToolBar.prototype.events = {
     }
 };
 
-ToolBar.prototype.init = function() {
+ToolBar.prototype.init = function(config) {
     var that = this,
         id,
         event,
@@ -62,12 +62,8 @@ ToolBar.prototype.init = function() {
         func,
         state;
 
-    this.config = new Config();
+    this.config = config;
     state = this.config.getState();
-
-    this.tmpl = document.getElementById("top-bar-tmpl");
-    this.el = document.getElementById("top-bar");
-    this.el.innerHTML = this.tmpl.innerHTML;
 
     document.getElementById("btn_"+state).className = this.classes["btn-state-active"];
 

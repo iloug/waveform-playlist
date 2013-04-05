@@ -3,20 +3,10 @@
     A container object (ex a div) must be passed in, the playlist will be built on this element.
 */
 
-var Config;
+var Config = function(params) {
 
-(function() {
-
-    var that,
-        defaultParams;
-
-    Config = function Config(container, params) {
-
-        if (that) {
-            return that;
-        }
-
-        that = this;
+        var that = this,
+            defaultParams;
 
         defaultParams = {
 
@@ -50,7 +40,6 @@ var Config;
             cursorPos: 0 //value is kept in seconds.
         };
 
-        params = params || {};
         params = Object.create(params);
         Object.keys(defaultParams).forEach(function(key) {
             if (!(key in params)) { 
@@ -69,10 +58,6 @@ var Config;
 
         that.getCursorPos = function getCursorPos() {
             return params.cursorPos;
-        };
-
-        that.getContainer = function getContainer() {
-            return container;
         };
 
         that.getState = function getState() {
@@ -158,7 +143,4 @@ var Config;
             scroll.left = left;
             scroll.top = top;
         };
-
-    };
-
-}());
+};
