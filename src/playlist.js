@@ -18,22 +18,18 @@ PlaylistEditor.prototype.init = function(tracks) {
         trackEditor,
         trackElem,
         timeScale,
-        toolBar,
-        bottomBar;
+        audioControls;
 
     this.storage = new Storage();
 
     this.trackContainer = div;
     this.trackEditors = [];
 
-    toolBar = new ToolBar();
-    toolBar.init(this.config);
+    audioControls = new AudioControls();
+    audioControls.init(this.config);
 
     timeScale = new TimeScale();
     timeScale.init(this.config);
-
-    bottomBar = new BottomBar();
-    bottomBar.init(this.config);
 
     this.timeScale = timeScale;
     
@@ -46,13 +42,13 @@ PlaylistEditor.prototype.init = function(tracks) {
         this.trackEditors.push(trackEditor);
         fragment.appendChild(trackElem);
 
-        toolBar.on("changestate", "onStateChange", trackEditor);
-        toolBar.on("trackedit", "onTrackEdit", trackEditor);
-        bottomBar.on("changeresolution", "onResolutionChange", trackEditor);
+        audioControls.on("changestate", "onStateChange", trackEditor);
+        audioControls.on("trackedit", "onTrackEdit", trackEditor);
+        audioControls.on("changeresolution", "onResolutionChange", trackEditor);
 
-        trackEditor.on("activateSelection", "onAudioSelection", toolBar);
-        trackEditor.on("deactivateSelection", "onAudioDeselection", toolBar);
-        trackEditor.on("changecursor", "onCursorSelection", bottomBar);
+        trackEditor.on("activateSelection", "onAudioSelection", audioControls);
+        trackEditor.on("deactivateSelection", "onAudioDeselection", audioControls);
+        trackEditor.on("changecursor", "onCursorSelection", audioControls);
         trackEditor.on("changecursor", "onSelectUpdate", this);
     }
 
@@ -68,19 +64,19 @@ PlaylistEditor.prototype.init = function(tracks) {
     this.interval;
 
     this.on("trackscroll", "onTrackScroll", timeScale);
-    this.on("playbackcursor", "onAudioUpdate", bottomBar);
+    this.on("playbackcursor", "onAudioUpdate", audioControls);
 
-    toolBar.on("playlistsave", "save", this);
-    toolBar.on("playlistrestore", "restore", this);
-    toolBar.on("rewindaudio", "rewind", this);
-    toolBar.on("playaudio", "play", this);
-    toolBar.on("stopaudio", "stop", this);
-    toolBar.on("trimaudio", "onTrimAudio", this);
-    toolBar.on("removeaudio", "onRemoveAudio", this);
-    toolBar.on("changestate", "onStateChange", this);
+    audioControls.on("playlistsave", "save", this);
+    audioControls.on("playlistrestore", "restore", this);
+    audioControls.on("rewindaudio", "rewind", this);
+    audioControls.on("playaudio", "play", this);
+    audioControls.on("stopaudio", "stop", this);
+    audioControls.on("trimaudio", "onTrimAudio", this);
+    audioControls.on("removeaudio", "onRemoveAudio", this);
+    audioControls.on("changestate", "onStateChange", this);
 
-    bottomBar.on("changeresolution", "onResolutionChange", timeScale);
-    bottomBar.on("changeselection", "onSelectionChange", this);  
+    audioControls.on("changeresolution", "onResolutionChange", timeScale);
+    audioControls.on("changeselection", "onSelectionChange", this);  
 };
 
 PlaylistEditor.prototype.onTrimAudio = function() {
