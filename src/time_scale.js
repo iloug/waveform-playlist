@@ -7,14 +7,20 @@ var TimeScale = function() {
 TimeScale.prototype.init = function(config) {
 
     var that = this,
-        canv = document.createElement("canvas");
+        canv,
+        div;
 
+    div = document.getElementsByClassName("playlist-time-scale")[0];
+
+    if (div === undefined) {
+        return;
+    }
+    
+    canv = document.createElement("canvas");
     this.canv = canv;
     this.context = canv.getContext('2d');
-    
     this.config = config;
-
-    this.container = document.getElementById("time-scale"); //container for the main time scale.
+    this.container = div; //container for the main time scale.
 
     //TODO check for window resizes to set these.
     this.width = this.container.clientWidth;

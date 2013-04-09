@@ -129,20 +129,20 @@ body {
     <div id=top-bar class="playlist-top-bar">
       <div class="btn-toolbar">
         <div class="btn-group">
-          <a id="btn_open" class="btn btn-inverse btn-small"><i class="icon-folder-open icon-white"></i></a>
-          <a id="btn_save" class="btn btn-inverse btn-small "><i class="icon-ok icon-white"></i></a>
+          <a class="btn_open btn btn-inverse btn-small"><i class="icon-folder-open icon-white"></i></a>
+          <a class="btn_save btn btn-inverse btn-small "><i class="icon-ok icon-white"></i></a>
         </div>
         <div class="btn-group">
-          <a id="btn_rewind" class="btn btn-success"><i class="icon-fast-backward icon-white"></i></a>
-          <a id="btn_play" class="btn btn-success"><i class="icon-play icon-white"></i></a>
-          <a id="btn_pause" class="btn btn-warning"><i class="icon-pause icon-white"></i></a>
-          <a id="btn_stop" class="btn btn-danger"><i class="icon-stop icon-white"></i></a>
+          <a class="btn_rewind btn btn-success"><i class="icon-fast-backward icon-white"></i></a>
+          <a class="btn_play btn btn-success"><i class="icon-play icon-white"></i></a>
+          <a class="btn_pause btn btn-warning"><i class="icon-pause icon-white"></i></a>
+          <a class="btn_stop btn btn-danger"><i class="icon-stop icon-white"></i></a>
         </div>
         <div class="btn-group">
-          <a id="btn_select" class="btn btn-mini" data-state="select"><i class="icon-italic"></i></a>
-          <a id="btn_shift" class="btn btn-mini" data-state="shift"><i class="icon-resize-horizontal"></i></a>
+          <a class="btn_select btn btn-mini" data-state="select"><i class="icon-italic"></i></a>
+          <a class="btn_shift btn btn-mini" data-state="shift"><i class="icon-resize-horizontal"></i></a>
         </div>
-        <div id="btns_fade" class="btn-group">
+        <div class="btns_fade btn-group">
           <div class="btn-group fade-in">
             <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="linear">Linear</a>
             <a class="btn btn-mini disabled" data-type="FadeIn" data-shape="logarithmic">Logarithmic</a>
@@ -156,26 +156,26 @@ body {
             <a class="btn btn-mini disabled" data-type="FadeOut" data-shape="exponential">Exponential</a>
           </div>
         </div>
-        <div id="btns_audio_tools" class="btn-group">
-          <a id="btn_trim_audio" class="btn btn-inverse btn-small disabled">Trim Audio</a>
+        <div class="btn-group">
+          <a class="btn_trim_audio btn btn-inverse btn-small disabled">Trim Audio</a>
         </div>
       </div>
     </div>
-    <div id=time-scale class="playlist-time-scale"></div>
-    <div id=tracks class="playlist-tracks"></div>
-    <div id=bottom-bar class="playlist-bottom-bar">
+    <div class="playlist-time-scale"></div>
+    <div class="playlist-tracks"></div>
+    <div class="playlist-bottom-bar">
       <form class="form-inline">
-        <select id="time_format">
+        <select class="time_format">
           <option value="seconds">seconds</option>
           <option value="thousandths">thousandths</option>
           <option value="hh:mm:ss">hh:mm:ss</option>
           <option value="hh:mm:ss.uu">hh:mm:ss + hundredths</option>
           <option value="hh:mm:ss.uuu">hh:mm:ss + milliseconds</option>
         </select>
-        <input id="audio_start" type="text" class="input-small">
-        <input id="audio_end" type="text" class="input-small">
-        <input id="audio_pos" type="text" class="input-small">
-        <select id="audio_resolution">
+        <input type="text" class="audio_start input-small">
+        <input type="text" class="audio_end input-small">
+        <input type="text" class="audio_pos input-small">
+        <select class="audio_resolution">
           <option>4000</option>
           <option>5000</option>
           <option>6000</option>
@@ -240,15 +240,18 @@ body {
     ];
 */
 
+    var container = document.getElementById("playlist");
+
     var config = new Config({
         resolution: 10000,
         mono: false,
-        waveHeight: 80
-    });
+        waveHeight: 80,
+        container: container
+    });  
 
     var playlistEditor = new PlaylistEditor();
     playlistEditor.setConfig(config);
-    playlistEditor.init(tracks);
+    playlistEditor.init(tracks, container);
 
 })();
 </script>

@@ -13,7 +13,8 @@ PlaylistEditor.prototype.init = function(tracks) {
     var that = this,
         i,
         len,
-        div = document.getElementById("tracks"),
+        container = this.config.getContainer(),
+        div = container.getElementsByClassName("playlist-tracks")[0],
         fragment = document.createDocumentFragment(),
         trackEditor,
         trackElem,
@@ -113,9 +114,8 @@ PlaylistEditor.prototype.onSelectionChange = function(args) {
         start = ~~(args.start * this.sampleRate / res),
         end = ~~(args.end * this.sampleRate / res);
 
-    this.config.setCursorPos(start);
+    this.config.setCursorPos(args.start);
     this.activeTrack.setSelectedArea(start, end);
-    this.activeTrack.updateEditor(-1);
     this.activeTrack.updateEditor(-1, start, end, true);
 };
 

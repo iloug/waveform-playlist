@@ -186,36 +186,45 @@ AudioControls.prototype.cueFormatters = function(format) {
 
 AudioControls.prototype.init = function(config) {
     var that = this,
-        id,
+        className,
         event,
         events = this.events,
         tmpEl,
         func,
-        state;
+        state,
+        container,
+        tmpBtn;
 
     this.ctrls = {};
     this.config = config;
+    container = this.config.getContainer();
     state = this.config.getState();
 
-    document.getElementById("btn_"+state).className = this.classes["btn-state-active"];
+    tmpBtn = document.getElementById("btn_"+state);
 
-    for (id in events) {
+    if (tmpBtn) {
+        tmpBtn.className = this.classes["btn-state-active"];
+    }
+
+    for (className in events) {
     
-        tmpEl = document.getElementById(id);
-        this.ctrls[id] = tmpEl;
+        tmpEl = container.getElementsByClassName(className)[0];
+        this.ctrls[className] = tmpEl;
 
-        for (event in events[id]) {
+        for (event in events[className]) {
 
-            func = that[events[id][event]].bind(that);
-            tmpEl.addEventListener(event, func);
+            if (tmpEl) {
+                func = that[events[className][event]].bind(that);
+                tmpEl.addEventListener(event, func);
+            }
         }
     } 
 
-    if (this.ctrls["time_format"] !== undefined) {
+    if (this.ctrls["time_format"]) {
         this.ctrls["time_format"].value = this.config.getTimeFormat();
     }
 
-    if (this.ctrls["audio_resolution"] !== undefined) {
+    if (this.ctrls["audio_resolution"]) {
         this.ctrls["audio_resolution"].value = this.config.getResolution();
     }
 
@@ -243,11 +252,11 @@ AudioControls.prototype.changeTimeFormat = function(e) {
         start = this.currentSelectionValues.start;
         end = this.currentSelectionValues.end;
 
-        if (this.ctrls["audio_start"] !== undefined) {
+        if (this.ctrls["audio_start"]) {
             this.ctrls["audio_start"].value = func(start);
         }
 
-        if (this.ctrls["audio_end"] !== undefined) {
+        if (this.ctrls["audio_end"]) {
             this.ctrls["audio_end"].value = func(end);
         }
     }
@@ -302,9 +311,15 @@ AudioControls.prototype.validateCueOut = function(e) {
 
 AudioControls.prototype.activateButtonGroup = function(id) {
     var el = document.getElementById(id),
-        btns = el.getElementsByTagName("a"),
+        btns,
         classes = this.classes,
         i, len;
+
+    if (el === null) {
+        return;
+    }
+
+    btns = el.getElementsByTagName("a");
 
     for (i = 0, len = btns.length; i < len; i++) {
         btns[i].classList.remove(classes["disabled"]);
@@ -313,9 +328,15 @@ AudioControls.prototype.activateButtonGroup = function(id) {
 
 AudioControls.prototype.deactivateButtonGroup = function(id) {
     var el = document.getElementById(id),
-        btns = el.getElementsByTagName("a"),
+        btns,
         classes = this.classes,
         i, len;
+
+    if (el === null) {
+        return;
+    }
+
+    btns = el.getElementsByTagName("a");
 
     for (i = 0, len = btns.length; i < len; i++) {
         btns[i].classList.add(classes["disabled"]);
@@ -477,11 +498,11 @@ AudioControls.prototype.onCursorSelection = function(args) {
         end:end
     };
 
-    if (this.ctrls["audio_start"] !== undefined) {
+    if (this.ctrls["audio_start"]) {
         this.ctrls["audio_start"].value = startFormat;
     }
 
-    if (this.ctrls["audio_end"] !== undefined) {
+    if (this.ctrls["audio_end"]) {
         this.ctrls["audio_end"].value = endFormat;
     }
 };
@@ -490,7 +511,7 @@ AudioControls.prototype.onCursorSelection = function(args) {
     args {seconds, pixels}
 */
 AudioControls.prototype.onAudioUpdate = function(args) {
-    if (this.ctrls["audio_pos"] !== undefined) {
+    if (this.ctrls["audio_pos"]) {
         this.ctrls["audio_pos"].value = this.cueFormatters(this.timeFormat)(args.seconds);
     } 
 };

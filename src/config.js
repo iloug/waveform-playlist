@@ -52,6 +52,10 @@ var Config = function(params) {
             Start of all getter methods for config.
         */
 
+        that.getContainer = function getContainer() {
+            return params.container;
+        };
+
         that.isDisplayMono = function isDisplayMono() {
             return params.mono;
         };
