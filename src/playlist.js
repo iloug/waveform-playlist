@@ -116,7 +116,7 @@ PlaylistEditor.prototype.onSelectionChange = function(args) {
 
     this.config.setCursorPos(args.start);
     this.activeTrack.setSelectedArea(start, end);
-    this.activeTrack.updateEditor(-1, start, end, true);
+    this.activeTrack.updateEditor(-1, undefined, undefined, true);
 };
 
 PlaylistEditor.prototype.onStateChange = function() {
