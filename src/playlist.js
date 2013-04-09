@@ -31,8 +31,12 @@ PlaylistEditor.prototype.init = function(tracks) {
     audioControls = new AudioControls();
     audioControls.init(this.config);
 
-    timeScale = new TimeScale();
-    timeScale.init(this.config);
+    if (this.config.isTimeScaleEnabled()) {
+        timeScale = new TimeScale();
+        timeScale.init(this.config);
+        audioControls.on("changeresolution", "onResolutionChange", timeScale);
+        this.on("trackscroll", "onTrackScroll", timeScale);
+    }
 
     this.timeScale = timeScale;
     
@@ -66,7 +70,6 @@ PlaylistEditor.prototype.init = function(tracks) {
     //for setInterval that's toggled during play/stop.
     this.interval;
 
-    this.on("trackscroll", "onTrackScroll", timeScale);
     this.on("playbackcursor", "onAudioUpdate", audioControls);
 
     audioControls.on("playlistsave", "save", this);
@@ -77,8 +80,6 @@ PlaylistEditor.prototype.init = function(tracks) {
     audioControls.on("trimaudio", "onTrimAudio", this);
     audioControls.on("removeaudio", "onRemoveAudio", this);
     audioControls.on("changestate", "onStateChange", this);
-
-    audioControls.on("changeresolution", "onResolutionChange", timeScale);
     audioControls.on("changeselection", "onSelectionChange", this);  
 };
 
