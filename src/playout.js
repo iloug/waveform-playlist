@@ -6,7 +6,7 @@ var AudioPlayout = function() {
 
 AudioPlayout.prototype.init = function(config) {
 
-    var that = this;
+    makePublisher(this);
 
     this.config = config;
     this.ac = this.config.getAudioContext();
@@ -158,6 +158,4 @@ AudioPlayout.prototype.stop = function(when) {
  
     this.source && this.source.stop(when || 0);
 };
-
-makePublisher(AudioPlayout.prototype);
 

@@ -10,6 +10,8 @@ TimeScale.prototype.init = function(config) {
         canv,
         div;
 
+    makePublisher(this);
+
     div = document.getElementsByClassName("playlist-time-scale")[0];
 
     if (div === undefined) {
@@ -147,4 +149,3 @@ TimeScale.prototype.onResolutionChange = function() {
     this.drawScale(scrollX);
 };
 
-makePublisher(TimeScale.prototype);

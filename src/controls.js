@@ -195,6 +195,8 @@ AudioControls.prototype.init = function(config) {
         container,
         tmpBtn;
 
+    makePublisher(this);
+
     this.ctrls = {};
     this.config = config;
     container = this.config.getContainer();
@@ -516,4 +518,3 @@ AudioControls.prototype.onAudioUpdate = function(args) {
     } 
 };
 
-makePublisher(AudioControls.prototype);

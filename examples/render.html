@@ -246,12 +246,13 @@ body {
         resolution: 10000,
         mono: false,
         waveHeight: 80,
-        container: container
+        container: container,
+        timescale: false
     });  
 
     var playlistEditor = new PlaylistEditor();
     playlistEditor.setConfig(config);
-    playlistEditor.init(tracks, container);
+    playlistEditor.init(tracks);
 
 })();
 </script>

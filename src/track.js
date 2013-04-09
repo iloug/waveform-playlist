@@ -35,7 +35,8 @@ TrackEditor.prototype.setWidth = function(width) {
 };
 
 TrackEditor.prototype.init = function(src, start, end, fades, cues) {
-    var that = this;
+   
+    makePublisher(this);
 
     this.container = document.createElement("div");
 
@@ -677,6 +678,4 @@ TrackEditor.prototype.getTrackDetails = function() {
 
     return d;
 };
-
-makePublisher(TrackEditor.prototype);
 

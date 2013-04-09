@@ -16,6 +16,8 @@ var Config = function(params) {
             timeFormat: 'hh:mm:ss.uuu',
             mono: true, //whether to draw multiple channels or combine them.
 
+            timescale: false, //whether or not to include the time measure.
+
             waveColor: 'grey',
             progressColor: 'orange',
             loadingColor: 'purple',
@@ -54,6 +56,10 @@ var Config = function(params) {
 
         that.getContainer = function getContainer() {
             return params.container;
+        };
+
+        that.isTimeScaleEnabled = function isTimeScaleEnabled() {
+            return params.timescale;
         };
 
         that.isDisplayMono = function isDisplayMono() {

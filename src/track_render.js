@@ -6,7 +6,7 @@ var WaveformDrawer = function() {
 
 WaveformDrawer.prototype.init = function(container, config) {
 
-    var that = this;
+    makePublisher(this);
 
     this.config = config;
     this.container = container;
@@ -401,6 +401,4 @@ WaveformDrawer.prototype.drawFades = function(fades) {
         }
     }
 };
-
-makePublisher(WaveformDrawer.prototype);
 

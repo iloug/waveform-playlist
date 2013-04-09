@@ -21,6 +21,8 @@ PlaylistEditor.prototype.init = function(tracks) {
         timeScale,
         audioControls;
 
+    makePublisher(this);
+
     this.storage = new Storage();
 
     this.trackContainer = div;
@@ -322,6 +324,4 @@ PlaylistEditor.prototype.restore = function() {
     this.trackContainer.innerHTML='';
     this.init(state);
 };
-
-makePublisher(PlaylistEditor.prototype);
 
