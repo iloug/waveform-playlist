@@ -11,11 +11,35 @@ WaveformDrawer.prototype.init = function(container, config) {
     this.config = config;
     this.container = container;
     this.channels = []; //array of canvases, contexts, 1 for each channel displayed.
+
+    var theme = this.config.getUITheme();
+
+    if (this.loaderStates[theme] !== undefined) {
+        this.loaderStates = this.loaderStates[theme];
+    }
+    else {
+        this.loaderStates = this.loaderStates["default"];
+    }
 };
 
 WaveformDrawer.prototype.loaderStates = {
-    "downloading": "progress progress-warning",
-    "decoding": "progress progress-success progress-striped active"
+    "bootstrap": {
+        "downloading": "progress progress-warning",
+        "decoding": "progress progress-success progress-striped active",
+        "loader": "bar"
+    },
+    
+    "jQueryUI": {
+        "downloading": "ui-progressbar ui-widget ui-widget-content ui-corner-all",
+        "decoding": "ui-progressbar ui-widget ui-widget-content ui-corner-all",
+        "loader": "ui-progressbar-value ui-widget-header ui-corner-left"
+    },
+
+    "default": {
+        "downloading": "progress",
+        "decoding": "decoding",
+        "loader": "bar"
+    }
 };
 
 WaveformDrawer.prototype.getPeaks = function(buffer, cues) {
@@ -104,9 +128,11 @@ WaveformDrawer.prototype.drawLoading = function() {
     this.height = this.config.getWaveHeight();
 
     div = document.createElement("div");
+    div.style.height = this.height+"px";
     
     loader = document.createElement("div");
-    loader.classList.add("bar");
+    loader.style.height = "10px";
+    loader.className = this.loaderStates["loader"];
 
     div.appendChild(loader);
 

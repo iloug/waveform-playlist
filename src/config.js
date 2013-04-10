@@ -18,6 +18,8 @@ var Config = function(params) {
 
             timescale: false, //whether or not to include the time measure.
 
+            UITheme: "default", // bootstrap || jQueryUI || default
+
             waveColor: 'grey',
             progressColor: 'orange',
             loadingColor: 'purple',
@@ -64,6 +66,10 @@ var Config = function(params) {
 
         that.isDisplayMono = function isDisplayMono() {
             return params.mono;
+        };
+
+        that.getUITheme = function getUITheme() {
+            return params.UITheme;
         };
 
         that.getCursorPos = function getCursorPos() {

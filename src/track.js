@@ -207,7 +207,6 @@ TrackEditor.prototype.deactivate = function() {
 
 /* start of state methods */
 
-//TODO modify this to work with scrolls.
 TrackEditor.prototype.timeShift = function(e) {
     var el = e.currentTarget, //want the events placed on the channel wrapper.
         startX = e.pageX, 
@@ -230,7 +229,7 @@ TrackEditor.prototype.timeShift = function(e) {
         editor.drawer.setTimeShift(updatedX);
         editor.leftOffset = editor.pixelsToSamples(updatedX);
     };
-    document.body.onmouseup = function() {
+    el.onmouseup = function() {
         var delta;
 
         el.onmousemove = document.body.onmouseup = null;
@@ -394,7 +393,7 @@ TrackEditor.prototype.selectStart = function(e) {
         editor.notifySelectUpdate(startTime, endTime);
         prevX = currentX;
     };
-    document.body.onmouseup = function(e) {
+    el.onmouseup = function(e) {
         var endX = scrollX + (e.layerX || e.offsetX),
             minX, maxX,
             cursorPos,
