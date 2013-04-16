@@ -349,10 +349,12 @@ TrackEditor.prototype.deactivateAudioSelection = function() {
 TrackEditor.prototype.selectStart = function(e) {
     var el = e.currentTarget, //want the events placed on the channel wrapper.
         editor = this,
-        scroll = this.config.getTrackScroll(),
-        scrollX = scroll.left,
-        startX = scrollX + (e.layerX || e.offsetX), //relative to e.target (want the canvas).
-        prevX = scrollX + (e.layerX || e.offsetX),
+        //scroll = this.config.getTrackScroll(),
+        //scrollX = scroll.left,
+        //startX = scrollX + (e.layerX || e.offsetX), //relative to e.target (want the canvas).
+        //prevX = scrollX + (e.layerX || e.offsetX),
+        startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
+        prevX = e.layerX || e.offsetX,
         offset = this.leftOffset,
         startTime;
 
@@ -368,7 +370,8 @@ TrackEditor.prototype.selectStart = function(e) {
 
     //dynamically put an event on the element.
     el.onmousemove = function(e) {
-        var currentX = scrollX + (e.layerX || e.offsetX),
+        var currentX = e.layerX || e.offsetX,
+            //currentX = scrollX + (e.layerX || e.offsetX),
             delta = currentX - prevX,
             minX = Math.min(prevX, currentX, startX),
             maxX = Math.max(prevX, currentX, startX),
@@ -394,7 +397,8 @@ TrackEditor.prototype.selectStart = function(e) {
         prevX = currentX;
     };
     el.onmouseup = function(e) {
-        var endX = scrollX + (e.layerX || e.offsetX),
+        var endX = e.layerX || e.offsetX,
+            //endX = scrollX + (e.layerX || e.offsetX),
             minX, maxX,
             cursorPos,
             startTime, endTime;
