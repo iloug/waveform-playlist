@@ -238,7 +238,7 @@ TrackEditor.prototype.timeShift = function(e) {
         scroll = this.config.getTrackScroll(),
         scrollX = scroll.left;
 
-    origX = editor.leftOffset/res;
+    origX = editor.leftOffset / res;
     
     //dynamically put an event on the element.
     el.onmousemove = function(e) {
@@ -252,7 +252,7 @@ TrackEditor.prototype.timeShift = function(e) {
     el.onmouseup = function() {
         var delta;
 
-        el.onmousemove = document.body.onmouseup = null;
+        el.onmousemove = el.onmouseup = null;
         editor.leftOffset = editor.pixelsToSamples(updatedX);
         delta = editor.pixelsToSeconds(diffX);
 
