@@ -437,7 +437,7 @@ TrackEditor.prototype.selectStart = function(e) {
         minX = editor.samplesToPixels(offset + editor.selectedArea.start);
         maxX = editor.samplesToPixels(offset + editor.selectedArea.end);
 
-        el.onmousemove = document.body.onmouseup = null;
+        el.onmousemove = el.onmouseup = null;
         
         //if more than one pixel is selected, listen to possible fade events.
         if (Math.abs(minX - maxX)) {
