@@ -36,6 +36,15 @@ AudioControls.prototype.events = {
         click: "changeState"
     },
 
+    "btn_fadein": {
+        click: "changeState"
+    },
+
+    "btn_fadeout": {
+        click: "changeState"
+    },
+
+
     "btns_fade": {
         click: "createFade"
     },
@@ -400,15 +409,25 @@ AudioControls.prototype.stopAudio = function() {
 
 AudioControls.prototype.activateButton = function(el) {
     if (el) {
-        el.classList.remove(this.classes["disabled"]);
         el.classList.add(this.classes["active"]);
+    }
+};
+
+AudioControls.prototype.deactivateButton = function(el) {
+    if (el) {
+        el.classList.remove(this.classes["active"]);
+    }
+};
+
+AudioControls.prototype.enableButton = function(el) {
+    if (el) {
+        el.classList.remove(this.classes["disabled"]);
     }
 };
 
 AudioControls.prototype.disableButton = function(el) {
     if (el) {
         el.classList.add(this.classes["disabled"]);
-        el.classList.remove(this.classes["active"]);
     }
 };
 
@@ -417,7 +436,7 @@ AudioControls.prototype.changeState = function(e) {
         prevEl = el.parentElement.getElementsByClassName('active')[0],
         state = el.dataset.state;
 
-    this.disableButton(prevEl);
+    this.deactivateButton(prevEl);
     this.activateButton(el);
 
     this.config.setState(state);
