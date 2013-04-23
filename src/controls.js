@@ -28,6 +28,10 @@ AudioControls.prototype.events = {
         click: "stopAudio"
     },
 
+    "btn_cursor": {
+        click: "changeState"
+    },
+
     "btn_select": {
         click: "changeState"
     },

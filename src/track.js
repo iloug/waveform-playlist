@@ -5,6 +5,16 @@ var TrackEditor = function() {
 };
 
 TrackEditor.prototype.states = {
+    cursor: {
+        events: {
+            mousedown: "selectCursorPos"
+        },
+
+        classes: [
+            "state-select"
+        ]
+    },
+
     select: {
         events: {
             mousedown: "selectStart"
@@ -424,9 +434,7 @@ TrackEditor.prototype.selectStart = function(e) {
     };
     el.onmouseup = function(e) {
         var endX = e.layerX || e.offsetX,
-            //endX = scrollX + (e.layerX || e.offsetX),
             minX, maxX,
-            cursorPos,
             startTime, endTime;
 
         minX = Math.min(startX, endX);
@@ -447,13 +455,35 @@ TrackEditor.prototype.selectStart = function(e) {
             editor.deactivateAudioSelection();
         }
 
-        cursorPos = startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
+        startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
         endTime = editor.samplesToSeconds(offset + editor.selectedArea.end);
 
         editor.updateEditor(-1, undefined, undefined, true);
-        editor.config.setCursorPos(cursorPos);
+        editor.config.setCursorPos(startTime);
         editor.notifySelectUpdate(startTime, endTime);    
     };
+};
+
+TrackEditor.prototype.selectCursorPos = function(e) {
+    var editor = this,
+        startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
+        offset = this.leftOffset,
+        startTime, 
+        endTime;
+
+    if (e.target.tagName !== "CANVAS") {
+        return;
+    }
+
+    editor.setSelectedArea(startX, startX);
+    startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
+    endTime = editor.samplesToSeconds(offset + editor.selectedArea.end);
+
+    editor.updateEditor(-1, undefined, undefined, true);
+    editor.config.setCursorPos(startTime);
+    editor.notifySelectUpdate(startTime, endTime);
+
+    editor.deactivateAudioSelection();
 };
 
 TrackEditor.prototype.selectFadeIn = function(e) {
