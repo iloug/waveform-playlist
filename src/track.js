@@ -394,21 +394,40 @@ TrackEditor.prototype.deactivateAudioSelection = function() {
     this.fire("deactivateSelection");
 };
 
+TrackEditor.prototype.findLayerOffset = function(e) {
+    var layerOffset = 0,
+        parent;
+
+    if (e.target.tagName !== "CANVAS") {
+        layerOffset = -1;
+    }
+    else {
+        //have to check if a fade canvas was selected. (Must add left offset)
+        parent = e.target.parentNode;
+
+        if (parent.classList.contains('playlist-fade')) {
+            layerOffset = parent.offsetLeft;
+        }
+    }
+
+    return layerOffset;
+};
+
 TrackEditor.prototype.selectStart = function(e) {
     var el = e.currentTarget, //want the events placed on the channel wrapper.
         editor = this,
-        //scroll = this.config.getTrackScroll(),
-        //scrollX = scroll.left,
-        //startX = scrollX + (e.layerX || e.offsetX), //relative to e.target (want the canvas).
-        //prevX = scrollX + (e.layerX || e.offsetX),
         startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
         prevX = e.layerX || e.offsetX,
         offset = this.leftOffset,
-        startTime;
+        startTime,
+        layerOffset;
 
-    if (e.target.tagName !== "CANVAS") {
+    layerOffset = this.findLayerOffset(e);
+    if (layerOffset < 0) {
         return;
     }
+    startX = startX + layerOffset;
+    prevX = prevX + layerOffset;
 
     editor.setSelectedArea(startX, startX);
     startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
@@ -418,8 +437,7 @@ TrackEditor.prototype.selectStart = function(e) {
 
     //dynamically put an event on the element.
     el.onmousemove = function(e) {
-        var currentX = e.layerX || e.offsetX,
-            //currentX = scrollX + (e.layerX || e.offsetX),
+        var currentX = layerOffset + (e.layerX || e.offsetX),
             delta = currentX - prevX,
             minX = Math.min(prevX, currentX, startX),
             maxX = Math.max(prevX, currentX, startX),
@@ -445,7 +463,7 @@ TrackEditor.prototype.selectStart = function(e) {
         prevX = currentX;
     };
     el.onmouseup = function(e) {
-        var endX = e.layerX || e.offsetX,
+        var endX = layerOffset + (e.layerX || e.offsetX),
             minX, maxX,
             startTime, endTime;
 
@@ -481,11 +499,14 @@ TrackEditor.prototype.selectCursorPos = function(e) {
         startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
         offset = this.leftOffset,
         startTime, 
-        endTime;
+        endTime,
+        layerOffset;
 
-    if (e.target.tagName !== "CANVAS") {
+    layerOffset = this.findLayerOffset(e);
+    if (layerOffset < 0) {
         return;
     }
+    startX = startX + layerOffset;
 
     editor.setSelectedArea(startX, startX);
     startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
@@ -503,11 +524,14 @@ TrackEditor.prototype.selectFadeIn = function(e) {
         startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
         offset = this.leftOffset,
         startTime, 
-        endTime;
+        endTime,
+        layerOffset;
 
-    if (e.target.tagName !== "CANVAS") {
+    layerOffset = this.findLayerOffset(e);
+    if (layerOffset < 0) {
         return;
     }
+    startX = startX + layerOffset;
 
     editor.setSelectedArea(undefined, startX);
     startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
@@ -524,11 +548,14 @@ TrackEditor.prototype.selectFadeOut = function(e) {
         startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
         offset = this.leftOffset,
         startTime,
-        endTime;
+        endTime,
+        layerOffset;
 
-    if (e.target.tagName !== "CANVAS") {
+    layerOffset = this.findLayerOffset(e);
+    if (layerOffset < 0) {
         return;
     }
+    startX = startX + layerOffset;
 
     editor.setSelectedArea(startX, undefined);
     startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
