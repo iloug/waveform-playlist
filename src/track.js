@@ -102,10 +102,6 @@ TrackEditor.prototype.init = function(src, start, end, fades, cues, moveable) {
     this.container.classList.add("channel-wrapper");
     this.container.style.left = this.leftOffset;
 
-    if (this.canShift === false) {
-        this.container.style.position = "static";
-    }
-
     this.drawer.drawLoading();
 
     return this.container;
@@ -238,7 +234,8 @@ TrackEditor.prototype.deactivate = function() {
     this.active = false;
     this.selectedArea = undefined;
     this.container.classList.remove("active");
-    this.drawer.draw(-1, this.getPixelOffset());
+    //this.drawer.draw(-1, this.getPixelOffset());
+    this.updateEditor(-1, undefined, undefined, true);
 };
 
 /* start of state methods */
@@ -313,13 +310,18 @@ TrackEditor.prototype.getSelectedArea = function() {
 };
 
 /*
-    start, end in samples.
+    start, end in samples. (relative to cuein/cueout)
 */
 TrackEditor.prototype.adjustSelectedArea = function(start, end) {
-    var buffer = this.getBuffer();
+    var buffer = this.getBuffer(),
+        cues = this.cues;
 
-    if (start < 0) {
+    if (start === undefined || start < 0) {
         start = 0;
+    }
+
+    if (end === undefined) {
+        end = cues.cueout - cues.cuein;
     }
 
     if (end > buffer.length - 1) {
@@ -375,8 +377,8 @@ TrackEditor.prototype.setSelectedArea = function(start, end, shiftKey) {
         right = end;
     }
 
-    sampLeft = left === undefined ? 0 : this.pixelsToSamples(left);
-    sampRight = right === undefined ? buffer.length - 1 : this.pixelsToSamples(right);
+    sampLeft = left === undefined ? undefined : this.pixelsToSamples(left);
+    sampRight = right === undefined ? undefined : this.pixelsToSamples(right);
 
     this.prevSelectedArea = this.selectedArea;
     this.selectedArea = this.adjustSelectedArea(sampLeft, sampRight);
