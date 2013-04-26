@@ -530,12 +530,10 @@ TrackEditor.prototype.selectCursorPos = function(e) {
 };
 
 TrackEditor.prototype.selectFadeIn = function(e) {
-    var editor = this,
-        startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
-        offset = this.leftOffset,
-        startTime, 
-        endTime,
-        layerOffset;
+    var startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
+        layerOffset,
+        FADETYPE = "FadeIn",
+        shape = this.config.getFadeType();
 
     layerOffset = this.findLayerOffset(e);
     if (layerOffset < 0) {
@@ -543,23 +541,16 @@ TrackEditor.prototype.selectFadeIn = function(e) {
     }
     startX = startX + layerOffset;
 
-    editor.setSelectedArea(undefined, startX);
-    startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
-    endTime = editor.samplesToSeconds(offset + editor.selectedArea.end);
-
-    editor.updateEditor(-1, undefined, undefined, true);
-    editor.notifySelectUpdate(startTime, endTime);
-
-    editor.activateAudioSelection();
+    this.setSelectedArea(undefined, startX);
+    this.removeFadeType(FADETYPE);
+    this.createFade(FADETYPE, shape);
 };
 
 TrackEditor.prototype.selectFadeOut = function(e) {
-    var editor = this,
-        startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
-        offset = this.leftOffset,
-        startTime,
-        endTime,
-        layerOffset;
+    var startX = e.layerX || e.offsetX, //relative to e.target (want the canvas).
+        layerOffset,
+        FADETYPE = "FadeOut",
+        shape = this.config.getFadeType();
 
     layerOffset = this.findLayerOffset(e);
     if (layerOffset < 0) {
@@ -567,14 +558,9 @@ TrackEditor.prototype.selectFadeOut = function(e) {
     }
     startX = startX + layerOffset;
 
-    editor.setSelectedArea(startX, undefined);
-    startTime = editor.samplesToSeconds(offset + editor.selectedArea.start);
-    endTime = editor.samplesToSeconds(offset + editor.selectedArea.end);
-
-    editor.updateEditor(-1, undefined, undefined, true);
-    editor.notifySelectUpdate(startTime, endTime);
-
-    editor.activateAudioSelection();
+    this.setSelectedArea(startX, undefined);
+    this.removeFadeType(FADETYPE);
+    this.createFade(FADETYPE, shape);
 };
 
 /* end of state methods */
@@ -594,6 +580,21 @@ TrackEditor.prototype.saveFade = function(id, type, shape, start, end) {
 TrackEditor.prototype.removeFade = function(id) {
 
     delete this.fades[id];
+    this.drawer.removeFade(id);
+};
+
+TrackEditor.prototype.removeFadeType = function(type) {
+    var id,
+        fades = this.fades,
+        fade;
+
+    for (id in fades) {
+        fade = fades[id];
+
+        if (fade.type === type) {
+            this.removeFade(id);
+        }
+    }
 };
 
 /*
@@ -645,9 +646,8 @@ TrackEditor.prototype.onTrackEdit = function(event) {
     }
 };
 
-TrackEditor.prototype.onCreateFade = function(args) {
+TrackEditor.prototype.createFade = function(type, shape) {
     var selected = this.selectedArea,
-        pixelOffset = this.getPixelOffset(),
         start = this.samplesToPixels(selected.start),
         end = this.samplesToPixels(selected.end),
         startTime = this.samplesToSeconds(selected.start),
@@ -655,10 +655,13 @@ TrackEditor.prototype.onCreateFade = function(args) {
         id = this.getFadeId();
 
     this.resetCursor();
-    this.saveFade(id, args.type, args.shape, startTime, endTime);
-    this.drawer.draw(-1, pixelOffset);
-    this.drawer.drawFade(id, args.type, args.shape, start, end);
+    this.saveFade(id, type, shape, startTime, endTime);
+    this.updateEditor(-1, undefined, undefined, true);
+    this.drawer.drawFade(id, type, shape, start, end);
+};
 
+TrackEditor.prototype.onCreateFade = function(args) {
+    this.createFade(args.type, args.shape);
     this.deactivateAudioSelection();
 };
 
