@@ -57,7 +57,7 @@ body {
 }
 
 .playlist-tracks {
-  position: absolute;
+  position: relative;
   top: 80px;
   left: 0;
   right: 0;
@@ -172,6 +172,7 @@ body {
           <option value="seconds">seconds</option>
           <option value="thousandths">thousandths</option>
           <option value="hh:mm:ss">hh:mm:ss</option>
+          <option value="hh:mm:ss.u">hh:mm:ss + tenths</option>
           <option value="hh:mm:ss.uu">hh:mm:ss + hundredths</option>
           <option value="hh:mm:ss.uuu">hh:mm:ss + milliseconds</option>
         </select>
@@ -200,12 +201,14 @@ body {
 
     var tracks = [
         {
-            src: "Tangerine.mp3"
-        },
-
-        {
-           src: "Beautiful.m4a"
+            src: "Tangerine.mp3",
+            cuein: 0.2,
+            cueout: 122.723265
         }
+
+        //{
+        //   src: "Beautiful.m4a"
+        //}
     ];
 
 
