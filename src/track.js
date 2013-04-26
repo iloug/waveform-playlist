@@ -89,8 +89,14 @@ TrackEditor.prototype.init = function(src, start, end, fades, cues, moveable) {
     this.prevStateEvents = {};
     this.setState(this.config.getState());
 
-    this.fades = fades || {};
-
+    this.fades = {};
+    if (fades !== undefined && fades.length > 0) {
+    
+        for (var i = 0; i < fades.length; i++) {
+            this.fades[this.getFadeId()] = fades[i];
+        }
+    }
+    
     if (cues.cuein !== undefined) {
         this.setCuePoints(this.secondsToSamples(cues.cuein), this.secondsToSamples(cues.cueout));
     }
@@ -185,6 +191,10 @@ TrackEditor.prototype.onTrackLoad = function(buffer) {
 
     if (this.cues === undefined) {
         this.setCuePoints(0, buffer.length - 1);
+    }
+    //adjust if the length was inaccurate and cueout is set to a higher sample than we actually have.
+    else if (this.cues.cueout > (buffer.length - 1)) {
+        this.cues.cueout = buffer.length - 1;
     }
 
     if (this.width !== undefined) {
@@ -807,12 +817,18 @@ TrackEditor.prototype.updateEditor = function(cursorPos, start, end, highlighted
 
 TrackEditor.prototype.getTrackDetails = function() {
     var d,
-        cues = this.cues;
+        cues = this.cues,
+        fades = [],
+        id;
+
+    for (id in this.fades) {
+        fades.push(this.fades[id]);
+    }
 
     d = {
         start: this.startTime,
         end: this.endTime,
-        fades: this.fades,
+        fades: fades,
         src: this.src,
         cuein: this.samplesToSeconds(cues.cuein),
         cueout: this.samplesToSeconds(cues.cueout)
