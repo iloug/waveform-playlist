@@ -4,55 +4,55 @@ var TrackEditor = function() {
 
 };
 
-TrackEditor.prototype.states = {
-    cursor: {
-        events: {
-            mousedown: "selectCursorPos"
-        },
+TrackEditor.prototype.classes = {
+    "cursor": [
+        "state-select"
+    ],
 
-        classes: [
-            "state-select"
-        ]
+    "select": [
+        "state-select"
+    ],
+
+    "fadein": [
+        "state-select"
+    ],
+
+    "fadeout": [
+        "state-select"
+    ],
+
+    "shift": [
+        "state-shift"
+    ],
+
+    "active": [
+        "active"
+    ],
+
+    "disabled": [
+        "disabled"
+    ]
+};
+
+TrackEditor.prototype.events = {
+    "cursor": {
+        "mousedown": "selectCursorPos"
     },
 
-    select: {
-        events: {
-            mousedown: "selectStart"
-        },
-
-        classes: [
-            "state-select"
-        ]
+    "select": {
+        "mousedown": "selectStart"
     },
 
-    fadein: {
-        events: {
-            mousedown: "selectFadeIn"
-        },
-
-        classes: [
-            "state-select"
-        ]
+    "fadein": {
+        "mousedown": "selectFadeIn"
     },
 
-    fadeout: {
-        events: {
-            mousedown: "selectFadeOut"
-        },
-
-        classes: [
-            "state-select"
-        ]
+    "fadeout": {
+        "mousedown": "selectFadeOut"
     },
-    
-    shift: {
-        events: {
-            mousedown: "timeShift"
-        },
 
-        classes: [
-            "state-shift"
-        ]
+    "shift": {
+        "mousedown": "timeShift"
     }
 };
 
@@ -64,7 +64,22 @@ TrackEditor.prototype.setWidth = function(width) {
     this.width = width;
 };
 
-TrackEditor.prototype.init = function(src, start, end, fades, cues, moveable) {
+TrackEditor.prototype.init = function(src, start, end, fades, cues, stateConfig) {
+
+    var statesEnabled = {
+        'cursor': true,
+        'fadein': true,
+        'fadeout': true,
+        'select': true,
+        'shift': true
+    };
+
+    //extend enabled states config.
+    Object.keys(statesEnabled).forEach(function (key) {
+        statesEnabled[key] = (key in stateConfig) ? stateConfig[key] : statesEnabled[key];
+    });
+
+    this.enabledStates = statesEnabled;
    
     makePublisher(this);
 
@@ -103,8 +118,7 @@ TrackEditor.prototype.init = function(src, start, end, fades, cues, moveable) {
     
     this.selectedArea = undefined; //selected area of track stored as inclusive buffer indices to the audio buffer.
     this.active = false;
-    this.canShift = moveable !== undefined ? moveable : true;
-
+    
     this.container.classList.add("channel-wrapper");
     this.container.style.left = this.leftOffset;
 
@@ -140,7 +154,7 @@ TrackEditor.prototype.loadTrack = function(track) {
             cuein: track.cuein,
             cueout: track.cueout
         },
-        track.moveable
+        track.states
     );
     this.loadBuffer(track.src);
 
@@ -244,7 +258,6 @@ TrackEditor.prototype.deactivate = function() {
     this.active = false;
     this.selectedArea = undefined;
     this.container.classList.remove("active");
-    //this.drawer.draw(-1, this.getPixelOffset());
     this.updateEditor(-1, undefined, undefined, true);
 };
 
@@ -260,10 +273,6 @@ TrackEditor.prototype.timeShift = function(e) {
         res = editor.resolution,
         scroll = this.config.getTrackScroll(),
         scrollX = scroll.left;
-
-    if (this.canShift === false) {
-        return; //setting the 'left' css property has no effect, but don't want internal variable leftOffset to update.
-    }
 
     origX = editor.leftOffset / res;
     
@@ -695,8 +704,10 @@ TrackEditor.prototype.onRemoveAudio = function() {
 
 TrackEditor.prototype.setState = function(state) {
     var that = this,
-        stateEvents = this.states[state].events,
-        stateClasses = this.states[state].classes,
+        stateEvents = this.events[state],
+        stateClasses = this.classes[state],
+        disabledClasses = this.classes['disabled'],
+        enabledStates = this.enabledStates,
         container = this.container,
         prevState = this.currentState,
         prevStateClasses,
@@ -705,36 +716,43 @@ TrackEditor.prototype.setState = function(state) {
         i, len;
 
     if (prevState) {
-        prevStateClasses = this.states[prevState].classes;
+        prevStateClasses = this.classes[prevState];
        
-        for (event in prevStateEvents) {
-            container.removeEventListener(event, prevStateEvents[event]);
-        }
-        this.prevStateEvents = {};
+        if (enabledStates[prevState] === true) {
+            for (event in prevStateEvents) {
+                container.removeEventListener(event, prevStateEvents[event]);
+            }
+            this.prevStateEvents = {};
 
-        for (i = 0, len = prevStateClasses.length; i < len; i++) {
-            container.classList.remove(prevStateClasses[i]);
+            for (i = 0, len = prevStateClasses.length; i < len; i++) {
+                container.classList.remove(prevStateClasses[i]);
+            }
         }
+        else {
+            for (i = 0, len = disabledClasses.length; i < len; i++) {
+                container.classList.remove(disabledClasses[i]);
+            }
+        }  
     }
 
-    for (event in stateEvents) {
-
-        func = that[stateEvents[event]].bind(that);
-        //need to keep track of the added events for later removal since a new function is returned after using "bind"
-        this.prevStateEvents[event] = func;
-        container.addEventListener(event, func);
-    }
-    for (i = 0, len = stateClasses.length; i < len; i++) {
+    if (enabledStates[state] === true) {
+        for (event in stateEvents) {
+            func = that[stateEvents[event]].bind(that);
+            //need to keep track of the added events for later removal since a new function is returned after using "bind"
+            this.prevStateEvents[event] = func;
+            container.addEventListener(event, func);
+        }
+        for (i = 0, len = stateClasses.length; i < len; i++) {
             container.classList.add(stateClasses[i]);
         }
+    }
+    else {
+        for (i = 0, len = disabledClasses.length; i < len; i++) {
+            container.classList.add(disabledClasses[i]);
+        }
+    }
 
     this.currentState = state;
-};
-
-TrackEditor.prototype.onStateChange = function() {
-    var state = this.config.getState();
-
-    this.setState(state);
 };
 
 TrackEditor.prototype.onResolutionChange = function(res) {
