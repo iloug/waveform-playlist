@@ -178,7 +178,7 @@ body {
         </select>
         <input type="text" class="audio_start input-small">
         <input type="text" class="audio_end input-small">
-        <input type="text" class="audio_pos input-small">
+        <label class="audio_pos">00:00:00.0</label>
         <select class="audio_resolution">
           <option>4000</option>
           <option>5000</option>
@@ -200,43 +200,32 @@ body {
 (function(){
 
     var tracks = [
-        {
-            src: "Tangerine.mp3",
-            cuein: 0.2,
-            cueout: 122.723265,
-            states: {
-                'fadein': false
+            {
+                src: "Tangerine.mp3",
+                selected: {
+                    start: 10,
+                    end: 48
+                }
             }
-        }
 
-        //{
-        //   src: "Beautiful.m4a"
-        //}
-    ];
+            //{
+            //   src: "Beautiful.m4a"
+            //}
+        ],
 
+        container = document.getElementById("playlist"),
 
-/*
-    var tracks = [
-        {url: "../sounds/techno.wav"},
-        {url: "../sounds/blueyellow.wav"},
-        {url: "../sounds/organ-echo-chords.wav"},
-        {url: "../sounds/snare.wav"},
-        {url: "../sounds/clapping-crowd.wav"} 
-    ];
-*/
+        config = new Config({
+            resolution: 10000,
+            mono: false,
+            waveHeight: 80,
+            container: container,
+            timescale: true,
+            UITheme: "bootstrap"
+        }), 
 
-    var container = document.getElementById("playlist");
+        playlistEditor = new PlaylistEditor();
 
-    var config = new Config({
-        resolution: 10000,
-        mono: false,
-        waveHeight: 80,
-        container: container,
-        timescale: true,
-        UITheme: "bootstrap"
-    });  
-
-    var playlistEditor = new PlaylistEditor();
     playlistEditor.setConfig(config);
     playlistEditor.init(tracks);
 
