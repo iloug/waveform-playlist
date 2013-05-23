@@ -8,7 +8,8 @@ TimeScale.prototype.init = function(config) {
 
     var that = this,
         canv,
-        div;
+        div,
+        resizeTimer;
 
     makePublisher(this);
 
@@ -24,7 +25,6 @@ TimeScale.prototype.init = function(config) {
     this.config = config;
     this.container = div; //container for the main time scale.
 
-    //TODO check for window resizes to set these.
     this.width = this.container.clientWidth;
     this.height = this.container.clientHeight;
 
@@ -35,6 +35,24 @@ TimeScale.prototype.init = function(config) {
     this.times = [];
 
     this.prevScrollPos = 0; //checking the horizontal scroll (must update timeline above in case of change)
+
+    //TODO check scroll adjust.
+    function doneResizing() {
+        that.width = that.container.clientWidth;
+        that.height = that.container.clientHeight;
+
+        canv.setAttribute('width', that.width);
+        canv.setAttribute('height', that.height);
+
+        that.drawScale();
+    };
+
+    function onResize() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(doneResizing, 100);
+    };
+
+    TimeScale.prototype.onResize = onResize;
 
     this.drawScale();
 };

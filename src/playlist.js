@@ -89,7 +89,7 @@ PlaylistEditor.prototype.init = function(tracks) {
     audioControls.on("trimaudio", "onTrimAudio", this);
     audioControls.on("removeaudio", "onRemoveAudio", this);
     audioControls.on("changestate", "onStateChange", this);
-    audioControls.on("changeselection", "onSelectionChange", this);  
+    audioControls.on("changeselection", "onSelectionChange", this); 
 };
 
 PlaylistEditor.prototype.removeTrack = function(trackEditor) {
@@ -106,6 +106,10 @@ PlaylistEditor.prototype.removeTrack = function(trackEditor) {
             return;
         }
     }
+};
+
+PlaylistEditor.prototype.resize = function() {
+    this.timeScale.onResize();
 };
 
 PlaylistEditor.prototype.onTrimAudio = function() {
