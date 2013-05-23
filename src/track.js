@@ -216,6 +216,9 @@ TrackEditor.prototype.onTrackLoad = function(buffer, err) {
     if (err !== undefined) {
         this.container.innerHTML = "";
         this.container.classList.add("error");
+
+        this.fire('unregister');
+
         return;
     }
 
