@@ -65,6 +65,11 @@ body {
   overflow: auto;
 }
 
+.playlist-tracks > .error {
+  height: 80px;
+  background-color: rgba(255,0,0,0.5);
+}
+
 .channel-wrapper {
   position: relative;
 }
@@ -201,16 +206,12 @@ body {
 
     var tracks = [
             {
-                src: "Tangerine.mp3",
-                selected: {
-                    start: 10,
-                    end: 48
-                }
-            }
+                src: "problem.mp3"
+            },
 
-            //{
-            //   src: "Beautiful.m4a"
-            //}
+            {
+                src: "Tangerine.mp3"
+            }
         ],
 
         container = document.getElementById("playlist"),

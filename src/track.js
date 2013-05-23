@@ -208,10 +208,16 @@ TrackEditor.prototype.drawTrack = function(buffer) {
     this.drawer.drawFades(this.fades);
 };
 
-TrackEditor.prototype.onTrackLoad = function(buffer) {
+TrackEditor.prototype.onTrackLoad = function(buffer, err) {
     var res,
         startTime,
         endTime;
+
+    if (err !== undefined) {
+        this.container.innerHTML = "";
+        this.container.classList.add("error");
+        return;
+    }
 
     if (this.cues === undefined) {
         this.setCuePoints(0, buffer.length - 1);
