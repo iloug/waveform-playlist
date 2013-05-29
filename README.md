@@ -10,7 +10,6 @@ Playlist editor written completely in Javascript.
 Try out the editor!
 ===================
 
-Music by [Ofir Gal](http://www.ofirgal.com)
+Code taken from [examples/render.html](http://naomiaro.github.io/waveform-playlist/examples/render.html).
 
-See
-[examples/render.html](http://naomiaro.github.io/waveform-playlist/examples/render.html).
+Music by [Ofir Gal](http://www.ofirgal.com)
