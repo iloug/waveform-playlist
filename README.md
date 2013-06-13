@@ -7,9 +7,9 @@ Playlist editor written completely in Javascript.
 
 ![Imgur](http://i.imgur.com/99u8ipS.png)
 
-Try out the editor!
+[Try out the editor!](http://naomiaro.github.io/waveform-playlist/examples/render.html)
 ===================
 
-Code taken from [examples/render.html](http://naomiaro.github.io/waveform-playlist/examples/render.html).
+Code taken from examples/render.html
 
 Music by [Ofir Gal](http://www.ofirgal.com)
